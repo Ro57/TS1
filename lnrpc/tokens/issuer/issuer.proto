@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package issuer;
+
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuer";
+
+import "tokens/replicator/replicator.proto";
+import "google/protobuf/empty.proto";
+
+// Is mainly used to generate compatible querier (client)
+//
+// Generated client can be used to serve two main purposes:
+//  - to interact with it via generated client
+//  - to test generated client implementation by mocking generated server
+//
+service Issuer {
+    // Returns token purchase signature for further registration along with
+    // offer via Replication Server
+    rpc SignTokenPurchase (SignTokenPurchaseRequest)
+        returns (SignTokenPurchaseResponse);
+
+    // Returns token sell signature for further registration along with offer
+    // via Replication Server
+    rpc SignTokenSell (SignTokenSellRequest) returns (SignTokenSellResponse);
+
+    // Issue new token with given data. Request data equal to token purchase
+    // data, because it is token offer.
+    rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
+
+    // Update token inforamtion with given data. Request data equal to token purchase
+    // data, because it is token offer.
+    rpc UpdateToken(UpdateTokenRequest) returns (google.protobuf.Empty);
+
+    // Revoke token - delete information about token by his name.
+    rpc RevokeToken(RevokeTokenRequest) returns (google.protobuf.Empty);
+
+}
+
+message SignTokenPurchaseRequest {
+    replicator.TokenOffer offer = 1;
+}
+
+message SignTokenPurchaseResponse {
+    string issuer_signature = 1;
+}
+
+message SignTokenSellRequest {
+    replicator.TokenOffer offer = 1;
+}
+
+message SignTokenSellResponse {
+    string issuer_signature = 1;
+}
+
+message IssueTokenRequest {
+    replicator.TokenOffer offer = 1;
+}
+
+message UpdateTokenRequest {
+    replicator.TokenOffer offer = 1;
+}
+
+message RevokeTokenRequest {
+    string token_name = 1;
+    string login = 2;
+}

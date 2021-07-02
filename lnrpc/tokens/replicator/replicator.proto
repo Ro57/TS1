@@ -1,0 +1,184 @@
+syntax = "proto3";
+
+package replicator;
+
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicator";
+
+import "google/protobuf/empty.proto";
+
+// Is mainly used to generate compatible querier (client)
+//
+// Generated client can be used to serve two main purposes:
+//  - to interact with it via generated client
+//  - to test generated client implementation by mocking generated server
+//
+service Replicator {
+    // Returns available token offers
+    rpc GetTokenOffers (GetTokenOffersRequest) returns (GetTokenOffersResponse);
+
+    // Verifies a signature of an issuer for this token purchase. This
+    // method should be called before channel initialization
+    rpc VerifyTokenPurchase (VerifyTokenPurchaseRequest)
+        returns (google.protobuf.Empty);
+
+    // Verifies a signature of an issuer for this token sell. This
+    // method should be called before channel initialization
+    rpc VerifyTokenSell (VerifyTokenSellRequest)
+        returns (google.protobuf.Empty);
+
+    // Registers token purchase to be tracked on the blockchain
+    // right after some necessary token purchase checks
+    rpc RegisterTokenPurchase (RegisterTokenPurchaseRequest)
+        returns (google.protobuf.Empty);
+
+    // Registers token sell to be tracked on the blockchain
+    // right after some necessary token sell checks
+    rpc RegisterTokenSell (RegisterTokenSellRequest)
+        returns (google.protobuf.Empty);
+
+    // Returns current token balances
+    rpc GetTokenBalances (GetTokenBalancesRequest)
+        returns (GetTokenBalancesResponse);
+
+    // Authentication user by login password pair, and generate jwt
+    // Call it method after unlock pkt wallet
+    rpc AuthTokenHolder (AuthRequest) returns (AuthResponse);
+
+    // Register new token holder user with passed password and login
+    rpc RegisterTokenHolder (RegisterRequest) returns (google.protobuf.Empty);
+
+    // Register new issuer user with passed password and login
+    rpc RegisterTokenIssuer (RegisterRequest) returns (google.protobuf.Empty);
+
+    // Verifies a user permitions to issue a token. Returns exceptions if
+    // passed user is not contained in issuer's db
+    rpc VerifyIssuer (VerifyIssuerRequest) returns (google.protobuf.Empty);
+}
+
+message GetTokenOffersRequest {
+    string issuer_id = 1;
+    Pagination params = 2;
+}
+
+message GetTokenOffersResponse {
+    repeated TokenOffer offers = 1;
+    uint64 total = 2;
+}
+
+message TokenOffer {
+    string token = 1;
+
+    // TODO: discuss
+    //  ? Should we assume decimal prices
+    //  ? Add units field
+    uint64 price = 2;
+
+    IssuerInfo issuer_info = 3;
+
+    // It is assumed that the each registered token holder login is unique
+    //
+    // Value of this field may be empty orRegisterTokenHolder filled depending
+    // on context (e.g. gettokenoffers, verifytokenpurchasesignature)
+    string token_holder_login = 4;
+
+    // It is assumed that the each registered token holder login is unique
+    //
+    // Value of this field may be empty or filled depending on context
+    // (e.g. gettokenoffers, verifytokenpurchasesignature)
+    string token_buyer_login = 5;
+
+    // This field protects issuers from such a case, when potential buyer
+    // successfully acquires dozens of signatures just in case if that issuer
+    // would raise up the price later. If a Token Wallet holder would like to
+    // open channel with an outdated offer, Replicator would reject to register
+    // this purchase and buyer stays unprotected
+    int64 valid_until_seconds = 6;
+}
+
+message IssuerInfo {
+    // This value is explicetely used by Replicator to uniquely identify related
+    // issuer later in order to ban him (discredite case), since
+    // "identity_pubkey", "host" may be changed
+    string id = 1;
+
+    // The following field values are used to open payment channel, invoices
+    // commands execution etc.
+    string identity_pubkey = 2;
+
+    // Is used to establish client connection to the issuer's node during some
+    // RPC calls
+    string host = 3;
+}
+
+message VerifyTokenPurchaseRequest {
+    TokenPurchase purchase = 1;
+}
+
+message VerifyTokenSellRequest {
+    TokenPurchase sell = 1;
+}
+
+message RegisterTokenPurchaseRequest {
+    TokenPurchase purchase = 1;
+}
+
+message RegisterTokenSellRequest {
+    TokenPurchase sell = 1;
+}
+
+message TokenPurchase {
+    TokenOffer offer = 1;
+
+    // Presents signature of an offer. This signature is used to identify,
+    // that issuer accepts terms described in the offer and is responsible
+    // to follow them in this transaction. If signature is not valid, then
+    // channel should be closed. Otherwise, Replicator registers token
+    // purchase details provided and tracks blockchain for a closing transaction
+    // in order to determine if the issuer were not break terms
+    string issuer_signature = 2;
+
+    string initial_tx_hash = 3;
+}
+
+// NOTE: we don't provide any token holder identification since the reqeuest is
+// authorized with JWT applied to the request metadata. It means, that
+// replicator is capable to extract all data needed to process the request
+message GetTokenBalancesRequest {
+    Pagination params = 1;
+}
+
+message GetTokenBalancesResponse {
+    repeated TokenBalance balances = 1;
+    uint64 total = 2;
+}
+
+message TokenBalance {
+    string token = 1;
+    uint64 available = 2;
+    uint64 frozen = 3;
+}
+message Pagination {
+    uint64 limit = 1;
+    uint64 offset = 2;
+}
+
+message AuthRequest {
+    string login = 1;
+    string password = 2;
+}
+
+// We need this dataset to validate jwt which will be needed later when we will
+// handle request with required login data. For this we save in memory jwt.
+message AuthResponse {
+    string jwt = 1;
+    int64 expire_date = 2;
+}
+
+message RegisterRequest {
+    string login = 1;
+    string password = 2;
+}
+
+message VerifyIssuerRequest {
+    string login = 1;
+}

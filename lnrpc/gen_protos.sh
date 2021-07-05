@@ -7,7 +7,7 @@ set -e
 function generate() {
   echo "Generating root gRPC server protos"
   
-  PROTOS="rpc.proto walletunlocker.proto **/*.proto tokens/replicator/*.proto tokens/issuer/*.proto"
+  PROTOS="rpc.proto walletunlocker.proto **/*.proto protos/*/*.proto"
   
   # For each of the sub-servers, we then generate their protos, but a restricted
   # set as they don't yet require REST proxies, or swagger docs.

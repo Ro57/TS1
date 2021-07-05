@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/pkt-cash/pktd/btcutil/er"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuer"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicator"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/urfave/cli"
 )
 

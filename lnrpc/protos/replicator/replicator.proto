@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package replicator;
 
-option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicator";
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator";
 
 import "google/protobuf/empty.proto";
 

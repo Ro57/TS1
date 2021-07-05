@@ -48,10 +48,10 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lncfg"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/invoicesrpc"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/routerrpc"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuer"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/jwtstore"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicator"
 
 	"github.com/pkt-cash/pktd/lnd/lntypes"
 	"github.com/pkt-cash/pktd/lnd/lnwallet"

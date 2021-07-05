@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package issuer;
 
-option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuer";
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer";
 
-import "tokens/replicator/replicator.proto";
+import "protos/replicator/replicator.proto";
 import "google/protobuf/empty.proto";
 
 // Is mainly used to generate compatible querier (client)

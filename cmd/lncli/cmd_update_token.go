@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pkt-cash/pktd/btcutil/er"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuer"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
 	"github.com/urfave/cli"
 )
 

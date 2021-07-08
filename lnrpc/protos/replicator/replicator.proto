@@ -157,6 +157,7 @@ message TokenBalance {
     uint64 available = 2;
     uint64 frozen = 3;
 }
+
 message Pagination {
     uint64 limit = 1;
     uint64 offset = 2;

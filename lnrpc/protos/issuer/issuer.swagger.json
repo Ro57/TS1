@@ -12,21 +12,43 @@
   ],
   "paths": {},
   "definitions": {
+    "issuerGetTokenListResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/replicatorTokenOffer"
+          },
+          "title": "tokens list of registred tokens"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32",
+          "title": "total number of registered tokens, if the issued_id is passed, only \nits tokens are taken into account"
+        }
+      },
+      "title": "GetTokenListResponse — list of tokens with additional info"
+    },
     "issuerSignTokenPurchaseResponse": {
       "type": "object",
       "properties": {
         "issuer_signature": {
-          "type": "string"
+          "type": "string",
+          "title": "issuer_signature signature on purchase offer"
         }
-      }
+      },
+      "title": "SignTokenPurchaseResponse — info about sign offer"
     },
     "issuerSignTokenSellResponse": {
       "type": "object",
       "properties": {
         "issuer_signature": {
-          "type": "string"
+          "type": "string",
+          "title": "issuer_signature signature on sell offer"
         }
-      }
+      },
+      "title": "SignTokenSellResponse — info about sign offer"
     },
     "protobufAny": {
       "type": "object",
@@ -54,6 +76,19 @@
         "host": {
           "type": "string",
           "title": "Is used to establish client connection to the issuer's node during some\nRPC calls"
+        }
+      }
+    },
+    "replicatorPagination": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "offset": {
+          "type": "string",
+          "format": "uint64"
         }
       }
     },

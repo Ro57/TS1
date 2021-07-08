@@ -4,63 +4,99 @@ package issuer;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer";
 
-import "protos/replicator/replicator.proto";
 import "google/protobuf/empty.proto";
+import "protos/replicator/replicator.proto";
 
-// Is mainly used to generate compatible querier (client)
+
+// IssuerService Is mainly used to generate compatible querier (client)
 //
 // Generated client can be used to serve two main purposes:
 //  - to interact with it via generated client
 //  - to test generated client implementation by mocking generated server
 //
-service Issuer {
-    // Returns token purchase signature for further registration along with
-    // offer via Replication Server
-    rpc SignTokenPurchase (SignTokenPurchaseRequest)
+service IssuerService {
+    // SignTokenPurchase Returns token purchase signature for further 
+    //registration along with offer via Replication Server
+    rpc SignTokenPurchase (SignTokenPurchaseRequest) 
         returns (SignTokenPurchaseResponse);
 
-    // Returns token sell signature for further registration along with offer
-    // via Replication Server
+    // SignTokenSell Returns token sell signature for further
+    // registration along with offer via Replication Server
     rpc SignTokenSell (SignTokenSellRequest) returns (SignTokenSellResponse);
 
-    // Issue new token with given data. Request data equal to token purchase
-    // data, because it is token offer.
+    // IssueToken — Issue new token with given data. Request data equal to 
+    // token purchase data, because it is token offer.
     rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
 
-    // Update token inforamtion with given data. Request data equal to token purchase
-    // data, because it is token offer.
+    // UpdateToken — Update token inforamtion with given data. Request data 
+    // equal to token purchase data, because it is token offer.
     rpc UpdateToken(UpdateTokenRequest) returns (google.protobuf.Empty);
 
-    // Revoke token - delete information about token by his name.
+    // RevokeToken — delete information about token by his name.
     rpc RevokeToken(RevokeTokenRequest) returns (google.protobuf.Empty);
 
+    // GetTokenList — return list of issued token with infomation about 
+    // expiration time and fix price.
+    rpc GetTokenList(GetTokenListRequest) returns(GetTokenListResponse);
 }
 
+// GetTokenListRequest — request token list with pagination
+message GetTokenListRequest {
+    // issuer_id is user login issued this token
+    string issuer_id = 1;
+    // params of paginaton
+    replicator.Pagination params = 2;
+}
+
+// GetTokenListResponse — list of tokens with additional info
+message GetTokenListResponse {
+    // tokens list of registred tokens
+    repeated replicator.TokenOffer tokens = 1;
+    // total number of registered tokens, if the issued_id is passed, only 
+    // its tokens are taken into account
+    int32 total = 2;
+}
+
+// SignTokenPurchaseRequest — info about token offer 
 message SignTokenPurchaseRequest {
+    // offer on buy token
     replicator.TokenOffer offer = 1;
 }
 
+// SignTokenPurchaseResponse — info about sign offer
 message SignTokenPurchaseResponse {
+    // issuer_signature signature on purchase offer
     string issuer_signature = 1;
 }
 
+// SignTokenSellRequest — info about sell token
 message SignTokenSellRequest {
+    // offer on sell token
     replicator.TokenOffer offer = 1;
 }
 
+// SignTokenSellResponse — info about sign offer
 message SignTokenSellResponse {
+    // issuer_signature signature on sell offer
     string issuer_signature = 1;
 }
 
+// IssueTokenRequest — info about token will be issued
 message IssueTokenRequest {
+    // offer on token issue
     replicator.TokenOffer offer = 1;
 }
 
+// UpdateTokenRequest — update info about current token
 message UpdateTokenRequest {
+    // offer with new data
     replicator.TokenOffer offer = 1;
 }
 
+// RevokeTokenRequest — request on delete info about token
 message RevokeTokenRequest {
+    // token_name  name of the deleted token
     string token_name = 1;
+    // login of user issued this token
     string login = 2;
 }

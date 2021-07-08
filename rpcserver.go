@@ -490,7 +490,12 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "offchain",
 			Action: "write",
 		}},
+
 		"/lnrpc.Lightning/GetTokenOffers": {{
+			Entity: "proxy",
+			Action: "read",
+		}},
+		"/lnrpc.Lightning/GetTokenList": {{
 			Entity: "proxy",
 			Action: "read",
 		}},
@@ -620,7 +625,7 @@ type rpcServer struct {
 
 	// issuanceClient is a instance of rpc server connection, started
 	// along with rpc server
-	issuanceClient issuer.IssuerClient
+	issuanceClient issuer.IssuerServiceClient
 }
 
 // jwtStore in memory storage of all authorized token with user id
@@ -7028,6 +7033,15 @@ func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBal
 	return resp, nil
 }
 
+func (r *rpcServer) GetTokenList(ctx context.Context, req *issuer.GetTokenListRequest) (*issuer.GetTokenListResponse, error) {
+	resp, err := r.issuanceClient.GetTokenList(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("querying token offers: %s", err)
+	}
+
+	return resp, nil
+}
+
 func (r *rpcServer) AuthTokenHolder(ctx context.Context, req *replicator.AuthRequest) (*empty.Empty, error) {
 	resp, err := r.replicatorClient.AuthTokenHolder(ctx, req)
 
@@ -7122,7 +7136,7 @@ func connectReplicatorClient(ReplicationServerAddress string) (_ replicator.Repl
 //	  This could be done in the following manner: connection reopening/closing for a while, after some time of inactivity
 // 	? Implement auto reconnects
 // 	? Implement auto disconnects
-func connectIssuerClient(address string) (_ issuer.IssuerClient, closeConn func() error, _ error) {
+func connectIssuerClient(address string) (_ issuer.IssuerServiceClient, closeConn func() error, _ error) {
 	if address == "" {
 		return nil, nil, errors.New("empty address")
 	}
@@ -7134,7 +7148,7 @@ func connectIssuerClient(address string) (_ issuer.IssuerClient, closeConn func(
 		return nil, nil, errors.WithMessage(err, "dialing")
 	}
 
-	return issuer.NewIssuerClient(conn), conn.Close, nil
+	return issuer.NewIssuerServiceClient(conn), conn.Close, nil
 }
 
 func JWTInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {

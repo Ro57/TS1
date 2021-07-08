@@ -30,7 +30,7 @@ type token struct {
 
 type Server struct {
 	// Nest unimplemented server implementation in order to satisfy server interface
-	issuer.UnimplementedIssuerServer
+	issuer.UnimplementedIssuerServiceServer
 
 	Client replicator.ReplicatorClient
 }
@@ -47,7 +47,7 @@ func RunServerServing(host string, replicationHost string, stopSig <-chan struct
 		}
 		root = grpc.NewServer()
 	)
-	issuer.RegisterIssuerServer(root, child)
+	issuer.RegisterIssuerServiceServer(root, child)
 
 	listener, err := net.Listen("tcp", host)
 	if err != nil {
@@ -150,9 +150,7 @@ func (s *Server) UpdateToken(ctx context.Context, req *issuer.UpdateTokenRequest
 		newToken.validTime = req.Offer.ValidUntilSeconds
 	}
 
-	fmt.Println("updated token: ", newToken)
-
-	tokens.Store(req.Offer.TokenHolderLogin, newToken)
+	tokens.Store(req.Offer.Token, newToken)
 
 	return &emptypb.Empty{}, nil
 }
@@ -175,6 +173,81 @@ func (s *Server) RevokeToken(ctx context.Context, req *issuer.RevokeTokenRequest
 	tokens.Delete(req.TokenName)
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) GetTokenList(ctx context.Context, req *issuer.GetTokenListRequest) (*issuer.GetTokenListResponse, error) {
+	var tokenList []*replicator.TokenOffer
+	var err error
+
+	if req.IssuerId != "" {
+		tokenList, err = s.issuerTokens(ctx, req.IssuerId)
+	} else {
+		tokenList, err = s.allTokens()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &issuer.GetTokenListResponse{
+		Tokens: tokenList,
+		Total:  int32(len(tokenList)),
+	}, nil
+
+}
+
+func (s *Server) issuerTokens(ctx context.Context, login string) ([]*replicator.TokenOffer, error) {
+	resultList := []*replicator.TokenOffer{}
+
+	replicatorReq := &replicator.VerifyIssuerRequest{
+		Login: login,
+	}
+
+	_, err := s.Client.VerifyIssuer(ctx, replicatorReq)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tokens.Range(func(key, value interface{}) bool {
+		t := value.(token)
+
+		if t.issuerLogin == login {
+			resultList = append(resultList, &replicator.TokenOffer{
+				Token:             key.(string),
+				Price:             t.price,
+				ValidUntilSeconds: t.validTime,
+				IssuerInfo: &replicator.IssuerInfo{
+					Id: login,
+				},
+			})
+		}
+
+		return true
+	})
+
+	return resultList, nil
+}
+
+func (s *Server) allTokens() ([]*replicator.TokenOffer, error) {
+	resultList := []*replicator.TokenOffer{}
+
+	tokens.Range(func(key, value interface{}) bool {
+		t := value.(token)
+
+		resultList = append(resultList, &replicator.TokenOffer{
+			Token:             key.(string),
+			Price:             t.price,
+			ValidUntilSeconds: t.validTime,
+			IssuerInfo: &replicator.IssuerInfo{
+				Id: t.issuerLogin,
+			},
+		})
+
+		return true
+	})
+
+	return resultList, nil
 }
 
 func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {

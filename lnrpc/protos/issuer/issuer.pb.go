@@ -26,7 +26,110 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+// GetTokenListRequest — request token list with pagination
+type GetTokenListRequest struct {
+	// issuer_id is user login issued this token
+	IssuerId string `protobuf:"bytes,1,opt,name=issuer_id,json=issuerId,proto3" json:"issuer_id,omitempty"`
+	// params of paginaton
+	Params               *replicator.Pagination `protobuf:"bytes,2,opt,name=params,proto3" json:"params,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
+}
+
+func (m *GetTokenListRequest) Reset()         { *m = GetTokenListRequest{} }
+func (m *GetTokenListRequest) String() string { return proto.CompactTextString(m) }
+func (*GetTokenListRequest) ProtoMessage()    {}
+func (*GetTokenListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_868a71152c014334, []int{0}
+}
+
+func (m *GetTokenListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTokenListRequest.Unmarshal(m, b)
+}
+func (m *GetTokenListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTokenListRequest.Marshal(b, m, deterministic)
+}
+func (m *GetTokenListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTokenListRequest.Merge(m, src)
+}
+func (m *GetTokenListRequest) XXX_Size() int {
+	return xxx_messageInfo_GetTokenListRequest.Size(m)
+}
+func (m *GetTokenListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTokenListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTokenListRequest proto.InternalMessageInfo
+
+func (m *GetTokenListRequest) GetIssuerId() string {
+	if m != nil {
+		return m.IssuerId
+	}
+	return ""
+}
+
+func (m *GetTokenListRequest) GetParams() *replicator.Pagination {
+	if m != nil {
+		return m.Params
+	}
+	return nil
+}
+
+// GetTokenListResponse — list of tokens with additional info
+type GetTokenListResponse struct {
+	// tokens list of registred tokens
+	Tokens []*replicator.TokenOffer `protobuf:"bytes,1,rep,name=tokens,proto3" json:"tokens,omitempty"`
+	// total number of registered tokens, if the issued_id is passed, only
+	// its tokens are taken into account
+	Total                int32    `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetTokenListResponse) Reset()         { *m = GetTokenListResponse{} }
+func (m *GetTokenListResponse) String() string { return proto.CompactTextString(m) }
+func (*GetTokenListResponse) ProtoMessage()    {}
+func (*GetTokenListResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_868a71152c014334, []int{1}
+}
+
+func (m *GetTokenListResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTokenListResponse.Unmarshal(m, b)
+}
+func (m *GetTokenListResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTokenListResponse.Marshal(b, m, deterministic)
+}
+func (m *GetTokenListResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTokenListResponse.Merge(m, src)
+}
+func (m *GetTokenListResponse) XXX_Size() int {
+	return xxx_messageInfo_GetTokenListResponse.Size(m)
+}
+func (m *GetTokenListResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTokenListResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTokenListResponse proto.InternalMessageInfo
+
+func (m *GetTokenListResponse) GetTokens() []*replicator.TokenOffer {
+	if m != nil {
+		return m.Tokens
+	}
+	return nil
+}
+
+func (m *GetTokenListResponse) GetTotal() int32 {
+	if m != nil {
+		return m.Total
+	}
+	return 0
+}
+
+// SignTokenPurchaseRequest — info about token offer
 type SignTokenPurchaseRequest struct {
+	// offer on buy token
 	Offer                *replicator.TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
 	XXX_unrecognized     []byte                 `json:"-"`
@@ -37,7 +140,7 @@ func (m *SignTokenPurchaseRequest) Reset()         { *m = SignTokenPurchaseReque
 func (m *SignTokenPurchaseRequest) String() string { return proto.CompactTextString(m) }
 func (*SignTokenPurchaseRequest) ProtoMessage()    {}
 func (*SignTokenPurchaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_868a71152c014334, []int{0}
+	return fileDescriptor_868a71152c014334, []int{2}
 }
 
 func (m *SignTokenPurchaseRequest) XXX_Unmarshal(b []byte) error {
@@ -65,7 +168,9 @@ func (m *SignTokenPurchaseRequest) GetOffer() *replicator.TokenOffer {
 	return nil
 }
 
+// SignTokenPurchaseResponse — info about sign offer
 type SignTokenPurchaseResponse struct {
+	// issuer_signature signature on purchase offer
 	IssuerSignature      string   `protobuf:"bytes,1,opt,name=issuer_signature,json=issuerSignature,proto3" json:"issuer_signature,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -76,7 +181,7 @@ func (m *SignTokenPurchaseResponse) Reset()         { *m = SignTokenPurchaseResp
 func (m *SignTokenPurchaseResponse) String() string { return proto.CompactTextString(m) }
 func (*SignTokenPurchaseResponse) ProtoMessage()    {}
 func (*SignTokenPurchaseResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_868a71152c014334, []int{1}
+	return fileDescriptor_868a71152c014334, []int{3}
 }
 
 func (m *SignTokenPurchaseResponse) XXX_Unmarshal(b []byte) error {
@@ -104,7 +209,9 @@ func (m *SignTokenPurchaseResponse) GetIssuerSignature() string {
 	return ""
 }
 
+// SignTokenSellRequest — info about sell token
 type SignTokenSellRequest struct {
+	// offer on sell token
 	Offer                *replicator.TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
 	XXX_unrecognized     []byte                 `json:"-"`
@@ -115,7 +222,7 @@ func (m *SignTokenSellRequest) Reset()         { *m = SignTokenSellRequest{} }
 func (m *SignTokenSellRequest) String() string { return proto.CompactTextString(m) }
 func (*SignTokenSellRequest) ProtoMessage()    {}
 func (*SignTokenSellRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_868a71152c014334, []int{2}
+	return fileDescriptor_868a71152c014334, []int{4}
 }
 
 func (m *SignTokenSellRequest) XXX_Unmarshal(b []byte) error {
@@ -143,7 +250,9 @@ func (m *SignTokenSellRequest) GetOffer() *replicator.TokenOffer {
 	return nil
 }
 
+// SignTokenSellResponse — info about sign offer
 type SignTokenSellResponse struct {
+	// issuer_signature signature on sell offer
 	IssuerSignature      string   `protobuf:"bytes,1,opt,name=issuer_signature,json=issuerSignature,proto3" json:"issuer_signature,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -154,7 +263,7 @@ func (m *SignTokenSellResponse) Reset()         { *m = SignTokenSellResponse{} }
 func (m *SignTokenSellResponse) String() string { return proto.CompactTextString(m) }
 func (*SignTokenSellResponse) ProtoMessage()    {}
 func (*SignTokenSellResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_868a71152c014334, []int{3}
+	return fileDescriptor_868a71152c014334, []int{5}
 }
 
 func (m *SignTokenSellResponse) XXX_Unmarshal(b []byte) error {
@@ -182,7 +291,9 @@ func (m *SignTokenSellResponse) GetIssuerSignature() string {
 	return ""
 }
 
+// IssueTokenRequest — info about token will be issued
 type IssueTokenRequest struct {
+	// offer on token issue
 	Offer                *replicator.TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
 	XXX_unrecognized     []byte                 `json:"-"`
@@ -193,7 +304,7 @@ func (m *IssueTokenRequest) Reset()         { *m = IssueTokenRequest{} }
 func (m *IssueTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*IssueTokenRequest) ProtoMessage()    {}
 func (*IssueTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_868a71152c014334, []int{4}
+	return fileDescriptor_868a71152c014334, []int{6}
 }
 
 func (m *IssueTokenRequest) XXX_Unmarshal(b []byte) error {
@@ -221,7 +332,9 @@ func (m *IssueTokenRequest) GetOffer() *replicator.TokenOffer {
 	return nil
 }
 
+// UpdateTokenRequest — update info about current token
 type UpdateTokenRequest struct {
+	// offer with new data
 	Offer                *replicator.TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
 	XXX_unrecognized     []byte                 `json:"-"`
@@ -232,7 +345,7 @@ func (m *UpdateTokenRequest) Reset()         { *m = UpdateTokenRequest{} }
 func (m *UpdateTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateTokenRequest) ProtoMessage()    {}
 func (*UpdateTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_868a71152c014334, []int{5}
+	return fileDescriptor_868a71152c014334, []int{7}
 }
 
 func (m *UpdateTokenRequest) XXX_Unmarshal(b []byte) error {
@@ -260,8 +373,11 @@ func (m *UpdateTokenRequest) GetOffer() *replicator.TokenOffer {
 	return nil
 }
 
+// RevokeTokenRequest — request on delete info about token
 type RevokeTokenRequest struct {
-	TokenName            string   `protobuf:"bytes,1,opt,name=token_name,json=tokenName,proto3" json:"token_name,omitempty"`
+	// token_name  name of the deleted token
+	TokenName string `protobuf:"bytes,1,opt,name=token_name,json=tokenName,proto3" json:"token_name,omitempty"`
+	// login of user issued this token
 	Login                string   `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -272,7 +388,7 @@ func (m *RevokeTokenRequest) Reset()         { *m = RevokeTokenRequest{} }
 func (m *RevokeTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*RevokeTokenRequest) ProtoMessage()    {}
 func (*RevokeTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_868a71152c014334, []int{6}
+	return fileDescriptor_868a71152c014334, []int{8}
 }
 
 func (m *RevokeTokenRequest) XXX_Unmarshal(b []byte) error {
@@ -308,6 +424,8 @@ func (m *RevokeTokenRequest) GetLogin() string {
 }
 
 func init() {
+	proto.RegisterType((*GetTokenListRequest)(nil), "issuer.GetTokenListRequest")
+	proto.RegisterType((*GetTokenListResponse)(nil), "issuer.GetTokenListResponse")
 	proto.RegisterType((*SignTokenPurchaseRequest)(nil), "issuer.SignTokenPurchaseRequest")
 	proto.RegisterType((*SignTokenPurchaseResponse)(nil), "issuer.SignTokenPurchaseResponse")
 	proto.RegisterType((*SignTokenSellRequest)(nil), "issuer.SignTokenSellRequest")
@@ -320,32 +438,38 @@ func init() {
 func init() { proto.RegisterFile("protos/issuer/issuer.proto", fileDescriptor_868a71152c014334) }
 
 var fileDescriptor_868a71152c014334 = []byte{
-	// 389 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x93, 0xdf, 0x4b, 0xeb, 0x30,
-	0x14, 0xc7, 0xd9, 0x60, 0x83, 0x9d, 0x71, 0xb9, 0x77, 0x61, 0x77, 0x6c, 0xd5, 0xc1, 0xec, 0x93,
-	0x82, 0xb6, 0x32, 0xff, 0x00, 0xd9, 0x50, 0x71, 0x20, 0x2a, 0x9d, 0x82, 0xf8, 0x32, 0xba, 0xee,
-	0xac, 0x2b, 0x6b, 0x9b, 0x9a, 0xa4, 0x82, 0x7f, 0xb9, 0xaf, 0xd2, 0xa4, 0x75, 0x9d, 0x75, 0x03,
-	0xe7, 0x43, 0x69, 0xce, 0x8f, 0x7c, 0x38, 0xc9, 0xf7, 0x1b, 0xd0, 0x22, 0x46, 0x05, 0xe5, 0xa6,
-	0xc7, 0x79, 0x8c, 0x2c, 0xfd, 0x19, 0x32, 0x49, 0xaa, 0x2a, 0xd2, 0xf4, 0xb4, 0x87, 0x61, 0xe4,
-	0x7b, 0x8e, 0x2d, 0x28, 0xcb, 0x2d, 0x55, 0xaf, 0xb6, 0xe7, 0x52, 0xea, 0xfa, 0x68, 0xca, 0x68,
-	0x1a, 0xcf, 0x4d, 0x0c, 0x22, 0xf1, 0xa6, 0x8a, 0xfa, 0x35, 0xb4, 0xc7, 0x9e, 0x1b, 0x3e, 0xd0,
-	0x25, 0x86, 0xf7, 0x31, 0x73, 0x16, 0x36, 0x47, 0x0b, 0x5f, 0x62, 0xe4, 0x82, 0x1c, 0x43, 0x85,
-	0xce, 0xe7, 0xc8, 0xda, 0xa5, 0x5e, 0xe9, 0xb0, 0xde, 0x6f, 0x19, 0x39, 0xb4, 0xdc, 0x70, 0x97,
-	0x54, 0x2d, 0xd5, 0xa4, 0x5f, 0x41, 0xe7, 0x1b, 0x12, 0x8f, 0x68, 0xc8, 0x91, 0x1c, 0xc1, 0x3f,
-	0x35, 0xf1, 0x84, 0x7b, 0x6e, 0x68, 0x8b, 0x98, 0xa1, 0xa4, 0xd6, 0xac, 0xbf, 0x2a, 0x3f, 0xce,
-	0xd2, 0xfa, 0x05, 0x34, 0x3f, 0x39, 0x63, 0xf4, 0xfd, 0xdd, 0xa6, 0x19, 0xc2, 0xff, 0x2f, 0x94,
-	0x9f, 0x4f, 0x32, 0x80, 0xc6, 0x28, 0x49, 0x49, 0xc8, 0xae, 0x63, 0x90, 0xc7, 0x68, 0x66, 0x8b,
-	0xdf, 0x30, 0x46, 0x40, 0x2c, 0x7c, 0xa5, 0xcb, 0x75, 0x46, 0x17, 0x40, 0x24, 0xf1, 0x24, 0xb4,
-	0x83, 0xec, 0x04, 0x35, 0x99, 0xb9, 0xb5, 0x03, 0x24, 0x4d, 0xa8, 0xf8, 0xd4, 0xf5, 0xc2, 0x76,
-	0x59, 0x56, 0x54, 0xd0, 0x7f, 0x2f, 0x43, 0x55, 0x1e, 0x89, 0x91, 0x27, 0x68, 0x14, 0xe4, 0x22,
-	0x3d, 0x23, 0x75, 0xd9, 0x26, 0x4f, 0x68, 0x07, 0x5b, 0x3a, 0xd2, 0x1b, 0xbe, 0x81, 0x3f, 0x6b,
-	0x57, 0x4f, 0xf6, 0x0b, 0x7b, 0x72, 0xba, 0x6a, 0xdd, 0x0d, 0xd5, 0x94, 0x76, 0x0e, 0xb0, 0x12,
-	0x81, 0x74, 0xb2, 0xe6, 0x82, 0x30, 0x5a, 0xcb, 0x50, 0x3e, 0x37, 0x32, 0x9f, 0x1b, 0x97, 0x89,
-	0xcf, 0xc9, 0x00, 0xea, 0x39, 0x09, 0x88, 0x96, 0x11, 0x8a, 0xba, 0x6c, 0x43, 0xe4, 0x14, 0x58,
-	0x21, 0x8a, 0xb2, 0x6c, 0x42, 0x0c, 0xfb, 0xcf, 0xa7, 0xae, 0x27, 0x16, 0xf1, 0xd4, 0x70, 0x68,
-	0x60, 0x46, 0x4b, 0x71, 0xe2, 0xd8, 0x7c, 0x91, 0x2c, 0x66, 0xa6, 0x1f, 0x26, 0x1f, 0x8b, 0x1c,
-	0x73, 0xed, 0xc5, 0x4f, 0xab, 0x32, 0x3c, 0xfb, 0x08, 0x00, 0x00, 0xff, 0xff, 0xcf, 0xa2, 0x63,
-	0xbb, 0x09, 0x04, 0x00, 0x00,
+	// 493 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x94, 0xef, 0x6a, 0xdb, 0x30,
+	0x14, 0xc5, 0xc9, 0x4a, 0xc2, 0x72, 0xbb, 0xb2, 0x55, 0xcb, 0x4a, 0xea, 0xb4, 0x90, 0xf9, 0x53,
+	0x07, 0x9b, 0x3d, 0xb2, 0x07, 0x18, 0x2d, 0xfb, 0x67, 0x28, 0x5b, 0x71, 0x36, 0x18, 0x63, 0x50,
+	0x14, 0xe7, 0xc6, 0x11, 0xb1, 0x25, 0x4f, 0x92, 0x0b, 0x7b, 0xc4, 0xbd, 0xd5, 0xb0, 0x24, 0xaf,
+	0x4e, 0x9d, 0x14, 0xd6, 0x7e, 0x08, 0xb1, 0x8e, 0x4f, 0x7e, 0xd2, 0xbd, 0x27, 0x57, 0xe0, 0x15,
+	0x52, 0x68, 0xa1, 0x42, 0xa6, 0x54, 0x89, 0xd2, 0x7d, 0x05, 0x46, 0x24, 0x3d, 0xbb, 0xf2, 0x46,
+	0xa9, 0x10, 0x69, 0x86, 0xa1, 0x51, 0x67, 0xe5, 0x22, 0xc4, 0xbc, 0xd0, 0xbf, 0xad, 0xc9, 0xf3,
+	0x1d, 0x40, 0x62, 0x91, 0xb1, 0x84, 0x6a, 0x21, 0x1b, 0x8f, 0xd6, 0xe3, 0xcf, 0xe0, 0xe9, 0x47,
+	0xd4, 0x5f, 0xc5, 0x0a, 0xf9, 0x39, 0x53, 0x3a, 0xc6, 0x5f, 0x25, 0x2a, 0x4d, 0x46, 0xd0, 0xb7,
+	0x3b, 0x5c, 0xb2, 0xf9, 0xb0, 0x33, 0xee, 0x9c, 0xf4, 0xe3, 0x87, 0x56, 0x88, 0xe6, 0x24, 0x80,
+	0x5e, 0x41, 0x25, 0xcd, 0xd5, 0xf0, 0xc1, 0xb8, 0x73, 0xb2, 0x3b, 0x39, 0x08, 0x1a, 0xd8, 0x0b,
+	0x9a, 0x32, 0x4e, 0x35, 0x13, 0x3c, 0x76, 0x2e, 0xff, 0x27, 0x0c, 0xd6, 0xf7, 0x50, 0x85, 0xe0,
+	0x0a, 0x2b, 0x8e, 0xae, 0x44, 0x35, 0xec, 0x8c, 0x77, 0x6e, 0x72, 0x8c, 0xfd, 0xcb, 0x62, 0x81,
+	0x32, 0x76, 0x2e, 0x32, 0x80, 0xae, 0x16, 0x9a, 0x66, 0x66, 0xdb, 0x6e, 0x6c, 0x17, 0xfe, 0x27,
+	0x18, 0x4e, 0x59, 0xca, 0x8d, 0xff, 0xa2, 0x94, 0xc9, 0x92, 0x2a, 0xac, 0xcb, 0x78, 0x09, 0x5d,
+	0x51, 0x21, 0x4c, 0x09, 0xdb, 0x37, 0xb0, 0x26, 0xff, 0x03, 0x1c, 0x6e, 0x20, 0xb9, 0xc3, 0xbe,
+	0x80, 0x27, 0xae, 0x23, 0x8a, 0xa5, 0x9c, 0xea, 0x52, 0xa2, 0x6b, 0xcc, 0x63, 0xab, 0x4f, 0x6b,
+	0xd9, 0x7f, 0x07, 0x83, 0x7f, 0x9c, 0x29, 0x66, 0xd9, 0xdd, 0x4e, 0x73, 0x06, 0xcf, 0x6e, 0x50,
+	0xfe, 0xff, 0x24, 0xa7, 0xb0, 0x1f, 0x55, 0x92, 0x81, 0xdc, 0xf5, 0x18, 0xe4, 0x5b, 0x31, 0xa7,
+	0xfa, 0x3e, 0x8c, 0x08, 0x48, 0x8c, 0x57, 0x62, 0xb5, 0xce, 0x38, 0x06, 0x30, 0xc1, 0x5e, 0x72,
+	0x9a, 0xd7, 0x15, 0xf4, 0x8d, 0xf2, 0x99, 0xe6, 0x58, 0xa5, 0x9d, 0x89, 0x94, 0x71, 0x93, 0x76,
+	0x3f, 0xb6, 0x8b, 0xc9, 0x9f, 0x1d, 0xd8, 0x8b, 0x6c, 0x95, 0x28, 0xaf, 0x58, 0x82, 0xe4, 0x3b,
+	0xec, 0xb7, 0x52, 0x23, 0xe3, 0xc0, 0x8d, 0xcb, 0xb6, 0xbf, 0x86, 0xf7, 0xfc, 0x16, 0x87, 0x6b,
+	0xf4, 0x39, 0xec, 0xad, 0x25, 0x40, 0x8e, 0x5a, 0xbf, 0x69, 0xc4, 0xeb, 0x1d, 0x6f, 0x79, 0xeb,
+	0x68, 0x6f, 0x01, 0xae, 0xb3, 0x20, 0x87, 0xb5, 0xb9, 0x95, 0x8f, 0x77, 0x10, 0xd8, 0xa1, 0x0e,
+	0xea, 0xa1, 0x0e, 0xde, 0x57, 0x43, 0x4d, 0x4e, 0x61, 0xb7, 0x91, 0x04, 0xf1, 0x6a, 0x42, 0x3b,
+	0x9e, 0xdb, 0x10, 0x8d, 0x20, 0xae, 0x11, 0xed, 0x74, 0xb6, 0x22, 0x22, 0x78, 0xd4, 0x1c, 0x66,
+	0x32, 0xaa, 0x19, 0x1b, 0xae, 0x11, 0xef, 0x68, 0xf3, 0x4b, 0xdb, 0x91, 0xb3, 0xc9, 0x8f, 0xd7,
+	0x29, 0xd3, 0xcb, 0x72, 0x16, 0x24, 0x22, 0x0f, 0x8b, 0x95, 0x7e, 0x95, 0x50, 0xb5, 0xac, 0x1e,
+	0xe6, 0x61, 0xc6, 0xab, 0x8f, 0x2c, 0x92, 0x70, 0xed, 0x16, 0x9c, 0xf5, 0xcc, 0xf2, 0xcd, 0xdf,
+	0x00, 0x00, 0x00, 0xff, 0xff, 0x4d, 0x64, 0x76, 0x39, 0x1d, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -356,234 +480,274 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// IssuerClient is the client API for Issuer service.
+// IssuerServiceClient is the client API for IssuerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type IssuerClient interface {
-	// Returns token purchase signature for further registration along with
-	// offer via Replication Server
+type IssuerServiceClient interface {
+	// SignTokenPurchase Returns token purchase signature for further
+	//registration along with offer via Replication Server
 	SignTokenPurchase(ctx context.Context, in *SignTokenPurchaseRequest, opts ...grpc.CallOption) (*SignTokenPurchaseResponse, error)
-	// Returns token sell signature for further registration along with offer
-	// via Replication Server
+	// SignTokenSell Returns token sell signature for further
+	// registration along with offer via Replication Server
 	SignTokenSell(ctx context.Context, in *SignTokenSellRequest, opts ...grpc.CallOption) (*SignTokenSellResponse, error)
-	// Issue new token with given data. Request data equal to token purchase
-	// data, because it is token offer.
+	// IssueToken — Issue new token with given data. Request data equal to
+	// token purchase data, because it is token offer.
 	IssueToken(ctx context.Context, in *IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// Update token inforamtion with given data. Request data equal to token purchase
-	// data, because it is token offer.
+	// UpdateToken — Update token inforamtion with given data. Request data
+	// equal to token purchase data, because it is token offer.
 	UpdateToken(ctx context.Context, in *UpdateTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// Revoke token - delete information about token by his name.
+	// RevokeToken — delete information about token by his name.
 	RevokeToken(ctx context.Context, in *RevokeTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// GetTokenList — return list of issued token with infomation about
+	// expiration time and fix price.
+	GetTokenList(ctx context.Context, in *GetTokenListRequest, opts ...grpc.CallOption) (*GetTokenListResponse, error)
 }
 
-type issuerClient struct {
+type issuerServiceClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewIssuerClient(cc *grpc.ClientConn) IssuerClient {
-	return &issuerClient{cc}
+func NewIssuerServiceClient(cc *grpc.ClientConn) IssuerServiceClient {
+	return &issuerServiceClient{cc}
 }
 
-func (c *issuerClient) SignTokenPurchase(ctx context.Context, in *SignTokenPurchaseRequest, opts ...grpc.CallOption) (*SignTokenPurchaseResponse, error) {
+func (c *issuerServiceClient) SignTokenPurchase(ctx context.Context, in *SignTokenPurchaseRequest, opts ...grpc.CallOption) (*SignTokenPurchaseResponse, error) {
 	out := new(SignTokenPurchaseResponse)
-	err := c.cc.Invoke(ctx, "/issuer.Issuer/SignTokenPurchase", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/issuer.IssuerService/SignTokenPurchase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *issuerClient) SignTokenSell(ctx context.Context, in *SignTokenSellRequest, opts ...grpc.CallOption) (*SignTokenSellResponse, error) {
+func (c *issuerServiceClient) SignTokenSell(ctx context.Context, in *SignTokenSellRequest, opts ...grpc.CallOption) (*SignTokenSellResponse, error) {
 	out := new(SignTokenSellResponse)
-	err := c.cc.Invoke(ctx, "/issuer.Issuer/SignTokenSell", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/issuer.IssuerService/SignTokenSell", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *issuerClient) IssueToken(ctx context.Context, in *IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *issuerServiceClient) IssueToken(ctx context.Context, in *IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/issuer.Issuer/IssueToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/issuer.IssuerService/IssueToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *issuerClient) UpdateToken(ctx context.Context, in *UpdateTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *issuerServiceClient) UpdateToken(ctx context.Context, in *UpdateTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/issuer.Issuer/UpdateToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/issuer.IssuerService/UpdateToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *issuerClient) RevokeToken(ctx context.Context, in *RevokeTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *issuerServiceClient) RevokeToken(ctx context.Context, in *RevokeTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/issuer.Issuer/RevokeToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/issuer.IssuerService/RevokeToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// IssuerServer is the server API for Issuer service.
-type IssuerServer interface {
-	// Returns token purchase signature for further registration along with
-	// offer via Replication Server
+func (c *issuerServiceClient) GetTokenList(ctx context.Context, in *GetTokenListRequest, opts ...grpc.CallOption) (*GetTokenListResponse, error) {
+	out := new(GetTokenListResponse)
+	err := c.cc.Invoke(ctx, "/issuer.IssuerService/GetTokenList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// IssuerServiceServer is the server API for IssuerService service.
+type IssuerServiceServer interface {
+	// SignTokenPurchase Returns token purchase signature for further
+	//registration along with offer via Replication Server
 	SignTokenPurchase(context.Context, *SignTokenPurchaseRequest) (*SignTokenPurchaseResponse, error)
-	// Returns token sell signature for further registration along with offer
-	// via Replication Server
+	// SignTokenSell Returns token sell signature for further
+	// registration along with offer via Replication Server
 	SignTokenSell(context.Context, *SignTokenSellRequest) (*SignTokenSellResponse, error)
-	// Issue new token with given data. Request data equal to token purchase
-	// data, because it is token offer.
+	// IssueToken — Issue new token with given data. Request data equal to
+	// token purchase data, because it is token offer.
 	IssueToken(context.Context, *IssueTokenRequest) (*empty.Empty, error)
-	// Update token inforamtion with given data. Request data equal to token purchase
-	// data, because it is token offer.
+	// UpdateToken — Update token inforamtion with given data. Request data
+	// equal to token purchase data, because it is token offer.
 	UpdateToken(context.Context, *UpdateTokenRequest) (*empty.Empty, error)
-	// Revoke token - delete information about token by his name.
+	// RevokeToken — delete information about token by his name.
 	RevokeToken(context.Context, *RevokeTokenRequest) (*empty.Empty, error)
+	// GetTokenList — return list of issued token with infomation about
+	// expiration time and fix price.
+	GetTokenList(context.Context, *GetTokenListRequest) (*GetTokenListResponse, error)
 }
 
-// UnimplementedIssuerServer can be embedded to have forward compatible implementations.
-type UnimplementedIssuerServer struct {
+// UnimplementedIssuerServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedIssuerServiceServer struct {
 }
 
-func (*UnimplementedIssuerServer) SignTokenPurchase(ctx context.Context, req *SignTokenPurchaseRequest) (*SignTokenPurchaseResponse, error) {
+func (*UnimplementedIssuerServiceServer) SignTokenPurchase(ctx context.Context, req *SignTokenPurchaseRequest) (*SignTokenPurchaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignTokenPurchase not implemented")
 }
-func (*UnimplementedIssuerServer) SignTokenSell(ctx context.Context, req *SignTokenSellRequest) (*SignTokenSellResponse, error) {
+func (*UnimplementedIssuerServiceServer) SignTokenSell(ctx context.Context, req *SignTokenSellRequest) (*SignTokenSellResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignTokenSell not implemented")
 }
-func (*UnimplementedIssuerServer) IssueToken(ctx context.Context, req *IssueTokenRequest) (*empty.Empty, error) {
+func (*UnimplementedIssuerServiceServer) IssueToken(ctx context.Context, req *IssueTokenRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueToken not implemented")
 }
-func (*UnimplementedIssuerServer) UpdateToken(ctx context.Context, req *UpdateTokenRequest) (*empty.Empty, error) {
+func (*UnimplementedIssuerServiceServer) UpdateToken(ctx context.Context, req *UpdateTokenRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateToken not implemented")
 }
-func (*UnimplementedIssuerServer) RevokeToken(ctx context.Context, req *RevokeTokenRequest) (*empty.Empty, error) {
+func (*UnimplementedIssuerServiceServer) RevokeToken(ctx context.Context, req *RevokeTokenRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevokeToken not implemented")
 }
-
-func RegisterIssuerServer(s *grpc.Server, srv IssuerServer) {
-	s.RegisterService(&_Issuer_serviceDesc, srv)
+func (*UnimplementedIssuerServiceServer) GetTokenList(ctx context.Context, req *GetTokenListRequest) (*GetTokenListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenList not implemented")
 }
 
-func _Issuer_SignTokenPurchase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func RegisterIssuerServiceServer(s *grpc.Server, srv IssuerServiceServer) {
+	s.RegisterService(&_IssuerService_serviceDesc, srv)
+}
+
+func _IssuerService_SignTokenPurchase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SignTokenPurchaseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IssuerServer).SignTokenPurchase(ctx, in)
+		return srv.(IssuerServiceServer).SignTokenPurchase(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/issuer.Issuer/SignTokenPurchase",
+		FullMethod: "/issuer.IssuerService/SignTokenPurchase",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IssuerServer).SignTokenPurchase(ctx, req.(*SignTokenPurchaseRequest))
+		return srv.(IssuerServiceServer).SignTokenPurchase(ctx, req.(*SignTokenPurchaseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Issuer_SignTokenSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _IssuerService_SignTokenSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SignTokenSellRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IssuerServer).SignTokenSell(ctx, in)
+		return srv.(IssuerServiceServer).SignTokenSell(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/issuer.Issuer/SignTokenSell",
+		FullMethod: "/issuer.IssuerService/SignTokenSell",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IssuerServer).SignTokenSell(ctx, req.(*SignTokenSellRequest))
+		return srv.(IssuerServiceServer).SignTokenSell(ctx, req.(*SignTokenSellRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Issuer_IssueToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _IssuerService_IssueToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IssueTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IssuerServer).IssueToken(ctx, in)
+		return srv.(IssuerServiceServer).IssueToken(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/issuer.Issuer/IssueToken",
+		FullMethod: "/issuer.IssuerService/IssueToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IssuerServer).IssueToken(ctx, req.(*IssueTokenRequest))
+		return srv.(IssuerServiceServer).IssueToken(ctx, req.(*IssueTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Issuer_UpdateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _IssuerService_UpdateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IssuerServer).UpdateToken(ctx, in)
+		return srv.(IssuerServiceServer).UpdateToken(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/issuer.Issuer/UpdateToken",
+		FullMethod: "/issuer.IssuerService/UpdateToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IssuerServer).UpdateToken(ctx, req.(*UpdateTokenRequest))
+		return srv.(IssuerServiceServer).UpdateToken(ctx, req.(*UpdateTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Issuer_RevokeToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _IssuerService_RevokeToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RevokeTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IssuerServer).RevokeToken(ctx, in)
+		return srv.(IssuerServiceServer).RevokeToken(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/issuer.Issuer/RevokeToken",
+		FullMethod: "/issuer.IssuerService/RevokeToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IssuerServer).RevokeToken(ctx, req.(*RevokeTokenRequest))
+		return srv.(IssuerServiceServer).RevokeToken(ctx, req.(*RevokeTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Issuer_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "issuer.Issuer",
-	HandlerType: (*IssuerServer)(nil),
+func _IssuerService_GetTokenList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTokenListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IssuerServiceServer).GetTokenList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/issuer.IssuerService/GetTokenList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IssuerServiceServer).GetTokenList(ctx, req.(*GetTokenListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _IssuerService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "issuer.IssuerService",
+	HandlerType: (*IssuerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "SignTokenPurchase",
-			Handler:    _Issuer_SignTokenPurchase_Handler,
+			Handler:    _IssuerService_SignTokenPurchase_Handler,
 		},
 		{
 			MethodName: "SignTokenSell",
-			Handler:    _Issuer_SignTokenSell_Handler,
+			Handler:    _IssuerService_SignTokenSell_Handler,
 		},
 		{
 			MethodName: "IssueToken",
-			Handler:    _Issuer_IssueToken_Handler,
+			Handler:    _IssuerService_IssueToken_Handler,
 		},
 		{
 			MethodName: "UpdateToken",
-			Handler:    _Issuer_UpdateToken_Handler,
+			Handler:    _IssuerService_UpdateToken_Handler,
 		},
 		{
 			MethodName: "RevokeToken",
-			Handler:    _Issuer_RevokeToken_Handler,
+			Handler:    _IssuerService_RevokeToken_Handler,
+		},
+		{
+			MethodName: "GetTokenList",
+			Handler:    _IssuerService_GetTokenList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

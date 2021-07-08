@@ -4,9 +4,9 @@ package lnrpc;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc";
 
-import "protos/replicator/replicator.proto";
-import "protos/issuer/issuer.proto";
 import "google/protobuf/empty.proto";
+import "protos/issuer/issuer.proto";
+import "protos/replicator/replicator.proto";
 
 /*
  * Comments in this file will be directly parsed into the API
@@ -536,6 +536,12 @@ service Lightning {
     // offers
     rpc GetTokenOffers (replicator.GetTokenOffersRequest)
         returns (replicator.GetTokenOffersResponse);
+
+    // lncli: `gettokenlist`
+    // Proxies initial request to the replicator for available issuer token
+    // offers
+    rpc GetTokenList (issuer.GetTokenListRequest)
+        returns (issuer.GetTokenListResponse);
 
     // lncli: `signtokenpurchase`
     // Proxies initial request to the issuer for a signature

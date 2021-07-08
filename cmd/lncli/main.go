@@ -362,6 +362,7 @@ func main() {
 		profileSubCommand,
 
 		getTokenOffersCommand,
+		getTokenListCommand,
 		getTokenBalancesCommand,
 		signTokenPurchaseCommand,
 		verifyTokenPurchaseSignatureCommand,

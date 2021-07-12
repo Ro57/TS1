@@ -33,12 +33,18 @@ type userInfo struct {
 	roles map[string]struct{}
 }
 
+type ReplicatorEvents struct {
+	StopSig chan struct{}
+}
+
 type Server struct {
 	// Nest unimplemented server implementation in order to satisfy server interface
 	replicator.UnimplementedReplicatorServer
 
 	holders        TokenHoldersStoreAPI
 	holderBalances TokenHolderBalancesStoreAPI
+
+	events ReplicatorEvents
 }
 
 type loginCliams struct {
@@ -46,11 +52,12 @@ type loginCliams struct {
 	jwt.StandardClaims
 }
 
-func RunServerServing(host string, stopSig <-chan struct{}) {
+func RunServerServing(host string, events ReplicatorEvents) {
 	var (
 		child = &Server{
 			holders:        NewTokenHoldersStore(),
 			holderBalances: NewTokenHolderBalancesStore(),
+			events:         events,
 		}
 		root = grpc.NewServer()
 	)
@@ -69,7 +76,7 @@ func RunServerServing(host string, stopSig <-chan struct{}) {
 	}()
 
 	go func() {
-		<-stopSig
+		<-events.StopSig
 		root.Stop()
 	}()
 
@@ -421,9 +428,6 @@ func (s *Server) RegisterTokenIssuer(ctx context.Context, req *replicator.Regist
 	if ok {
 		return nil, status.Error(codes.InvalidArgument, "user with this login already exists")
 	}
-
-	fmt.Println("Registred login: ", req.Login)
-
 	roles := make(map[string]struct{})
 	roles["issuer"] = struct{}{}
 

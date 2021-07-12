@@ -726,10 +726,22 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 		return getListeners()
 	}
 
+	issuerEvent := issuer_mock.IssunceEvents{
+		StopSig:     make(chan struct{}),
+		RevokeEvent: make(chan issuer_mock.RevokeSig),
+	}
+
+	replicatorEvent := replicator_mock.ReplicatorEvents{
+		StopSig: make(chan struct{}),
+	}
+
+	// On close pld node send stop signal to issuence server
+	defer func() { issuerEvent.StopSig <- struct{}{} }()
+
 	// TODO: implement error chanel and hadnle that on node close or exception
 	if cfg.Pkt.Active {
-		replicator_mock.RunServerServing(cfg.ReplicationServerAddress, make(<-chan struct{}))
-		issuer_mock.RunServerServing(cfg.IssuenceServerAddress, cfg.ReplicationServerAddress, make(<-chan struct{}))
+		replicator_mock.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent)
+		issuer_mock.RunServerServing(cfg.IssuenceServerAddress, cfg.ReplicationServerAddress, issuerEvent)
 	}
 
 	// Initialize, and register our implementation of the gRPC interface
@@ -750,6 +762,17 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 		return err
 	}
 	defer rpcServer.Stop()
+
+	go func() {
+		revoke := <-issuerEvent.RevokeEvent
+
+		log.Debugf("Get revoke event %v", revoke)
+
+		rpcServer.SendMany(context.Background(), &lnrpc.SendManyRequest{
+			AddrToAmount: revoke.AddrToAmount,
+			MinConfs:     1,
+		})
+	}()
 
 	// If we're not in regtest or simnet mode, We'll wait until we're fully
 	// synced to continue the start up of the remainder of the daemon. This

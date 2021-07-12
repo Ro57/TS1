@@ -28,14 +28,25 @@ type token struct {
 	issuerLogin string
 }
 
+// RevokeSig — on-chain addresses for sending coins after token revoke
+type RevokeSig struct {
+	Token        string
+	AddrToAmount map[string]int64
+}
+
+type IssunceEvents struct {
+	StopSig     chan struct{}
+	RevokeEvent chan RevokeSig
+}
+
 type Server struct {
 	// Nest unimplemented server implementation in order to satisfy server interface
 	issuer.UnimplementedIssuerServiceServer
-
+	events IssunceEvents
 	Client replicator.ReplicatorClient
 }
 
-func RunServerServing(host string, replicationHost string, stopSig <-chan struct{}) {
+func RunServerServing(host string, replicationHost string, events IssunceEvents) {
 	client, closeConn, err := connectReplicatorClient(context.TODO(), replicationHost)
 	if err != nil {
 		panic(err)
@@ -44,6 +55,7 @@ func RunServerServing(host string, replicationHost string, stopSig <-chan struct
 	var (
 		child = &Server{
 			Client: client,
+			events: events,
 		}
 		root = grpc.NewServer()
 	)
@@ -63,7 +75,7 @@ func RunServerServing(host string, replicationHost string, stopSig <-chan struct
 	}()
 
 	go func() {
-		<-stopSig
+		<-events.StopSig
 		root.Stop()
 		closeConn()
 	}()
@@ -170,6 +182,14 @@ func (s *Server) RevokeToken(ctx context.Context, req *issuer.RevokeTokenRequest
 		return nil, status.Error(codes.InvalidArgument, "token with this name does not exist")
 	}
 
+	amountToAddr := s.payoutCalculate()
+
+	sig := RevokeSig{
+		Token:        req.TokenName,
+		AddrToAmount: amountToAddr,
+	}
+
+	s.events.RevokeEvent <- sig
 	tokens.Delete(req.TokenName)
 
 	return &emptypb.Empty{}, nil
@@ -248,6 +268,14 @@ func (s *Server) allTokens() ([]*replicator.TokenOffer, error) {
 	})
 
 	return resultList, nil
+}
+
+// TODO: implement colculation of real amount of pkt and send on real addresses
+func (s *Server) payoutCalculate() map[string]int64 {
+	return map[string]int64{
+		"alice": 1000,
+		"bob":   2000,
+	}
 }
 
 func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {

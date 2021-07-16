@@ -867,6 +867,7 @@ func newRPCServer(
 	// Finally, with all the pre-set up complete,  we can create the main
 	// gRPC server, and register the main lnrpc server along side.
 	grpcServer := grpc.NewServer(serverOpts...)
+
 	rootRPCServer := &rpcServer{
 		cfg:              cfg,
 		restDialOpts:     restDialOpts,

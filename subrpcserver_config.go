@@ -16,6 +16,8 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lnrpc/invoicesrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/routerrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/signrpc"
+	issueancerpc "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuerrpc"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicatorrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/walletrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/watchtowerrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/wtclientrpc"
@@ -74,6 +76,16 @@ type subRPCServerConfigs struct {
 	// instance within lnd in order to add, remove, list registered client
 	// towers, etc.
 	WatchtowerClientRPC *wtclientrpc.Config `group:"wtclientrpc" namespace:"wtclientrpc"`
+
+	// RouterRPC is a sub-RPC server the exposes functionality that allows
+	// clients to issue, revoke, and update tokens and genereate transactions
+	// htlc.
+	IssuanceRPC *issueancerpc.Config `group:"issuancerpc" namespace:"issuancerpc"`
+
+	// ReplicatorRPC is a sub-RPC server the exposes functionality that allows
+	// clients to bay, exchange tokens, registrate autorize and manage users
+	// and post trnasaction resaults to network
+	ReplicatorRPC *replicatorrpc.Config `group:"replicatorrpc" namespace:"replicatorrpc"`
 }
 
 // PopulateDependencies attempts to iterate through all the sub-server configs
@@ -137,6 +149,26 @@ func (s *subRPCServerConfigs) PopulateDependencies(cfg *Config,
 			)
 			subCfgValue.FieldByName("KeyRing").Set(
 				reflect.ValueOf(cc.KeyRing),
+			)
+
+		case *replicatorrpc.Config:
+			subCfgValue := extractReflectValue(subCfg)
+
+			subCfgValue.FieldByName("MacService").Set(
+				reflect.ValueOf(macService),
+			)
+			subCfgValue.FieldByName("NetworkDir").Set(
+				reflect.ValueOf(networkDir),
+			)
+
+		case *issueancerpc.Config:
+			subCfgValue := extractReflectValue(subCfg)
+
+			subCfgValue.FieldByName("MacService").Set(
+				reflect.ValueOf(macService),
+			)
+			subCfgValue.FieldByName("NetworkDir").Set(
+				reflect.ValueOf(networkDir),
 			)
 
 		case *walletrpc.Config:

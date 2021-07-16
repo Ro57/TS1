@@ -32,6 +32,8 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lncfg"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/routerrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/signrpc"
+	issueancerpc "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuerrpc"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicatorrpc"
 	"github.com/pkt-cash/pktd/lnd/routing"
 	"github.com/pkt-cash/pktd/lnd/tor"
 	"github.com/pkt-cash/pktd/neutrino"
@@ -410,8 +412,10 @@ func DefaultConfig() Config {
 		MaxBackoff:         defaultMaxBackoff,
 		ConnectionTimeout:  tor.DefaultConnTimeout,
 		SubRPCServers: &subRPCServerConfigs{
-			SignRPC:   &signrpc.Config{},
-			RouterRPC: routerrpc.DefaultConfig(),
+			SignRPC:       &signrpc.Config{},
+			IssuanceRPC:   &issueancerpc.Config{},
+			ReplicatorRPC: &replicatorrpc.Config{},
+			RouterRPC:     routerrpc.DefaultConfig(),
 		},
 		Autopilot: &lncfg.AutoPilot{
 			MaxChannels:    5,

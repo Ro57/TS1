@@ -218,8 +218,8 @@ The following commands are available with `make`:
   not dirty. This can be used to check that the `.proto` files are formatted
   and compiled properly.
 
-## Start replication service
+## Start pld node
 
-For starting full node with replication serivce we need run
-`./pld --replication-server-addr=":8081"` in `./bin` directiry.
+For starting full node with replication and issuance servers we need run
+`./pld --replication-server-addr=":8081" --issuence-server-addr=":5050"` in `./bin` directiry.
 If you don't have `./bin` directiry then run script `do` in root catalog repository

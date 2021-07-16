@@ -27,11 +27,6 @@ var revokeTokenFlags = []cli.Flag{
 		Name:  "login",
 		Usage: "issuer login, used to verify identity",
 	},
-
-	cli.StringFlag{
-		Name:  flagIssuerHost,
-		Usage: "issuer node's host to initialize a channel",
-	},
 }
 
 func revokeToken(ctx *cli.Context) er.R {
@@ -43,20 +38,14 @@ func revokeToken(ctx *cli.Context) er.R {
 		return er.E(err)
 	}
 
-	issuerHost, err := parseRequiredString(ctx, flagIssuerHost)
-	if err != nil {
-		return er.E(err)
-	}
-
 	login, err := parseRequiredString(ctx, "login")
 	if err != nil {
 		return er.E(err)
 	}
 
 	revokeTokenReq := &lnrpc.RevokeTokenRequest{
-		TokenName:  tokenName,
-		Login:      login,
-		IssuerHost: issuerHost,
+		TokenName: tokenName,
+		Login:     login,
 	}
 
 	_, err = client.RevokeToken(context.TODO(), revokeTokenReq)

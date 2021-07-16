@@ -45,14 +45,6 @@ var issueTokenFlags = []cli.Flag{
 		Name:  flagIssuerID,
 		Usage: "issuer identity to buy target token from",
 	},
-	cli.StringFlag{
-		Name:  flagIssuerIdentityPubKey,
-		Usage: "issuer node's pubkey to initialize a channel",
-	},
-	cli.StringFlag{
-		Name:  flagIssuerHost,
-		Usage: "issuer node's host to initialize a channel",
-	},
 }
 
 func issueToken(ctx *cli.Context) er.R {
@@ -106,14 +98,6 @@ func extractTokenIssue(ctx *cli.Context) (*replicator.TokenOffer, er.R) {
 	issuerInfo.Id = ctx.String(flagIssuerID)
 	if issuerInfo.Id == "" {
 		return nil, er.Errorf("empty %q argument provided", flagIssuerID)
-	}
-	issuerInfo.IdentityPubkey = ctx.String(flagIssuerIdentityPubKey)
-	if issuerInfo.IdentityPubkey == "" {
-		return nil, er.Errorf("empty %q argument provided", flagIssuerIdentityPubKey)
-	}
-	issuerInfo.Host = ctx.String(flagIssuerHost)
-	if issuerInfo.Host == "" {
-		return nil, er.Errorf("empty %q argument provided", flagIssuerHost)
 	}
 
 	offer.IssuerInfo = issuerInfo

@@ -2,6 +2,7 @@ package replicatorrpc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -17,6 +18,7 @@ import (
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/encoder"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/jwtstore"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
@@ -421,6 +423,7 @@ func (s *Server) VerifyTokenPurchase(ctx context.Context, req *replicator.Verify
 }
 
 func (s *Server) VerifyTokenSell(ctx context.Context, req *replicator.VerifyTokenSellRequest) (*empty.Empty, error) {
+
 	// NOTE: is expected to be empty
 	if req.Sell.InitialTxHash != "" {
 		return nil, status.Error(codes.InvalidArgument, "initial tx hash is provided")
@@ -460,6 +463,28 @@ func (s *Server) VerifyTokenSell(ctx context.Context, req *replicator.VerifyToke
 	}
 	if req.Sell.Offer.IssuerInfo.Host == "" {
 		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
+	}
+
+	tokenSell := encoder.TokenSell{
+		Token:            req.Sell.Offer.Token,
+		Price:            req.Sell.Offer.Price,
+		ID:               req.Sell.Offer.IssuerInfo.Id,
+		Identity_pubkey:  req.Sell.Offer.IssuerInfo.IdentityPubkey,
+		Host:             req.Sell.Offer.IssuerInfo.Host,
+		TokenHolderLogin: req.Sell.Offer.TokenHolderLogin,
+		TokenBuyerLogin:  req.Sell.Offer.TokenBuyerLogin,
+		ValidUntilTime:   req.Sell.Offer.ValidUntilSeconds,
+	}
+
+	bytes, err := json.Marshal(tokenSell)
+	if err != nil {
+		return nil, errors.WithMessage(err, "marshalling request")
+	}
+
+	hash := encoder.CreateHash(bytes)
+
+	if fmt.Sprintf("%x", hash) != req.Sell.IssuerSignature {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprint("Expect hash ", fmt.Sprintf("%x", hash), " but got ", req.Sell.IssuerSignature))
 	}
 
 	return &empty.Empty{}, nil

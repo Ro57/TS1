@@ -18,6 +18,7 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/encoder"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
 	"google.golang.org/grpc"
@@ -238,12 +239,23 @@ func (s *Server) SignTokenPurchase(ctx context.Context, req *issuer.SignTokenPur
 }
 
 func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {
-	bytes, err := json.Marshal(req)
+	tokenSell := encoder.TokenSell{
+		Token:            req.Offer.Token,
+		Price:            req.Offer.Price,
+		ID:               req.Offer.IssuerInfo.Id,
+		Identity_pubkey:  req.Offer.IssuerInfo.IdentityPubkey,
+		Host:             req.Offer.IssuerInfo.Host,
+		TokenHolderLogin: req.Offer.TokenHolderLogin,
+		TokenBuyerLogin:  req.Offer.TokenBuyerLogin,
+		ValidUntilTime:   req.Offer.ValidUntilSeconds,
+	}
+
+	bytes, err := json.Marshal(tokenSell)
 	if err != nil {
 		return nil, errors.WithMessage(err, "marshalling request")
 	}
 
-	hash := sha256.Sum256(bytes)
+	hash := encoder.CreateHash(bytes)
 
 	resp := &issuer.SignTokenSellResponse{
 		IssuerSignature: fmt.Sprintf("%x", hash),

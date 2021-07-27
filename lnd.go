@@ -732,7 +732,9 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	}
 
 	replicatorEvent := replicator_mock.ReplicatorEvents{
-		StopSig: make(chan struct{}),
+		StopSig:          make(chan struct{}),
+		OpenChannelEvent: make(chan lnrpc.LightningAddress),
+		OpenChannelError: make(chan error),
 	}
 
 	// On close pld node send stop signal to issuence server
@@ -764,14 +766,37 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	defer rpcServer.Stop()
 
 	go func() {
-		revoke := <-issuerEvent.RevokeEvent
+		for {
+			select {
+			case revoke := <-issuerEvent.RevokeEvent:
+				log.Debugf("Get revoke event %v", revoke)
 
-		log.Debugf("Get revoke event %v", revoke)
+				rpcServer.SendMany(context.Background(), &lnrpc.SendManyRequest{
+					AddrToAmount: revoke.AddrToAmount,
+					MinConfs:     1,
+				})
+			case addr := <-replicatorEvent.OpenChannelEvent:
+				log.Debugf("Get open channel event %v", addr)
 
-		rpcServer.SendMany(context.Background(), &lnrpc.SendManyRequest{
-			AddrToAmount: revoke.AddrToAmount,
-			MinConfs:     1,
-		})
+				connect := &lnrpc.ConnectPeerRequest{
+					Addr:    &addr,
+					Perm:    false,
+					Timeout: 10,
+				}
+
+				log.Debug("Connect info: ", connect)
+
+				_, err := rpcServer.ConnectPeer(context.Background(), connect)
+				if err != nil {
+					log.Errorf("Open channel error ", err)
+				}
+
+				replicatorEvent.OpenChannelError <- err
+
+				// TODO: Add send many operation
+
+			}
+		}
 	}()
 
 	// If we're not in regtest or simnet mode, We'll wait until we're fully

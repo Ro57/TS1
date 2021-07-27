@@ -71,7 +71,9 @@ type userInfo struct {
 }
 
 type ReplicatorEvents struct {
-	StopSig chan struct{}
+	StopSig          chan struct{}
+	OpenChannelEvent chan lnrpc.LightningAddress
+	OpenChannelError chan error
 }
 
 type Server struct {
@@ -531,6 +533,8 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 }
 
 func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.RegisterTokenSellRequest) (*empty.Empty, error) {
+	log.Debugf("Execute RegisterTokenSell")
+
 	if req.Sell.InitialTxHash == "" {
 		return nil, status.Error(codes.InvalidArgument, "initial tx hash not provided")
 	}
@@ -568,6 +572,20 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 	}
 	if req.Sell.Offer.IssuerInfo.Host == "" {
 		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
+	}
+
+	s.events.OpenChannelEvent <- lnrpc.LightningAddress{
+		Pubkey: req.Sell.Offer.IssuerInfo.IdentityPubkey,
+		Host:   req.Sell.Offer.IssuerInfo.Host,
+	}
+
+	log.Debugf("After to channel")
+
+	err := <-s.events.OpenChannelError
+	log.Debugf("After get error")
+
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "registrete sell own token: %v", err)
 	}
 
 	return &empty.Empty{}, nil

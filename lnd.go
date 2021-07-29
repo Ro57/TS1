@@ -733,7 +733,7 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 
 	replicatorEvent := replicator_mock.ReplicatorEvents{
 		StopSig:          make(chan struct{}),
-		OpenChannelEvent: make(chan lnrpc.LightningAddress),
+		OpenChannelEvent: make(chan replicator_mock.OpenChannel),
 		OpenChannelError: make(chan error),
 	}
 
@@ -775,11 +775,11 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 					AddrToAmount: revoke.AddrToAmount,
 					MinConfs:     1,
 				})
-			case addr := <-replicatorEvent.OpenChannelEvent:
-				log.Debugf("Get open channel event %v", addr)
+			case open := <-replicatorEvent.OpenChannelEvent:
+				log.Debugf("Get open channel event %v", open)
 
 				connect := &lnrpc.ConnectPeerRequest{
-					Addr:    &addr,
+					Addr:    &open.Address,
 					Perm:    false,
 					Timeout: 10,
 				}
@@ -787,14 +787,34 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 				log.Debug("Connect info: ", connect)
 
 				_, err := rpcServer.ConnectPeer(context.Background(), connect)
+
 				if err != nil {
-					log.Errorf("Open channel error ", err)
+					replicatorEvent.OpenChannelError <- err
+
+					return
 				}
 
-				replicatorEvent.OpenChannelError <- err
+				_, err = rpcServer.OpenChannelSync(context.TODO(), &lnrpc.OpenChannelRequest{})
+				if err != nil {
+					replicatorEvent.OpenChannelError <- err
 
-				// TODO: Add send many operation
+					return
+				}
 
+				_, err = rpcServer.SendMany(context.Background(), &lnrpc.SendManyRequest{
+					AddrToAmount: map[string]int64{
+						open.Address.Pubkey: open.Amount,
+					},
+					MinConfs: 1,
+				})
+
+				if err != nil {
+					replicatorEvent.OpenChannelError <- err
+
+					return
+				}
+
+				replicatorEvent.OpenChannelError <- nil
 			}
 		}
 	}()

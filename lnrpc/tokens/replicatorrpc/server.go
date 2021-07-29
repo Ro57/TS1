@@ -70,9 +70,14 @@ type userInfo struct {
 	roles map[string]struct{}
 }
 
+type OpenChannel struct {
+	Address lnrpc.LightningAddress
+	Amount  int64
+}
+
 type ReplicatorEvents struct {
 	StopSig          chan struct{}
-	OpenChannelEvent chan lnrpc.LightningAddress
+	OpenChannelEvent chan OpenChannel
 	OpenChannelError chan error
 }
 
@@ -574,15 +579,16 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
 	}
 
-	s.events.OpenChannelEvent <- lnrpc.LightningAddress{
-		Pubkey: req.Sell.Offer.IssuerInfo.IdentityPubkey,
-		Host:   req.Sell.Offer.IssuerInfo.Host,
+	s.events.OpenChannelEvent <- OpenChannel{
+		lnrpc.LightningAddress{
+			Pubkey: req.Sell.Offer.IssuerInfo.IdentityPubkey,
+			Host:   req.Sell.Offer.IssuerInfo.Host,
+		},
+
+		int64(req.Sell.Offer.GetPrice()),
 	}
 
-	log.Debugf("After to channel")
-
 	err := <-s.events.OpenChannelError
-	log.Debugf("After get error")
 
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "registrete sell own token: %v", err)

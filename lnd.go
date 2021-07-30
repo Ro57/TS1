@@ -801,11 +801,16 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 					return
 				}
 
-				_, err = rpcServer.SendMany(context.Background(), &lnrpc.SendManyRequest{
-					AddrToAmount: map[string]int64{
-						open.Address.Pubkey: open.Amount,
-					},
-					MinConfs: 1,
+				resp, err := rpcServer.AddInvoice(context.Background(), &lnrpc.Invoice{
+					Value: open.Amount,
+				})
+				if err != nil {
+					replicatorEvent.OpenChannelError <- err
+
+					return
+				}
+				_, err = rpcServer.SendPaymentSync(context.Background(), &lnrpc.SendRequest{
+					PaymentHashString: resp.PaymentRequest,
 				})
 
 				if err != nil {

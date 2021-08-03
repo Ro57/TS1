@@ -790,14 +790,16 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 
 				if err != nil {
 					replicatorEvent.OpenChannelError <- err
-
+					log.Error(err)
 					return
 				}
 
-				_, err = rpcServer.OpenChannelSync(context.TODO(), &lnrpc.OpenChannelRequest{})
+				_, err = rpcServer.OpenChannelSync(context.TODO(), &lnrpc.OpenChannelRequest{
+					NodePubkey: []byte(open.Address.Pubkey),
+				})
 				if err != nil {
 					replicatorEvent.OpenChannelError <- err
-
+					log.Error(err)
 					return
 				}
 
@@ -806,7 +808,7 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 				})
 				if err != nil {
 					replicatorEvent.OpenChannelError <- err
-
+					log.Error(err)
 					return
 				}
 				_, err = rpcServer.SendPaymentSync(context.Background(), &lnrpc.SendRequest{
@@ -815,7 +817,7 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 
 				if err != nil {
 					replicatorEvent.OpenChannelError <- err
-
+					log.Error(err)
 					return
 				}
 

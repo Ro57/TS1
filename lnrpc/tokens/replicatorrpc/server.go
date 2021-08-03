@@ -36,7 +36,6 @@ const (
 
 // token holders with login password
 var (
-	users      sync.Map
 	jwtStore   *jwtstore.Store
 	signingKey = []byte("SUPER_SECRET")
 
@@ -67,7 +66,8 @@ type userInfo struct {
 	password string
 	// TODO: implement role system
 	// ? method for add new role to user
-	roles map[string]struct{}
+	roles    map[string]struct{}
+	balances TokenHolderBalancesStore
 }
 
 type OpenChannel struct {
@@ -85,8 +85,7 @@ type Server struct {
 	// Nest unimplemented server implementation in order to satisfy server interface
 	replicator.UnimplementedReplicatorServer
 
-	holders        TokenHoldersStoreAPI
-	holderBalances TokenHolderBalancesStoreAPI
+	users sync.Map
 
 	events ReplicatorEvents
 	cfg    *Config
@@ -153,9 +152,7 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 func RunServerServing(host string, events ReplicatorEvents) {
 	var (
 		child = &Server{
-			holders:        NewTokenHoldersStore(),
-			holderBalances: NewTokenHolderBalancesStore(),
-			events:         events,
+			events: events,
 		}
 		root = grpc.NewServer()
 	)
@@ -351,36 +348,16 @@ func (s *Server) GetTokenBalances(ctx context.Context, req *replicator.GetTokenB
 		return nil, status.Error(codes.ResourceExhausted, fmt.Sprintf("session expired"))
 	}
 
-	balances := make([]*replicator.TokenBalance, 0, tokensNum)
-
-	// Fill mocked token balances. At this time balances are not owned by a specific holder
-	for i := tokensNum; i > 0; i-- {
-		balance := &replicator.TokenBalance{
-			Token:     fmt.Sprintf("token_%d", i),
-			Available: uint64(i*2 + 1),
-			Frozen:    uint64(i*3 + 1),
-		}
-		balances = append(balances, balance)
+	v, ok := s.users.Load(innerJWT.HolderLogin)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", innerJWT.HolderLogin))
 	}
+
+	info := v.(userInfo)
 
 	resp := &replicator.GetTokenBalancesResponse{
-		Balances: balances,
-		Total:    tokensNum,
-	}
-
-	// Apply pagination
-	if req.Params.Offset > 0 {
-		if int(req.Params.Offset) <= len(resp.Balances)-1 {
-			resp.Balances = resp.Balances[req.Params.Offset:]
-		} else {
-			resp.Balances = nil
-		}
-	}
-
-	if req.Params.Limit > 0 {
-		if int(req.Params.Limit) <= len(resp.Balances)-1 {
-			resp.Balances = resp.Balances[:req.Params.Limit]
-		}
+		Balances: info.balances.store,
+		Total:    uint64(len(info.balances.store)),
 	}
 
 	return resp, nil
@@ -430,7 +407,6 @@ func (s *Server) VerifyTokenPurchase(ctx context.Context, req *replicator.Verify
 }
 
 func (s *Server) VerifyTokenSell(ctx context.Context, req *replicator.VerifyTokenSellRequest) (*empty.Empty, error) {
-
 	// NOTE: is expected to be empty
 	if req.Sell.InitialTxHash != "" {
 		return nil, status.Error(codes.InvalidArgument, "initial tx hash is provided")
@@ -498,6 +474,8 @@ func (s *Server) VerifyTokenSell(ctx context.Context, req *replicator.VerifyToke
 }
 
 func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.RegisterTokenPurchaseRequest) (*empty.Empty, error) {
+	login := req.Purchase.Offer.TokenHolderLogin
+
 	if req.Purchase.InitialTxHash == "" {
 		return nil, status.Error(codes.InvalidArgument, "initial tx hash not provided")
 	}
@@ -534,12 +512,42 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
 	}
 
+	v, ok := s.users.Load(login)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", login))
+	}
+
+	s.events.OpenChannelEvent <- OpenChannel{
+		lnrpc.LightningAddress{
+			Pubkey: req.Purchase.Offer.IssuerInfo.IdentityPubkey,
+			Host:   req.Purchase.Offer.IssuerInfo.Host,
+		},
+
+		int64(req.Purchase.Offer.GetPrice()),
+	}
+
+	info := v.(userInfo)
+
+	// TODO: Calculate token count. Now we get price of token as 1 PKT
+	info.balances.Append([]*replicator.TokenBalance{{
+		Token:     req.Purchase.Offer.Token,
+		Available: req.Purchase.Offer.Price,
+		Frozen:    1,
+	}})
+
+	s.users.Store(login, info)
+
+	// TODO: Replace error hanlder before store a new balance
+	err := <-s.events.OpenChannelError
+
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "registrete sell own token: %v", err)
+	}
+
 	return &empty.Empty{}, nil
 }
 
 func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.RegisterTokenSellRequest) (*empty.Empty, error) {
-	log.Debugf("Execute RegisterTokenSell")
-
 	if req.Sell.InitialTxHash == "" {
 		return nil, status.Error(codes.InvalidArgument, "initial tx hash not provided")
 	}
@@ -578,6 +586,20 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 	if req.Sell.Offer.IssuerInfo.Host == "" {
 		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
 	}
+	if req.Sell.Offer.TokenHolderLogin == req.Sell.Offer.TokenBuyerLogin {
+		return nil, status.Error(codes.InvalidArgument, "buyer and holder don't have to be the same")
+
+	}
+
+	holder, ok := s.users.Load(req.Sell.Offer.TokenHolderLogin)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", req.Sell.Offer.TokenHolderLogin))
+	}
+
+	buyer, ok := s.users.Load(req.Sell.Offer.TokenBuyerLogin)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", req.Sell.Offer.TokenBuyerLogin))
+	}
 
 	s.events.OpenChannelEvent <- OpenChannel{
 		lnrpc.LightningAddress{
@@ -588,17 +610,47 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 		int64(req.Sell.Offer.GetPrice()),
 	}
 
-	err := <-s.events.OpenChannelError
+	holderInfo := holder.(userInfo)
+	buyerInfo := buyer.(userInfo)
+
+	holderBalance, err := holderInfo.balances.Get(req.Sell.Offer.Token)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	// TODO: Calculate token count. Now we get price of token as 1 PKT
+	if holderBalance.Available < req.Sell.Offer.Price {
+		return nil, status.Error(codes.InvalidArgument, "Not enough available funds on the balance sheet")
+	}
+
+	// TODO: Calculate token count. Now we get price of token as 1 PKT
+	holderInfo.balances.Upadte(req.Sell.Offer.Token, &replicator.TokenBalance{
+		Token:     req.Sell.Offer.Token,
+		Available: holderBalance.Available - req.Sell.Offer.Price,
+		Frozen:    holderBalance.Frozen + req.Sell.Offer.Price,
+	})
+
+	// TODO: Check if token contain in store update balance
+	buyerInfo.balances.Append([]*replicator.TokenBalance{{
+		Token:     req.Sell.Offer.Token,
+		Available: req.Sell.Offer.Price,
+		Frozen:    0,
+	}})
+
+	s.users.Store(req.Sell.Offer.TokenHolderLogin, holderInfo)
+	s.users.Store(req.Sell.Offer.TokenBuyerLogin, buyerInfo)
+
+	// TODO: Replace error hanlder before store a new balance
+	err = <-s.events.OpenChannelError
 
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "registrete sell own token: %v", err)
 	}
-
 	return &empty.Empty{}, nil
 }
 
 func (s *Server) RegisterTokenHolder(ctx context.Context, req *replicator.RegisterRequest) (*empty.Empty, error) {
-	_, ok := users.Load(req.Login)
+	_, ok := s.users.Load(req.Login)
 	if ok {
 		return nil, status.Error(codes.InvalidArgument, "user with this login already exists")
 	}
@@ -606,7 +658,7 @@ func (s *Server) RegisterTokenHolder(ctx context.Context, req *replicator.Regist
 	roles := make(map[string]struct{})
 	roles["holder"] = struct{}{}
 
-	users.Store(req.Login, userInfo{
+	s.users.Store(req.Login, userInfo{
 		password: req.Password,
 		roles:    roles,
 	})
@@ -615,14 +667,14 @@ func (s *Server) RegisterTokenHolder(ctx context.Context, req *replicator.Regist
 }
 
 func (s *Server) RegisterTokenIssuer(ctx context.Context, req *replicator.RegisterRequest) (*empty.Empty, error) {
-	_, ok := users.Load(req.Login)
+	_, ok := s.users.Load(req.Login)
 	if ok {
 		return nil, status.Error(codes.InvalidArgument, "user with this login already exists")
 	}
 	roles := make(map[string]struct{})
 	roles["issuer"] = struct{}{}
 
-	users.Store(req.Login, userInfo{
+	s.users.Store(req.Login, userInfo{
 		password: req.Password,
 		roles:    roles,
 	})
@@ -631,7 +683,7 @@ func (s *Server) RegisterTokenIssuer(ctx context.Context, req *replicator.Regist
 }
 
 func (s *Server) AuthTokenHolder(ctx context.Context, req *replicator.AuthRequest) (*replicator.AuthResponse, error) {
-	user, ok := users.Load(req.Login)
+	user, ok := s.users.Load(req.Login)
 
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, "token holder not registered")
@@ -653,7 +705,6 @@ func (s *Server) AuthTokenHolder(ctx context.Context, req *replicator.AuthReques
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MjM5MjI1OTksImlzcyI6IjExMSJ9.eaSaGGyxzOLsGaAcQCQgKUwbwKvh9xy35lef1xF89u8
 
 	signedToken, err := token.SignedString(signingKey)
 	if err != nil {
@@ -677,7 +728,7 @@ func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerR
 		return nil, status.Error(codes.InvalidArgument, "user login not presented")
 	}
 
-	user, ok := users.Load(req.Login)
+	user, ok := s.users.Load(req.Login)
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, "user with this login does not exist")
 	}
@@ -732,6 +783,7 @@ func (s *TokenHoldersStore) Has(holder TokenHolder) bool {
 }
 
 type TokenHolderLogin string
+type TokenName = string
 
 type TokenHolder struct {
 	Login    TokenHolderLogin
@@ -739,36 +791,55 @@ type TokenHolder struct {
 }
 
 type TokenHolderBalancesStoreAPI interface {
-	Set(TokenHolderLogin, TokenHolderBalances) error
-	Get(TokenHolderLogin) TokenHolderBalances
+	Get(TokenName) (*replicator.TokenBalance, error)
+	Upadte(TokenName, *replicator.TokenBalance) error
+	Append(TokenHolderBalances)
 }
 type TokenHolderBalancesStore struct {
-	holders map[TokenHolderLogin]TokenHolderBalances
-	mu      sync.RWMutex
+	store TokenHolderBalances
+	mu    sync.RWMutex
 }
 
 var _ TokenHolderBalancesStoreAPI = (*TokenHolderBalancesStore)(nil)
 
-func NewTokenHolderBalancesStore() *TokenHolderBalancesStore {
+func NewTokenHolderBalancesStore(balances TokenHolderBalances) *TokenHolderBalancesStore {
 	return &TokenHolderBalancesStore{
-		holders: make(map[TokenHolderLogin]TokenHolderBalances),
+		store: balances,
 	}
 }
 
-func (s *TokenHolderBalancesStore) Set(login TokenHolderLogin, balances TokenHolderBalances) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.holders[login] = balances
-
-	return nil
-}
-
-func (s *TokenHolderBalancesStore) Get(login TokenHolderLogin) TokenHolderBalances {
+func (s *TokenHolderBalancesStore) Get(token TokenName) (*replicator.TokenBalance, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	return s.holders[login]
+	for _, v := range s.store {
+		if v.Token == token {
+			return v, nil
+		}
+	}
+
+	return nil, errors.Errorf("Token with %v name not found in store", token)
 }
 
-type TokenHolderBalances []replicator.TokenBalance
+func (s *TokenHolderBalancesStore) Append(balances TokenHolderBalances) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	s.store = append(s.store, balances...)
+
+}
+
+func (s *TokenHolderBalancesStore) Upadte(token TokenName, balance *replicator.TokenBalance) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for i, v := range s.store {
+		if v.Token == token {
+			s.store[i] = balance
+		}
+	}
+
+	return errors.Errorf("Token with %v name not found in store", token)
+}
+
+type TokenHolderBalances = []*replicator.TokenBalance

@@ -529,10 +529,10 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 	info := v.(userInfo)
 
 	// TODO: Calculate token count. Now we get price of token as 1 PKT
-	info.balances.Append([]*replicator.TokenBalance{{
+	info.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Purchase.Offer.Token,
 		Available: req.Purchase.Offer.Price,
-		Frozen:    1,
+		Frozen:    0,
 	}})
 
 	s.users.Store(login, info)
@@ -541,8 +541,10 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 	err := <-s.events.OpenChannelError
 
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "registrete sell own token: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "registrete purchase token: %v", err)
 	}
+
+	log.Debug("Purchase return")
 
 	return &empty.Empty{}, nil
 }
@@ -619,19 +621,19 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 	}
 
 	// TODO: Calculate token count. Now we get price of token as 1 PKT
-	if holderBalance.Available < req.Sell.Offer.Price {
+	if holderBalance.Available <= req.Sell.Offer.Price {
 		return nil, status.Error(codes.InvalidArgument, "Not enough available funds on the balance sheet")
 	}
 
 	// TODO: Calculate token count. Now we get price of token as 1 PKT
-	holderInfo.balances.Upadte(req.Sell.Offer.Token, &replicator.TokenBalance{
+	holderInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Sell.Offer.Token,
-		Available: holderBalance.Available - req.Sell.Offer.Price,
-		Frozen:    holderBalance.Frozen + req.Sell.Offer.Price,
-	})
+		Available: -req.Sell.Offer.Price,
+		Frozen:    req.Sell.Offer.Price,
+	}})
 
 	// TODO: Check if token contain in store update balance
-	buyerInfo.balances.Append([]*replicator.TokenBalance{{
+	buyerInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Sell.Offer.Token,
 		Available: req.Sell.Offer.Price,
 		Frozen:    0,
@@ -646,6 +648,7 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "registrete sell own token: %v", err)
 	}
+
 	return &empty.Empty{}, nil
 }
 
@@ -793,11 +796,13 @@ type TokenHolder struct {
 type TokenHolderBalancesStoreAPI interface {
 	Get(TokenName) (*replicator.TokenBalance, error)
 	Upadte(TokenName, *replicator.TokenBalance) error
-	Append(TokenHolderBalances)
+	Append(TokenHolderBalances) error
+	AppendOrUpdate(TokenHolderBalances)
+	IsContain(TokenName) bool
 }
+
 type TokenHolderBalancesStore struct {
 	store TokenHolderBalances
-	mu    sync.RWMutex
 }
 
 var _ TokenHolderBalancesStoreAPI = (*TokenHolderBalancesStore)(nil)
@@ -808,10 +813,17 @@ func NewTokenHolderBalancesStore(balances TokenHolderBalances) *TokenHolderBalan
 	}
 }
 
-func (s *TokenHolderBalancesStore) Get(token TokenName) (*replicator.TokenBalance, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+func (s *TokenHolderBalancesStore) IsContain(token TokenName) bool {
+	for _, v := range s.store {
+		if v.Token == token {
+			return true
+		}
+	}
 
+	return false
+}
+
+func (s *TokenHolderBalancesStore) Get(token TokenName) (*replicator.TokenBalance, error) {
 	for _, v := range s.store {
 		if v.Token == token {
 			return v, nil
@@ -821,18 +833,40 @@ func (s *TokenHolderBalancesStore) Get(token TokenName) (*replicator.TokenBalanc
 	return nil, errors.Errorf("Token with %v name not found in store", token)
 }
 
-func (s *TokenHolderBalancesStore) Append(balances TokenHolderBalances) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+func (s *TokenHolderBalancesStore) Append(balances TokenHolderBalances) error {
+	for _, v := range balances {
+		if s.IsContain(v.Token) {
+			return errors.Errorf("Failed to append token. Token with %v name is already in store.", v.Token)
+		}
+	}
 
 	s.store = append(s.store, balances...)
-
+	return nil
 }
 
-func (s *TokenHolderBalancesStore) Upadte(token TokenName, balance *replicator.TokenBalance) error {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+func (s *TokenHolderBalancesStore) AppendOrUpdate(balances TokenHolderBalances) {
+	for _, v := range balances {
+		s.appendOrUpdate(v)
+	}
+}
 
+func (s *TokenHolderBalancesStore) appendOrUpdate(balance *replicator.TokenBalance) {
+
+	if s.IsContain(balance.Token) {
+		log.Info(balance.Available)
+
+		token, _ := s.Get(balance.Token)
+		s.Upadte(token.Token, &replicator.TokenBalance{
+			Token:     token.Token,
+			Available: token.Available + balance.Available,
+			Frozen:    token.Frozen + balance.Frozen,
+		})
+		return
+	}
+
+	s.Append([]*replicator.TokenBalance{balance})
+}
+func (s *TokenHolderBalancesStore) Upadte(token TokenName, balance *replicator.TokenBalance) error {
 	for i, v := range s.store {
 		if v.Token == token {
 			s.store[i] = balance

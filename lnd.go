@@ -775,51 +775,21 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 					AddrToAmount: revoke.AddrToAmount,
 					MinConfs:     1,
 				})
-			case open := <-replicatorEvent.OpenChannelEvent:
+			case open, ok := <-replicatorEvent.OpenChannelEvent:
+				if !ok {
+					log.Error("Open channel is broken")
+					break
+				}
 				log.Debugf("Get open channel event %v", open)
 
-				connect := &lnrpc.ConnectPeerRequest{
-					Addr:    &open.Address,
-					Perm:    false,
-					Timeout: 10,
-				}
-
-				log.Debug("Connect info: ", connect)
-
-				_, err := rpcServer.ConnectPeer(context.Background(), connect)
-
+				err := OpenChannelHanlder(open, rpcServer)
 				if err != nil {
 					replicatorEvent.OpenChannelError <- err
 					log.Error(err)
-					return
+					break
 				}
 
-				_, err = rpcServer.OpenChannelSync(context.TODO(), &lnrpc.OpenChannelRequest{
-					NodePubkey: []byte(open.Address.Pubkey),
-				})
-				if err != nil {
-					replicatorEvent.OpenChannelError <- err
-					log.Error(err)
-					return
-				}
-
-				resp, err := rpcServer.AddInvoice(context.Background(), &lnrpc.Invoice{
-					Value: open.Amount,
-				})
-				if err != nil {
-					replicatorEvent.OpenChannelError <- err
-					log.Error(err)
-					return
-				}
-				_, err = rpcServer.SendPaymentSync(context.Background(), &lnrpc.SendRequest{
-					PaymentHashString: resp.PaymentRequest,
-				})
-
-				if err != nil {
-					replicatorEvent.OpenChannelError <- err
-					log.Error(err)
-					return
-				}
+				log.Debugf("Channel opened successfully")
 
 				replicatorEvent.OpenChannelError <- nil
 			}
@@ -909,6 +879,44 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	// Wait for shutdown signal from either a graceful server stop or from
 	// the interrupt handler.
 	<-shutdownChan
+	return nil
+}
+
+func OpenChannelHanlder(open replicator_mock.OpenChannel, server *rpcServer) error {
+	connect := &lnrpc.ConnectPeerRequest{
+		Addr:    &open.Address,
+		Perm:    false,
+		Timeout: 10,
+	}
+
+	log.Debug("Peer connection info: ", connect)
+
+	_, err := server.ConnectPeer(context.Background(), connect)
+	if err != nil {
+		return err
+	}
+
+	_, err = server.OpenChannelSync(context.TODO(), &lnrpc.OpenChannelRequest{
+		NodePubkey: []byte(open.Address.Pubkey),
+	})
+	if err != nil {
+		return err
+	}
+
+	resp, err := server.AddInvoice(context.Background(), &lnrpc.Invoice{
+		Value: open.Amount,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = server.SendPaymentSync(context.Background(), &lnrpc.SendRequest{
+		PaymentHashString: resp.PaymentRequest,
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

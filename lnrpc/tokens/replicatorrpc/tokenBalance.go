@@ -64,7 +64,6 @@ func (s *TokenHolderBalancesStore) AppendOrUpdate(balances TokenHolderBalances) 
 }
 
 func (s *TokenHolderBalancesStore) appendOrUpdate(balance *replicator.TokenBalance) {
-
 	if s.IsContain(balance.Token) {
 		log.Info(balance.Available)
 

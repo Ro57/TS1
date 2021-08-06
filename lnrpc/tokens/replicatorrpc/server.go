@@ -527,6 +527,15 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
 	}
 
+	issuedToken, ok := tokens.Load(req.Purchase.Offer.Token)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("token with name %v was not issued", req.Purchase.Offer.Token))
+	}
+
+	issuedTokenInfo := issuedToken.(token)
+
+	PKTPrice := req.Purchase.Offer.Price / issuedTokenInfo.price
+
 	v, ok := s.users.Load(login)
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", login))
@@ -543,10 +552,9 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 
 	info := v.(userInfo)
 
-	// TODO: Calculate token count. Now we get price of token as 1 PKT
 	info.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Purchase.Offer.Token,
-		Available: req.Purchase.Offer.Price,
+		Available: PKTPrice,
 		Frozen:    0,
 	}})
 
@@ -558,8 +566,6 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "registrete purchase token: %v", err)
 	}
-
-	log.Debug("Purchase return")
 
 	return &empty.Empty{}, nil
 }
@@ -608,6 +614,11 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 
 	}
 
+	issuedToken, ok := tokens.Load(req.Sell.Offer.Token)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("token with name %v was not issued", req.Sell.Offer.Token))
+	}
+
 	holder, ok := s.users.Load(req.Sell.Offer.TokenHolderLogin)
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", req.Sell.Offer.TokenHolderLogin))
@@ -629,6 +640,9 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 
 	holderInfo := holder.(userInfo)
 	buyerInfo := buyer.(userInfo)
+	issuedTokenInfo := issuedToken.(token)
+
+	PKTPrice := req.Sell.Offer.Price / issuedTokenInfo.price
 
 	holderBalance, err := holderInfo.balances.Get(req.Sell.Offer.Token)
 	if err != nil {
@@ -636,21 +650,21 @@ func (s *Server) RegisterTokenSell(ctx context.Context, req *replicator.Register
 	}
 
 	// TODO: Calculate token count. Now we get price of token as 1 PKT
-	if holderBalance.Available <= req.Sell.Offer.Price {
+	if holderBalance.Available <= PKTPrice {
 		return nil, status.Error(codes.InvalidArgument, "Not enough available funds on the balance sheet")
 	}
 
 	// TODO: Calculate token count. Now we get price of token as 1 PKT
 	holderInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Sell.Offer.Token,
-		Available: -req.Sell.Offer.Price,
-		Frozen:    req.Sell.Offer.Price,
+		Available: -PKTPrice,
+		Frozen:    PKTPrice,
 	}})
 
 	// TODO: Check if token contain in store update balance
 	buyerInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Sell.Offer.Token,
-		Available: req.Sell.Offer.Price,
+		Available: PKTPrice,
 		Frozen:    0,
 	}})
 
@@ -773,6 +787,21 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 		price:       req.Offer.Price,
 		validTime:   req.Offer.ValidUntilSeconds,
 	})
+
+	v, ok := s.users.Load(req.Offer.TokenHolderLogin)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", req.Offer.TokenHolderLogin))
+	}
+
+	issuer := v.(userInfo)
+
+	issuer.balances.AppendOrUpdate([]*replicator.TokenBalance{{
+		Token:     req.Offer.Token,
+		Available: req.Offer.Count,
+		Frozen:    0,
+	}})
+
+	s.users.Store(req.Offer.TokenHolderLogin, issuer)
 
 	return &emptypb.Empty{}, nil
 }

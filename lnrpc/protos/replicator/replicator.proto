@@ -126,6 +126,9 @@ message TokenOffer {
     // open channel with an outdated offer, Replicator would reject to register
     // this purchase and buyer stays unprotected
     int64 valid_until_seconds = 6;
+
+    // count — the number of tokens to be issued
+    uint64 count = 7;
 }
 
 message IssuerInfo {

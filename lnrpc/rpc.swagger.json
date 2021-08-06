@@ -5854,6 +5854,11 @@
           "type": "string",
           "format": "int64",
           "title": "This field protects issuers from such a case, when potential buyer\nsuccessfully acquires dozens of signatures just in case if that issuer\nwould raise up the price later. If a Token Wallet holder would like to\nopen channel with an outdated offer, Replicator would reject to register\nthis purchase and buyer stays unprotected"
+        },
+        "count": {
+          "type": "string",
+          "format": "uint64",
+          "title": "count — the number of tokens to be issued"
         }
       }
     },

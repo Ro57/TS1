@@ -21,6 +21,7 @@ var issueTokenCommand = cli.Command{
 
 const (
 	flagTokenIssuerLogin = "token-issuer-login"
+	flagCount            = "count"
 )
 
 var issueTokenFlags = []cli.Flag{
@@ -43,6 +44,10 @@ var issueTokenFlags = []cli.Flag{
 	cli.StringFlag{
 		Name:  flagIssuerID,
 		Usage: "issuer identity to buy target token from",
+	},
+	cli.StringFlag{
+		Name:  flagCount,
+		Usage: "number of issued token",
 	},
 }
 
@@ -76,13 +81,20 @@ func extractTokenIssue(ctx *cli.Context) (*replicator.TokenOffer, er.R) {
 	if offer.Token == "" {
 		return nil, er.Errorf("empty %q argument provided", flagTokenName)
 	}
+
 	offer.Price = ctx.Uint64(flagTokenPrice)
 	if offer.Price == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagTokenPrice)
 	}
+
 	offer.TokenHolderLogin = ctx.String(flagTokenIssuerLogin)
 	if offer.TokenHolderLogin == "" {
 		return nil, er.Errorf("empty %q argument provided", flagTokenIssuerLogin)
+	}
+
+	offer.Count = ctx.Uint64(flagCount)
+	if offer.Count == 0 {
+		return nil, er.Errorf("empty %q argument provided", flagCount)
 	}
 
 	offer.ValidUntilSeconds = ctx.Int64(flagIssuerOfferValidUntilSeconds)

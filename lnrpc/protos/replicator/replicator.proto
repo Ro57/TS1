@@ -53,6 +53,22 @@ service Replicator {
     // Verifies a user permitions to issue a token. Returns exceptions if
     // passed user is not contained in issuer's db
     rpc VerifyIssuer (VerifyIssuerRequest) returns (google.protobuf.Empty);
+
+    // IssueToken — Issue new token with given data. Request data equal to 
+    // token purchase data, because it is token offer.
+    rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
+
+    // UpdateToken — Update token inforamtion with given data. Request data 
+    // equal to token purchase data, because it is token offer.
+    rpc UpdateToken(UpdateTokenRequest) returns (google.protobuf.Empty);
+
+    // RevokeToken — Delete information about token by his name.
+    rpc RevokeToken(RevokeTokenRequest) returns (google.protobuf.Empty);
+
+    // GetTokenList — return list of issued token with infomation about 
+    // expiration time and fix price.
+    rpc GetTokenList(GetTokenListRequest) 
+        returns(GetTokenListResponse);
 }
 
 message GetTokenOffersRequest {
@@ -63,6 +79,23 @@ message GetTokenOffersRequest {
 message GetTokenOffersResponse {
     repeated TokenOffer offers = 1;
     uint64 total = 2;
+}
+
+// GetTokenListRequest — request token list with pagination
+message GetTokenListRequest {
+    // issuer_id is user login issued this token
+    string issuer_id = 1;
+    // params of paginaton
+    replicator.Pagination params = 2;
+}
+
+// GetTokenListResponse — list of tokens with additional info
+message GetTokenListResponse {
+    // tokens list of registred tokens
+    repeated replicator.TokenOffer tokens = 1;
+    // total number of registered tokens, if the issued_id is passed, only 
+    // its tokens are taken into account
+    int32 total = 2;
 }
 
 message TokenOffer {
@@ -182,4 +215,49 @@ message RegisterRequest {
 
 message VerifyIssuerRequest {
     string login = 1;
+}
+
+// IssueTokenRequest — info about token will be issued
+message IssueTokenRequest {
+    // offer on token issue
+    TokenOffer offer = 1;
+}
+
+// UpdateTokenRequest — update info about current token
+message UpdateTokenRequest {
+    // offer with new data
+    TokenOffer offer = 1;
+}
+
+// RevokeTokenRequest — request on delete info about token
+message RevokeTokenRequest {
+    // token_name  name of the deleted token
+    string token_name = 1;
+    // login of user issued this token
+    string login = 2;
+}
+
+// TokenInfoRequest — contain name of requested token
+message TokenInfoRequest {
+    // name of the token
+    string name = 1;
+}
+
+// TokenInfoResponse — Token information with his name, price, expiration time 
+// and issuer login
+message TokenInfoResponse {
+    // name of the token
+    string name = 1;
+    
+    // price of token in pkt
+    // TODO: discuss
+    //  ? Should we assume decimal prices
+    //  ? Add units field
+    uint64 price = 2;
+
+    // valid_time is expiration date
+    int64 valid_time = 3;
+
+    // issuer_login — user issued token
+    string issuer_login = 4;
 }

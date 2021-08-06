@@ -36,7 +36,9 @@ const (
 
 // token holders with login password
 var (
-	jwtStore   *jwtstore.Store
+	jwtStore *jwtstore.Store
+	tokens   sync.Map
+
 	signingKey = []byte("SUPER_SECRET")
 
 	// macaroonOps are the set of capabilities that our minted macaroon (if
@@ -78,7 +80,14 @@ type OpenChannel struct {
 type ReplicatorEvents struct {
 	StopSig          chan struct{}
 	OpenChannelEvent chan OpenChannel
+	RevokeEvent      chan RevokeSig
 	OpenChannelError chan error
+}
+
+// RevokeSig — on-chain addresses for sending coins after token revoke
+type RevokeSig struct {
+	Token        string
+	AddrToAmount map[string]int64
 }
 
 type Server struct {
@@ -94,6 +103,12 @@ type Server struct {
 type loginCliams struct {
 	login string
 	jwt.StandardClaims
+}
+
+type token struct {
+	price       uint64
+	validTime   int64
+	issuerLogin string
 }
 
 // New returns a new instance of the replicatorrpc Repicator sub-server. We also return
@@ -726,6 +741,7 @@ func (s *Server) AuthTokenHolder(ctx context.Context, req *replicator.AuthReques
 	}, nil
 
 }
+
 func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerRequest) (*empty.Empty, error) {
 	if req.Login == "" {
 		return nil, status.Error(codes.InvalidArgument, "user login not presented")
@@ -744,6 +760,144 @@ func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerR
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
+	_, ok := tokens.Load(req.Offer.Token)
+	if ok {
+		return nil, status.Error(codes.InvalidArgument, "token with this name already exists")
+	}
+
+	tokens.Store(req.Offer.Token, token{
+		issuerLogin: req.Offer.TokenHolderLogin,
+		price:       req.Offer.Price,
+		validTime:   req.Offer.ValidUntilSeconds,
+	})
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) UpdateToken(ctx context.Context, req *replicator.UpdateTokenRequest) (*empty.Empty, error) {
+	t, ok := tokens.Load(req.Offer.Token)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, "token with this name does not exist")
+	}
+
+	newToken := t.(token)
+
+	if req.Offer.Price != 0 {
+		newToken.price = req.Offer.Price
+	}
+
+	if req.Offer.ValidUntilSeconds != 0 {
+		newToken.validTime = req.Offer.ValidUntilSeconds
+	}
+
+	tokens.Store(req.Offer.Token, newToken)
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) RevokeToken(ctx context.Context, req *replicator.RevokeTokenRequest) (*empty.Empty, error) {
+	_, ok := tokens.Load(req.TokenName)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, "token with this name does not exist")
+	}
+
+	amountToAddr := s.payoutCalculate()
+
+	sig := RevokeSig{
+		Token:        req.TokenName,
+		AddrToAmount: amountToAddr,
+	}
+
+	s.events.RevokeEvent <- sig
+	tokens.Delete(req.TokenName)
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
+	var tokenList []*replicator.TokenOffer
+	var err error
+
+	if req.IssuerId != "" {
+		tokenList, err = s.issuerTokens(ctx, req.IssuerId)
+	} else {
+		tokenList, err = s.allTokens()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &replicator.GetTokenListResponse{
+		Tokens: tokenList,
+		Total:  int32(len(tokenList)),
+	}, nil
+
+}
+
+func (s *Server) issuerTokens(ctx context.Context, login string) ([]*replicator.TokenOffer, error) {
+	resultList := []*replicator.TokenOffer{}
+
+	replicatorReq := &replicator.VerifyIssuerRequest{
+		Login: login,
+	}
+
+	_, err := s.VerifyIssuer(ctx, replicatorReq)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tokens.Range(func(key, value interface{}) bool {
+		t := value.(token)
+
+		if t.issuerLogin == login {
+			resultList = append(resultList, &replicator.TokenOffer{
+				Token:             key.(string),
+				Price:             t.price,
+				ValidUntilSeconds: t.validTime,
+				IssuerInfo: &replicator.IssuerInfo{
+					Id: login,
+				},
+			})
+		}
+
+		return true
+	})
+
+	return resultList, nil
+}
+
+func (s *Server) allTokens() ([]*replicator.TokenOffer, error) {
+	resultList := []*replicator.TokenOffer{}
+
+	tokens.Range(func(key, value interface{}) bool {
+		t := value.(token)
+
+		resultList = append(resultList, &replicator.TokenOffer{
+			Token:             key.(string),
+			Price:             t.price,
+			ValidUntilSeconds: t.validTime,
+			IssuerInfo: &replicator.IssuerInfo{
+				Id: t.issuerLogin,
+			},
+		})
+
+		return true
+	})
+
+	return resultList, nil
+}
+
+// TODO: implement colculation of real amount of pkt and send on real addresses
+func (s *Server) payoutCalculate() map[string]int64 {
+	return map[string]int64{
+		"alice": 1000,
+		"bob":   2000,
+	}
 }
 
 type TokenHoldersStoreAPI interface {
@@ -792,88 +946,3 @@ type TokenHolder struct {
 	Login    TokenHolderLogin
 	Password string
 }
-
-type TokenHolderBalancesStoreAPI interface {
-	Get(TokenName) (*replicator.TokenBalance, error)
-	Upadte(TokenName, *replicator.TokenBalance) error
-	Append(TokenHolderBalances) error
-	AppendOrUpdate(TokenHolderBalances)
-	IsContain(TokenName) bool
-}
-
-type TokenHolderBalancesStore struct {
-	store TokenHolderBalances
-}
-
-var _ TokenHolderBalancesStoreAPI = (*TokenHolderBalancesStore)(nil)
-
-func NewTokenHolderBalancesStore(balances TokenHolderBalances) *TokenHolderBalancesStore {
-	return &TokenHolderBalancesStore{
-		store: balances,
-	}
-}
-
-func (s *TokenHolderBalancesStore) IsContain(token TokenName) bool {
-	for _, v := range s.store {
-		if v.Token == token {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (s *TokenHolderBalancesStore) Get(token TokenName) (*replicator.TokenBalance, error) {
-	for _, v := range s.store {
-		if v.Token == token {
-			return v, nil
-		}
-	}
-
-	return nil, errors.Errorf("Token with %v name not found in store", token)
-}
-
-func (s *TokenHolderBalancesStore) Append(balances TokenHolderBalances) error {
-	for _, v := range balances {
-		if s.IsContain(v.Token) {
-			return errors.Errorf("Failed to append token. Token with %v name is already in store.", v.Token)
-		}
-	}
-
-	s.store = append(s.store, balances...)
-	return nil
-}
-
-func (s *TokenHolderBalancesStore) AppendOrUpdate(balances TokenHolderBalances) {
-	for _, v := range balances {
-		s.appendOrUpdate(v)
-	}
-}
-
-func (s *TokenHolderBalancesStore) appendOrUpdate(balance *replicator.TokenBalance) {
-
-	if s.IsContain(balance.Token) {
-		log.Info(balance.Available)
-
-		token, _ := s.Get(balance.Token)
-		s.Upadte(token.Token, &replicator.TokenBalance{
-			Token:     token.Token,
-			Available: token.Available + balance.Available,
-			Frozen:    token.Frozen + balance.Frozen,
-		})
-		return
-	}
-
-	s.Append([]*replicator.TokenBalance{balance})
-}
-func (s *TokenHolderBalancesStore) Upadte(token TokenName, balance *replicator.TokenBalance) error {
-	for i, v := range s.store {
-		if v.Token == token {
-			s.store[i] = balance
-		}
-	}
-
-	return errors.Errorf("Token with %v name not found in store", token)
-}
-
-type TokenHolderBalances = []*replicator.TokenBalance

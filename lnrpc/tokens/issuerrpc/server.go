@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -22,8 +21,6 @@ import (
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
@@ -33,7 +30,6 @@ const (
 )
 
 var (
-	tokens sync.Map
 
 	// macaroonOps are the set of capabilities that our minted macaroon (if
 	// it doesn't already exist) will have.
@@ -58,21 +54,8 @@ var (
 	DefaultIssuanceMacFilename = "issuance.macaroon"
 )
 
-type token struct {
-	price       uint64
-	validTime   int64
-	issuerLogin string
-}
-
-// RevokeSig — on-chain addresses for sending coins after token revoke
-type RevokeSig struct {
-	Token        string
-	AddrToAmount map[string]int64
-}
-
 type IssunceEvents struct {
-	StopSig     chan struct{}
-	RevokeEvent chan RevokeSig
+	StopSig chan struct{}
 }
 
 type Server struct {
@@ -264,7 +247,7 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 	return resp, nil
 }
 
-func (s *Server) IssueToken(ctx context.Context, req *issuer.IssueTokenRequest) (*empty.Empty, error) {
+func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
 	replicatorReq := &replicator.VerifyIssuerRequest{
 		Login: req.Offer.TokenHolderLogin,
 	}
@@ -275,21 +258,15 @@ func (s *Server) IssueToken(ctx context.Context, req *issuer.IssueTokenRequest) 
 		return nil, err
 	}
 
-	_, ok := tokens.Load(req.Offer.Token)
-	if ok {
-		return nil, status.Error(codes.InvalidArgument, "token with this name already exists")
+	_, err = s.Client.IssueToken(ctx, req)
+	if err != nil {
+		return nil, err
 	}
-
-	tokens.Store(req.Offer.Token, token{
-		issuerLogin: req.Offer.TokenHolderLogin,
-		price:       req.Offer.Price,
-		validTime:   req.Offer.ValidUntilSeconds,
-	})
 
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) UpdateToken(ctx context.Context, req *issuer.UpdateTokenRequest) (*empty.Empty, error) {
+func (s *Server) UpdateToken(ctx context.Context, req *replicator.UpdateTokenRequest) (*empty.Empty, error) {
 	replicatorReq := &replicator.VerifyIssuerRequest{
 		Login: req.Offer.TokenHolderLogin,
 	}
@@ -299,27 +276,15 @@ func (s *Server) UpdateToken(ctx context.Context, req *issuer.UpdateTokenRequest
 		return nil, err
 	}
 
-	t, ok := tokens.Load(req.Offer.Token)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "token with this name does not exist")
+	_, err = s.Client.UpdateToken(ctx, req)
+	if err != nil {
+		return nil, err
 	}
-
-	newToken := t.(token)
-
-	if req.Offer.Price != 0 {
-		newToken.price = req.Offer.Price
-	}
-
-	if req.Offer.ValidUntilSeconds != 0 {
-		newToken.validTime = req.Offer.ValidUntilSeconds
-	}
-
-	tokens.Store(req.Offer.Token, newToken)
 
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) RevokeToken(ctx context.Context, req *issuer.RevokeTokenRequest) (*empty.Empty, error) {
+func (s *Server) RevokeToken(ctx context.Context, req *replicator.RevokeTokenRequest) (*empty.Empty, error) {
 	replicatorReq := &replicator.VerifyIssuerRequest{
 		Login: req.Login,
 	}
@@ -329,105 +294,16 @@ func (s *Server) RevokeToken(ctx context.Context, req *issuer.RevokeTokenRequest
 		return nil, err
 	}
 
-	_, ok := tokens.Load(req.TokenName)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "token with this name does not exist")
+	_, err = s.Client.RevokeToken(ctx, req)
+	if err != nil {
+		return nil, err
 	}
-
-	amountToAddr := s.payoutCalculate()
-
-	sig := RevokeSig{
-		Token:        req.TokenName,
-		AddrToAmount: amountToAddr,
-	}
-
-	s.events.RevokeEvent <- sig
-	tokens.Delete(req.TokenName)
 
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) GetTokenList(ctx context.Context, req *issuer.GetTokenListRequest) (*issuer.GetTokenListResponse, error) {
-	var tokenList []*replicator.TokenOffer
-	var err error
-
-	if req.IssuerId != "" {
-		tokenList, err = s.issuerTokens(ctx, req.IssuerId)
-	} else {
-		tokenList, err = s.allTokens()
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &issuer.GetTokenListResponse{
-		Tokens: tokenList,
-		Total:  int32(len(tokenList)),
-	}, nil
-
-}
-
-func (s *Server) issuerTokens(ctx context.Context, login string) ([]*replicator.TokenOffer, error) {
-	resultList := []*replicator.TokenOffer{}
-
-	replicatorReq := &replicator.VerifyIssuerRequest{
-		Login: login,
-	}
-
-	_, err := s.Client.VerifyIssuer(ctx, replicatorReq)
-
-	if err != nil {
-		return nil, err
-	}
-
-	tokens.Range(func(key, value interface{}) bool {
-		t := value.(token)
-
-		if t.issuerLogin == login {
-			resultList = append(resultList, &replicator.TokenOffer{
-				Token:             key.(string),
-				Price:             t.price,
-				ValidUntilSeconds: t.validTime,
-				IssuerInfo: &replicator.IssuerInfo{
-					Id: login,
-				},
-			})
-		}
-
-		return true
-	})
-
-	return resultList, nil
-}
-
-func (s *Server) allTokens() ([]*replicator.TokenOffer, error) {
-	resultList := []*replicator.TokenOffer{}
-
-	tokens.Range(func(key, value interface{}) bool {
-		t := value.(token)
-
-		resultList = append(resultList, &replicator.TokenOffer{
-			Token:             key.(string),
-			Price:             t.price,
-			ValidUntilSeconds: t.validTime,
-			IssuerInfo: &replicator.IssuerInfo{
-				Id: t.issuerLogin,
-			},
-		})
-
-		return true
-	})
-
-	return resultList, nil
-}
-
-// TODO: implement colculation of real amount of pkt and send on real addresses
-func (s *Server) payoutCalculate() map[string]int64 {
-	return map[string]int64{
-		"alice": 1000,
-		"bob":   2000,
-	}
+func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
+	return s.Client.GetTokenList(ctx, req)
 }
 
 func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {

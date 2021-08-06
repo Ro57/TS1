@@ -119,6 +119,107 @@ func (m *GetTokenOffersResponse) GetTotal() uint64 {
 	return 0
 }
 
+// GetTokenListRequest — request token list with pagination
+type GetTokenListRequest struct {
+	// issuer_id is user login issued this token
+	IssuerId string `protobuf:"bytes,1,opt,name=issuer_id,json=issuerId,proto3" json:"issuer_id,omitempty"`
+	// params of paginaton
+	Params               *Pagination `protobuf:"bytes,2,opt,name=params,proto3" json:"params,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *GetTokenListRequest) Reset()         { *m = GetTokenListRequest{} }
+func (m *GetTokenListRequest) String() string { return proto.CompactTextString(m) }
+func (*GetTokenListRequest) ProtoMessage()    {}
+func (*GetTokenListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f2f15fabe54a973d, []int{2}
+}
+
+func (m *GetTokenListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTokenListRequest.Unmarshal(m, b)
+}
+func (m *GetTokenListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTokenListRequest.Marshal(b, m, deterministic)
+}
+func (m *GetTokenListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTokenListRequest.Merge(m, src)
+}
+func (m *GetTokenListRequest) XXX_Size() int {
+	return xxx_messageInfo_GetTokenListRequest.Size(m)
+}
+func (m *GetTokenListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTokenListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTokenListRequest proto.InternalMessageInfo
+
+func (m *GetTokenListRequest) GetIssuerId() string {
+	if m != nil {
+		return m.IssuerId
+	}
+	return ""
+}
+
+func (m *GetTokenListRequest) GetParams() *Pagination {
+	if m != nil {
+		return m.Params
+	}
+	return nil
+}
+
+// GetTokenListResponse — list of tokens with additional info
+type GetTokenListResponse struct {
+	// tokens list of registred tokens
+	Tokens []*TokenOffer `protobuf:"bytes,1,rep,name=tokens,proto3" json:"tokens,omitempty"`
+	// total number of registered tokens, if the issued_id is passed, only
+	// its tokens are taken into account
+	Total                int32    `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetTokenListResponse) Reset()         { *m = GetTokenListResponse{} }
+func (m *GetTokenListResponse) String() string { return proto.CompactTextString(m) }
+func (*GetTokenListResponse) ProtoMessage()    {}
+func (*GetTokenListResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f2f15fabe54a973d, []int{3}
+}
+
+func (m *GetTokenListResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTokenListResponse.Unmarshal(m, b)
+}
+func (m *GetTokenListResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTokenListResponse.Marshal(b, m, deterministic)
+}
+func (m *GetTokenListResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTokenListResponse.Merge(m, src)
+}
+func (m *GetTokenListResponse) XXX_Size() int {
+	return xxx_messageInfo_GetTokenListResponse.Size(m)
+}
+func (m *GetTokenListResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTokenListResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTokenListResponse proto.InternalMessageInfo
+
+func (m *GetTokenListResponse) GetTokens() []*TokenOffer {
+	if m != nil {
+		return m.Tokens
+	}
+	return nil
+}
+
+func (m *GetTokenListResponse) GetTotal() int32 {
+	if m != nil {
+		return m.Total
+	}
+	return 0
+}
+
 type TokenOffer struct {
 	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	// TODO: discuss
@@ -151,7 +252,7 @@ func (m *TokenOffer) Reset()         { *m = TokenOffer{} }
 func (m *TokenOffer) String() string { return proto.CompactTextString(m) }
 func (*TokenOffer) ProtoMessage()    {}
 func (*TokenOffer) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{2}
+	return fileDescriptor_f2f15fabe54a973d, []int{4}
 }
 
 func (m *TokenOffer) XXX_Unmarshal(b []byte) error {
@@ -234,7 +335,7 @@ func (m *IssuerInfo) Reset()         { *m = IssuerInfo{} }
 func (m *IssuerInfo) String() string { return proto.CompactTextString(m) }
 func (*IssuerInfo) ProtoMessage()    {}
 func (*IssuerInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{3}
+	return fileDescriptor_f2f15fabe54a973d, []int{5}
 }
 
 func (m *IssuerInfo) XXX_Unmarshal(b []byte) error {
@@ -287,7 +388,7 @@ func (m *VerifyTokenPurchaseRequest) Reset()         { *m = VerifyTokenPurchaseR
 func (m *VerifyTokenPurchaseRequest) String() string { return proto.CompactTextString(m) }
 func (*VerifyTokenPurchaseRequest) ProtoMessage()    {}
 func (*VerifyTokenPurchaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{4}
+	return fileDescriptor_f2f15fabe54a973d, []int{6}
 }
 
 func (m *VerifyTokenPurchaseRequest) XXX_Unmarshal(b []byte) error {
@@ -326,7 +427,7 @@ func (m *VerifyTokenSellRequest) Reset()         { *m = VerifyTokenSellRequest{}
 func (m *VerifyTokenSellRequest) String() string { return proto.CompactTextString(m) }
 func (*VerifyTokenSellRequest) ProtoMessage()    {}
 func (*VerifyTokenSellRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{5}
+	return fileDescriptor_f2f15fabe54a973d, []int{7}
 }
 
 func (m *VerifyTokenSellRequest) XXX_Unmarshal(b []byte) error {
@@ -365,7 +466,7 @@ func (m *RegisterTokenPurchaseRequest) Reset()         { *m = RegisterTokenPurch
 func (m *RegisterTokenPurchaseRequest) String() string { return proto.CompactTextString(m) }
 func (*RegisterTokenPurchaseRequest) ProtoMessage()    {}
 func (*RegisterTokenPurchaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{6}
+	return fileDescriptor_f2f15fabe54a973d, []int{8}
 }
 
 func (m *RegisterTokenPurchaseRequest) XXX_Unmarshal(b []byte) error {
@@ -404,7 +505,7 @@ func (m *RegisterTokenSellRequest) Reset()         { *m = RegisterTokenSellReque
 func (m *RegisterTokenSellRequest) String() string { return proto.CompactTextString(m) }
 func (*RegisterTokenSellRequest) ProtoMessage()    {}
 func (*RegisterTokenSellRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{7}
+	return fileDescriptor_f2f15fabe54a973d, []int{9}
 }
 
 func (m *RegisterTokenSellRequest) XXX_Unmarshal(b []byte) error {
@@ -451,7 +552,7 @@ func (m *TokenPurchase) Reset()         { *m = TokenPurchase{} }
 func (m *TokenPurchase) String() string { return proto.CompactTextString(m) }
 func (*TokenPurchase) ProtoMessage()    {}
 func (*TokenPurchase) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{8}
+	return fileDescriptor_f2f15fabe54a973d, []int{10}
 }
 
 func (m *TokenPurchase) XXX_Unmarshal(b []byte) error {
@@ -507,7 +608,7 @@ func (m *GetTokenBalancesRequest) Reset()         { *m = GetTokenBalancesRequest
 func (m *GetTokenBalancesRequest) String() string { return proto.CompactTextString(m) }
 func (*GetTokenBalancesRequest) ProtoMessage()    {}
 func (*GetTokenBalancesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{9}
+	return fileDescriptor_f2f15fabe54a973d, []int{11}
 }
 
 func (m *GetTokenBalancesRequest) XXX_Unmarshal(b []byte) error {
@@ -547,7 +648,7 @@ func (m *GetTokenBalancesResponse) Reset()         { *m = GetTokenBalancesRespon
 func (m *GetTokenBalancesResponse) String() string { return proto.CompactTextString(m) }
 func (*GetTokenBalancesResponse) ProtoMessage()    {}
 func (*GetTokenBalancesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{10}
+	return fileDescriptor_f2f15fabe54a973d, []int{12}
 }
 
 func (m *GetTokenBalancesResponse) XXX_Unmarshal(b []byte) error {
@@ -595,7 +696,7 @@ func (m *TokenBalance) Reset()         { *m = TokenBalance{} }
 func (m *TokenBalance) String() string { return proto.CompactTextString(m) }
 func (*TokenBalance) ProtoMessage()    {}
 func (*TokenBalance) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{11}
+	return fileDescriptor_f2f15fabe54a973d, []int{13}
 }
 
 func (m *TokenBalance) XXX_Unmarshal(b []byte) error {
@@ -649,7 +750,7 @@ func (m *Pagination) Reset()         { *m = Pagination{} }
 func (m *Pagination) String() string { return proto.CompactTextString(m) }
 func (*Pagination) ProtoMessage()    {}
 func (*Pagination) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{12}
+	return fileDescriptor_f2f15fabe54a973d, []int{14}
 }
 
 func (m *Pagination) XXX_Unmarshal(b []byte) error {
@@ -696,7 +797,7 @@ func (m *AuthRequest) Reset()         { *m = AuthRequest{} }
 func (m *AuthRequest) String() string { return proto.CompactTextString(m) }
 func (*AuthRequest) ProtoMessage()    {}
 func (*AuthRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{13}
+	return fileDescriptor_f2f15fabe54a973d, []int{15}
 }
 
 func (m *AuthRequest) XXX_Unmarshal(b []byte) error {
@@ -745,7 +846,7 @@ func (m *AuthResponse) Reset()         { *m = AuthResponse{} }
 func (m *AuthResponse) String() string { return proto.CompactTextString(m) }
 func (*AuthResponse) ProtoMessage()    {}
 func (*AuthResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{14}
+	return fileDescriptor_f2f15fabe54a973d, []int{16}
 }
 
 func (m *AuthResponse) XXX_Unmarshal(b []byte) error {
@@ -792,7 +893,7 @@ func (m *RegisterRequest) Reset()         { *m = RegisterRequest{} }
 func (m *RegisterRequest) String() string { return proto.CompactTextString(m) }
 func (*RegisterRequest) ProtoMessage()    {}
 func (*RegisterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{15}
+	return fileDescriptor_f2f15fabe54a973d, []int{17}
 }
 
 func (m *RegisterRequest) XXX_Unmarshal(b []byte) error {
@@ -838,7 +939,7 @@ func (m *VerifyIssuerRequest) Reset()         { *m = VerifyIssuerRequest{} }
 func (m *VerifyIssuerRequest) String() string { return proto.CompactTextString(m) }
 func (*VerifyIssuerRequest) ProtoMessage()    {}
 func (*VerifyIssuerRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{16}
+	return fileDescriptor_f2f15fabe54a973d, []int{18}
 }
 
 func (m *VerifyIssuerRequest) XXX_Unmarshal(b []byte) error {
@@ -866,9 +967,256 @@ func (m *VerifyIssuerRequest) GetLogin() string {
 	return ""
 }
 
+// IssueTokenRequest — info about token will be issued
+type IssueTokenRequest struct {
+	// offer on token issue
+	Offer                *TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *IssueTokenRequest) Reset()         { *m = IssueTokenRequest{} }
+func (m *IssueTokenRequest) String() string { return proto.CompactTextString(m) }
+func (*IssueTokenRequest) ProtoMessage()    {}
+func (*IssueTokenRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f2f15fabe54a973d, []int{19}
+}
+
+func (m *IssueTokenRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IssueTokenRequest.Unmarshal(m, b)
+}
+func (m *IssueTokenRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IssueTokenRequest.Marshal(b, m, deterministic)
+}
+func (m *IssueTokenRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IssueTokenRequest.Merge(m, src)
+}
+func (m *IssueTokenRequest) XXX_Size() int {
+	return xxx_messageInfo_IssueTokenRequest.Size(m)
+}
+func (m *IssueTokenRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_IssueTokenRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IssueTokenRequest proto.InternalMessageInfo
+
+func (m *IssueTokenRequest) GetOffer() *TokenOffer {
+	if m != nil {
+		return m.Offer
+	}
+	return nil
+}
+
+// UpdateTokenRequest — update info about current token
+type UpdateTokenRequest struct {
+	// offer with new data
+	Offer                *TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *UpdateTokenRequest) Reset()         { *m = UpdateTokenRequest{} }
+func (m *UpdateTokenRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateTokenRequest) ProtoMessage()    {}
+func (*UpdateTokenRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f2f15fabe54a973d, []int{20}
+}
+
+func (m *UpdateTokenRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateTokenRequest.Unmarshal(m, b)
+}
+func (m *UpdateTokenRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateTokenRequest.Marshal(b, m, deterministic)
+}
+func (m *UpdateTokenRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateTokenRequest.Merge(m, src)
+}
+func (m *UpdateTokenRequest) XXX_Size() int {
+	return xxx_messageInfo_UpdateTokenRequest.Size(m)
+}
+func (m *UpdateTokenRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateTokenRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateTokenRequest proto.InternalMessageInfo
+
+func (m *UpdateTokenRequest) GetOffer() *TokenOffer {
+	if m != nil {
+		return m.Offer
+	}
+	return nil
+}
+
+// RevokeTokenRequest — request on delete info about token
+type RevokeTokenRequest struct {
+	// token_name  name of the deleted token
+	TokenName string `protobuf:"bytes,1,opt,name=token_name,json=tokenName,proto3" json:"token_name,omitempty"`
+	// login of user issued this token
+	Login                string   `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RevokeTokenRequest) Reset()         { *m = RevokeTokenRequest{} }
+func (m *RevokeTokenRequest) String() string { return proto.CompactTextString(m) }
+func (*RevokeTokenRequest) ProtoMessage()    {}
+func (*RevokeTokenRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f2f15fabe54a973d, []int{21}
+}
+
+func (m *RevokeTokenRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RevokeTokenRequest.Unmarshal(m, b)
+}
+func (m *RevokeTokenRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RevokeTokenRequest.Marshal(b, m, deterministic)
+}
+func (m *RevokeTokenRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RevokeTokenRequest.Merge(m, src)
+}
+func (m *RevokeTokenRequest) XXX_Size() int {
+	return xxx_messageInfo_RevokeTokenRequest.Size(m)
+}
+func (m *RevokeTokenRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RevokeTokenRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RevokeTokenRequest proto.InternalMessageInfo
+
+func (m *RevokeTokenRequest) GetTokenName() string {
+	if m != nil {
+		return m.TokenName
+	}
+	return ""
+}
+
+func (m *RevokeTokenRequest) GetLogin() string {
+	if m != nil {
+		return m.Login
+	}
+	return ""
+}
+
+// TokenInfoRequest — contain name of requested token
+type TokenInfoRequest struct {
+	// name of the token
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TokenInfoRequest) Reset()         { *m = TokenInfoRequest{} }
+func (m *TokenInfoRequest) String() string { return proto.CompactTextString(m) }
+func (*TokenInfoRequest) ProtoMessage()    {}
+func (*TokenInfoRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f2f15fabe54a973d, []int{22}
+}
+
+func (m *TokenInfoRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TokenInfoRequest.Unmarshal(m, b)
+}
+func (m *TokenInfoRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TokenInfoRequest.Marshal(b, m, deterministic)
+}
+func (m *TokenInfoRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TokenInfoRequest.Merge(m, src)
+}
+func (m *TokenInfoRequest) XXX_Size() int {
+	return xxx_messageInfo_TokenInfoRequest.Size(m)
+}
+func (m *TokenInfoRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TokenInfoRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TokenInfoRequest proto.InternalMessageInfo
+
+func (m *TokenInfoRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+// TokenInfoResponse — Token information with his name, price, expiration time
+// and issuer login
+type TokenInfoResponse struct {
+	// name of the token
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// price of token in pkt
+	// TODO: discuss
+	//  ? Should we assume decimal prices
+	//  ? Add units field
+	Price uint64 `protobuf:"varint,2,opt,name=price,proto3" json:"price,omitempty"`
+	// valid_time is expiration date
+	ValidTime int64 `protobuf:"varint,3,opt,name=valid_time,json=validTime,proto3" json:"valid_time,omitempty"`
+	// issuer_login — user issued token
+	IssuerLogin          string   `protobuf:"bytes,4,opt,name=issuer_login,json=issuerLogin,proto3" json:"issuer_login,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TokenInfoResponse) Reset()         { *m = TokenInfoResponse{} }
+func (m *TokenInfoResponse) String() string { return proto.CompactTextString(m) }
+func (*TokenInfoResponse) ProtoMessage()    {}
+func (*TokenInfoResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f2f15fabe54a973d, []int{23}
+}
+
+func (m *TokenInfoResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TokenInfoResponse.Unmarshal(m, b)
+}
+func (m *TokenInfoResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TokenInfoResponse.Marshal(b, m, deterministic)
+}
+func (m *TokenInfoResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TokenInfoResponse.Merge(m, src)
+}
+func (m *TokenInfoResponse) XXX_Size() int {
+	return xxx_messageInfo_TokenInfoResponse.Size(m)
+}
+func (m *TokenInfoResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_TokenInfoResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TokenInfoResponse proto.InternalMessageInfo
+
+func (m *TokenInfoResponse) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *TokenInfoResponse) GetPrice() uint64 {
+	if m != nil {
+		return m.Price
+	}
+	return 0
+}
+
+func (m *TokenInfoResponse) GetValidTime() int64 {
+	if m != nil {
+		return m.ValidTime
+	}
+	return 0
+}
+
+func (m *TokenInfoResponse) GetIssuerLogin() string {
+	if m != nil {
+		return m.IssuerLogin
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*GetTokenOffersRequest)(nil), "replicator.GetTokenOffersRequest")
 	proto.RegisterType((*GetTokenOffersResponse)(nil), "replicator.GetTokenOffersResponse")
+	proto.RegisterType((*GetTokenListRequest)(nil), "replicator.GetTokenListRequest")
+	proto.RegisterType((*GetTokenListResponse)(nil), "replicator.GetTokenListResponse")
 	proto.RegisterType((*TokenOffer)(nil), "replicator.TokenOffer")
 	proto.RegisterType((*IssuerInfo)(nil), "replicator.IssuerInfo")
 	proto.RegisterType((*VerifyTokenPurchaseRequest)(nil), "replicator.VerifyTokenPurchaseRequest")
@@ -884,6 +1232,11 @@ func init() {
 	proto.RegisterType((*AuthResponse)(nil), "replicator.AuthResponse")
 	proto.RegisterType((*RegisterRequest)(nil), "replicator.RegisterRequest")
 	proto.RegisterType((*VerifyIssuerRequest)(nil), "replicator.VerifyIssuerRequest")
+	proto.RegisterType((*IssueTokenRequest)(nil), "replicator.IssueTokenRequest")
+	proto.RegisterType((*UpdateTokenRequest)(nil), "replicator.UpdateTokenRequest")
+	proto.RegisterType((*RevokeTokenRequest)(nil), "replicator.RevokeTokenRequest")
+	proto.RegisterType((*TokenInfoRequest)(nil), "replicator.TokenInfoRequest")
+	proto.RegisterType((*TokenInfoResponse)(nil), "replicator.TokenInfoResponse")
 }
 
 func init() {
@@ -891,64 +1244,76 @@ func init() {
 }
 
 var fileDescriptor_f2f15fabe54a973d = []byte{
-	// 903 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x71, 0x6f, 0xdb, 0x44,
-	0x14, 0x57, 0x9a, 0x34, 0x6a, 0x5e, 0xba, 0xa6, 0xbd, 0xb2, 0xcc, 0xa4, 0x93, 0x56, 0xcc, 0x34,
-	0x0a, 0x6c, 0x89, 0x54, 0x06, 0x48, 0xfc, 0x83, 0x56, 0x86, 0xba, 0x22, 0x10, 0xc5, 0x6d, 0x41,
-	0x9b, 0x04, 0xd6, 0x25, 0x3e, 0xc7, 0x47, 0xaf, 0x3e, 0x73, 0x77, 0xde, 0x1a, 0x3e, 0x05, 0xdf,
-	0x88, 0x0f, 0xc6, 0x3f, 0xc8, 0x77, 0x67, 0xc7, 0x89, 0xeb, 0x6c, 0x2a, 0xfc, 0x11, 0xe9, 0xee,
-	0xf7, 0xde, 0xfb, 0xf9, 0xbd, 0x7b, 0xf7, 0x7b, 0x17, 0x70, 0x13, 0xc1, 0x15, 0x97, 0x23, 0x41,
-	0x12, 0x46, 0x27, 0x58, 0x71, 0x51, 0x5a, 0x0e, 0xb5, 0x11, 0xc1, 0x1c, 0x19, 0xec, 0x4d, 0x39,
-	0x9f, 0x32, 0x32, 0xd2, 0x96, 0x71, 0x1a, 0x8e, 0xc8, 0x55, 0xa2, 0x66, 0xc6, 0xd1, 0x0d, 0xe0,
-	0xee, 0x31, 0x51, 0xe7, 0xfc, 0x92, 0xc4, 0x3f, 0x86, 0x21, 0x11, 0xd2, 0x23, 0x7f, 0xa4, 0x44,
-	0x2a, 0xb4, 0x07, 0x1d, 0x2a, 0x65, 0x4a, 0x84, 0x4f, 0x03, 0xa7, 0xb1, 0xdf, 0x38, 0xe8, 0x78,
-	0x1b, 0x06, 0x38, 0x09, 0xd0, 0x10, 0xda, 0x09, 0x16, 0xf8, 0x4a, 0x3a, 0x6b, 0xfb, 0x8d, 0x83,
-	0xee, 0x61, 0x7f, 0x58, 0xca, 0xe0, 0x14, 0x4f, 0x69, 0x8c, 0x15, 0xe5, 0xb1, 0x67, 0xbd, 0xdc,
-	0xdf, 0xa0, 0xbf, 0xfc, 0x15, 0x99, 0xf0, 0x58, 0x92, 0x8c, 0x89, 0x6b, 0xc4, 0x69, 0xec, 0x37,
-	0x97, 0x99, 0xe6, 0x01, 0x9e, 0xf5, 0x42, 0xef, 0xc1, 0xba, 0xe2, 0x0a, 0x33, 0xfd, 0xe1, 0x96,
-	0x67, 0x36, 0xee, 0x3f, 0x0d, 0x80, 0xb9, 0xb3, 0x71, 0xba, 0x24, 0xb1, 0xcd, 0xdb, 0x6c, 0x32,
-	0x34, 0x11, 0x74, 0x42, 0xf2, 0x50, 0xbd, 0x41, 0x5f, 0x42, 0x37, 0xaf, 0x33, 0x0e, 0xb9, 0xd3,
-	0xac, 0xd6, 0x73, 0x62, 0xaa, 0x8e, 0x43, 0xee, 0x01, 0x2d, 0xd6, 0xe8, 0x31, 0x20, 0xcd, 0xeb,
-	0x47, 0x9c, 0x05, 0x44, 0xf8, 0x8c, 0x4f, 0x69, 0xec, 0xb4, 0xf4, 0x17, 0xb7, 0xb5, 0xe5, 0x85,
-	0x36, 0x7c, 0x9f, 0xe1, 0xe8, 0x13, 0xd8, 0x31, 0xde, 0xe3, 0x74, 0x56, 0x38, 0xaf, 0x6b, 0xe7,
-	0x9e, 0x36, 0x1c, 0x65, 0xb8, 0xf1, 0x1d, 0xc2, 0xee, 0x6b, 0xcc, 0x68, 0xe0, 0xa7, 0xb1, 0xa2,
-	0xcc, 0x97, 0x64, 0xc2, 0xe3, 0x40, 0x3a, 0xed, 0xfd, 0xc6, 0x41, 0xd3, 0xdb, 0xd1, 0xa6, 0x8b,
-	0xcc, 0x72, 0x66, 0x0c, 0xee, 0x4b, 0x80, 0x79, 0x8e, 0x68, 0x0b, 0xd6, 0x8a, 0x8e, 0xad, 0xd1,
-	0x00, 0x7d, 0x04, 0x3d, 0x1a, 0x90, 0x58, 0x51, 0x35, 0xf3, 0x93, 0x74, 0x7c, 0x49, 0x66, 0xfa,
-	0x00, 0x3a, 0xde, 0x56, 0x0e, 0x9f, 0x6a, 0x14, 0x21, 0x68, 0x45, 0x5c, 0x2a, 0x7d, 0x04, 0x1d,
-	0x4f, 0xaf, 0xdd, 0x33, 0x18, 0xfc, 0x4c, 0x04, 0x0d, 0x67, 0xfa, 0x74, 0x4f, 0x53, 0x31, 0x89,
-	0xb0, 0x24, 0xf9, 0x1d, 0xf9, 0x1c, 0x36, 0x12, 0x0b, 0xe9, 0x0f, 0x76, 0x0f, 0xdf, 0xaf, 0xb4,
-	0xaf, 0x88, 0x29, 0x5c, 0xdd, 0x63, 0xe8, 0x97, 0x48, 0xcf, 0x08, 0x63, 0x39, 0xe1, 0x13, 0x68,
-	0x49, 0xc2, 0xd8, 0xdb, 0xc9, 0xb4, 0x9b, 0x7b, 0x01, 0xf7, 0x3d, 0x32, 0xa5, 0x52, 0x11, 0xf1,
-	0x7f, 0xe6, 0x77, 0x02, 0xce, 0x02, 0xed, 0x7f, 0xc8, 0xf0, 0xaf, 0x06, 0xdc, 0x59, 0xc0, 0xd1,
-	0x63, 0x58, 0xd7, 0x57, 0xd9, 0x32, 0xd4, 0xdd, 0x77, 0xe3, 0x84, 0x3e, 0x86, 0x6d, 0x7b, 0x3b,
-	0x25, 0x9d, 0xc6, 0x58, 0xa5, 0x82, 0xd8, 0xee, 0xf5, 0x0c, 0x7e, 0x96, 0xc3, 0xe8, 0x11, 0xf4,
-	0x68, 0x4c, 0x15, 0xc5, 0xcc, 0x57, 0xd7, 0x7e, 0x84, 0x65, 0x64, 0x3b, 0x79, 0xc7, 0xc2, 0xe7,
-	0xd7, 0x2f, 0xb0, 0x8c, 0xdc, 0x13, 0xb8, 0x97, 0x6b, 0xf1, 0x08, 0x33, 0x1c, 0x4f, 0x48, 0xa1,
-	0xf9, 0xb9, 0xac, 0x1b, 0xef, 0x24, 0xeb, 0x10, 0x9c, 0x2a, 0x95, 0x15, 0xf6, 0x53, 0xd8, 0x18,
-	0x5b, 0xcc, 0x4a, 0xdb, 0xa9, 0x94, 0x6a, 0x83, 0xbc, 0xc2, 0xb3, 0x46, 0xde, 0xaf, 0x60, 0xb3,
-	0xec, 0x5f, 0xa3, 0xef, 0xfb, 0xd0, 0xc1, 0xaf, 0x31, 0x65, 0x78, 0xcc, 0x72, 0x8d, 0xcf, 0x01,
-	0xd4, 0x87, 0x76, 0x28, 0xf8, 0x9f, 0x24, 0xd6, 0xa7, 0xd2, 0xf2, 0xec, 0xce, 0xfd, 0x0a, 0x60,
-	0x5e, 0x59, 0xc6, 0xcc, 0xe8, 0x15, 0x55, 0x9a, 0xb9, 0xe5, 0x99, 0x4d, 0x16, 0xcb, 0xc3, 0x50,
-	0x12, 0x65, 0x69, 0xed, 0xce, 0xfd, 0x1a, 0xba, 0xcf, 0x52, 0x15, 0xe5, 0xc7, 0x97, 0x05, 0x6b,
-	0x5d, 0xdb, 0xb4, 0xf4, 0x06, 0x0d, 0x60, 0x23, 0xc1, 0x52, 0xbe, 0xe1, 0x22, 0xb0, 0xad, 0x2b,
-	0xf6, 0xee, 0x33, 0xd8, 0x34, 0x04, 0xf6, 0xd0, 0xb6, 0xa1, 0xf9, 0xfb, 0x1b, 0x65, 0xe3, 0xb3,
-	0x25, 0x7a, 0x00, 0x5d, 0x72, 0x9d, 0x50, 0x41, 0xfc, 0x00, 0x2b, 0x53, 0x56, 0xd3, 0x03, 0x03,
-	0x3d, 0xc7, 0x8a, 0xb8, 0xdf, 0x40, 0x2f, 0xbf, 0xac, 0xb7, 0xcf, 0xe3, 0x53, 0xd8, 0x35, 0x8a,
-	0x34, 0x73, 0x64, 0x25, 0xd1, 0xe1, 0xdf, 0x6d, 0x00, 0xaf, 0xe8, 0x24, 0xfa, 0x05, 0xb6, 0x16,
-	0x67, 0x3b, 0xfa, 0xa0, 0xdc, 0xe8, 0x1b, 0x5f, 0x97, 0x81, 0xbb, 0xca, 0xc5, 0x1e, 0xc6, 0x45,
-	0x9e, 0xd4, 0xa2, 0x80, 0x1e, 0x95, 0x43, 0xeb, 0x87, 0xd3, 0xa0, 0x3f, 0x34, 0xef, 0xde, 0x30,
-	0x7f, 0xf7, 0x86, 0xdf, 0x66, 0xef, 0x1e, 0xfa, 0x01, 0x7a, 0x4b, 0xd3, 0x07, 0xb9, 0x35, 0x94,
-	0x25, 0xe1, 0xd7, 0xd2, 0xbd, 0x84, 0xbb, 0x37, 0xce, 0x20, 0x74, 0x50, 0x26, 0x5d, 0x35, 0xa6,
-	0x6a, 0xa9, 0x7f, 0x82, 0x9d, 0xca, 0x1c, 0x42, 0x0f, 0x6b, 0x69, 0xdf, 0x25, 0xdb, 0x5f, 0x61,
-	0x7b, 0x59, 0xb1, 0xe8, 0xc3, 0x9b, 0x7a, 0xb1, 0x34, 0x1a, 0x06, 0x0f, 0x57, 0x3b, 0xd9, 0x96,
-	0x3d, 0x87, 0x5e, 0x76, 0x9f, 0xcf, 0xe7, 0xaf, 0x1f, 0xba, 0x57, 0x0e, 0x2c, 0xa9, 0x65, 0xe0,
-	0x54, 0x0d, 0x96, 0xe5, 0x3b, 0xd8, 0x5d, 0x28, 0xcc, 0x32, 0xed, 0xdd, 0x54, 0xf9, 0xdb, 0x0a,
-	0x5e, 0xe6, 0x32, 0x17, 0xfc, 0x76, 0x5c, 0xc7, 0xb0, 0x59, 0x56, 0x09, 0x7a, 0x50, 0xbd, 0x36,
-	0x0b, 0xfa, 0xa9, 0x23, 0x3a, 0xfa, 0xe2, 0xd5, 0xd3, 0x29, 0x55, 0x51, 0x3a, 0x1e, 0x4e, 0xf8,
-	0xd5, 0x28, 0xb9, 0x54, 0x4f, 0x26, 0x58, 0x46, 0xd9, 0x22, 0x18, 0xb1, 0x38, 0xfb, 0x89, 0x64,
-	0x32, 0xaa, 0xfc, 0xcd, 0x1b, 0xb7, 0x35, 0xf4, 0xd9, 0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xc3,
-	0xbf, 0x82, 0xbc, 0x02, 0x0a, 0x00, 0x00,
+	// 1093 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x57, 0x61, 0x73, 0xdb, 0x34,
+	0x18, 0xbe, 0x34, 0x69, 0xaf, 0x79, 0xd3, 0x2d, 0xad, 0xba, 0x75, 0x26, 0x5d, 0x59, 0x67, 0x76,
+	0xa5, 0xc0, 0x96, 0xdc, 0x95, 0x01, 0x77, 0x7c, 0xe1, 0xda, 0x6d, 0xd7, 0x95, 0x1b, 0x50, 0xdc,
+	0x16, 0x6e, 0x3b, 0x20, 0xa7, 0xc4, 0x72, 0x22, 0xe2, 0x58, 0xc6, 0x92, 0xbb, 0x86, 0x2f, 0xfc,
+	0x05, 0xfe, 0x24, 0xbf, 0x82, 0x2f, 0x9c, 0x25, 0x39, 0x96, 0xe3, 0x38, 0x1d, 0x1b, 0x7c, 0xc8,
+	0x9d, 0xf4, 0xe8, 0xd1, 0x63, 0xbd, 0x92, 0xde, 0x47, 0x6f, 0xc0, 0x0e, 0x23, 0x26, 0x18, 0xef,
+	0x44, 0x24, 0xf4, 0x69, 0x1f, 0x0b, 0x16, 0x19, 0xcd, 0xb6, 0x1c, 0x44, 0x90, 0x21, 0xad, 0xed,
+	0x01, 0x63, 0x03, 0x9f, 0x74, 0xe4, 0x48, 0x2f, 0xf6, 0x3a, 0x64, 0x1c, 0x8a, 0x89, 0x22, 0xda,
+	0x2e, 0xdc, 0x3e, 0x26, 0xe2, 0x9c, 0x8d, 0x48, 0xf0, 0x9d, 0xe7, 0x91, 0x88, 0x3b, 0xe4, 0xb7,
+	0x98, 0x70, 0x81, 0xb6, 0xa1, 0x4e, 0x39, 0x8f, 0x49, 0xd4, 0xa5, 0xae, 0x55, 0xd9, 0xad, 0xec,
+	0xd7, 0x9d, 0x55, 0x05, 0x9c, 0xb8, 0xa8, 0x0d, 0x2b, 0x21, 0x8e, 0xf0, 0x98, 0x5b, 0x4b, 0xbb,
+	0x95, 0xfd, 0xc6, 0xc1, 0x56, 0xdb, 0x58, 0xc1, 0x29, 0x1e, 0xd0, 0x00, 0x0b, 0xca, 0x02, 0x47,
+	0xb3, 0xec, 0x5f, 0x60, 0x6b, 0xf6, 0x2b, 0x3c, 0x64, 0x01, 0x27, 0x89, 0x12, 0x93, 0x88, 0x55,
+	0xd9, 0xad, 0xce, 0x2a, 0x65, 0x13, 0x1c, 0xcd, 0x42, 0xb7, 0x60, 0x59, 0x30, 0x81, 0x7d, 0xf9,
+	0xe1, 0x9a, 0xa3, 0x3a, 0x76, 0x0f, 0x36, 0x53, 0xfd, 0x17, 0x94, 0x8b, 0xff, 0x25, 0x86, 0x9f,
+	0xe0, 0x56, 0xfe, 0x1b, 0x59, 0x04, 0x22, 0x01, 0xaf, 0x8d, 0x40, 0xb1, 0xf2, 0x11, 0x2c, 0xa7,
+	0x11, 0xfc, 0x5d, 0x01, 0xc8, 0xc8, 0x8a, 0x34, 0x22, 0x81, 0x5e, 0xb5, 0xea, 0x24, 0x68, 0x18,
+	0xd1, 0x3e, 0x49, 0x83, 0x97, 0x1d, 0xf4, 0x05, 0x34, 0xd2, 0x28, 0x03, 0x8f, 0x59, 0xd5, 0x62,
+	0x34, 0x27, 0x2a, 0xe6, 0xc0, 0x63, 0x0e, 0xd0, 0x69, 0x1b, 0x3d, 0x04, 0x24, 0x75, 0xbb, 0x43,
+	0xe6, 0xbb, 0x24, 0xea, 0xfa, 0x6c, 0x40, 0x03, 0xab, 0x26, 0xbf, 0xb8, 0x2e, 0x47, 0x9e, 0xcb,
+	0x81, 0x17, 0x09, 0x8e, 0x3e, 0x86, 0x0d, 0xc5, 0xee, 0xc5, 0x93, 0x29, 0x79, 0x59, 0x92, 0x9b,
+	0x72, 0xe0, 0x28, 0xc1, 0x15, 0xb7, 0x0d, 0x9b, 0x97, 0xd8, 0xa7, 0x6e, 0x37, 0x0e, 0x04, 0xf5,
+	0xbb, 0x9c, 0xf4, 0x59, 0xe0, 0x72, 0x6b, 0x65, 0xb7, 0xb2, 0x5f, 0x75, 0x36, 0xe4, 0xd0, 0x45,
+	0x32, 0x72, 0xa6, 0x06, 0xec, 0x97, 0x00, 0xd9, 0x1a, 0xd1, 0x4d, 0x58, 0x9a, 0x9e, 0xd7, 0x12,
+	0x75, 0xd1, 0x87, 0xd0, 0xa4, 0x2e, 0x09, 0x04, 0x15, 0x93, 0x6e, 0x18, 0xf7, 0x46, 0x64, 0x22,
+	0x37, 0xa0, 0xee, 0xdc, 0x4c, 0xe1, 0x53, 0x89, 0x22, 0x04, 0xb5, 0x21, 0xe3, 0x42, 0x6e, 0x41,
+	0xdd, 0x91, 0x6d, 0xfb, 0x0c, 0x5a, 0x3f, 0x90, 0x88, 0x7a, 0x13, 0xb9, 0xbb, 0xa7, 0x71, 0xd4,
+	0x1f, 0x62, 0x4e, 0xd2, 0x1b, 0xf2, 0x19, 0xac, 0x86, 0x1a, 0x92, 0x1f, 0x6c, 0x1c, 0xbc, 0x57,
+	0x38, 0xbe, 0xe9, 0x9c, 0x29, 0xd5, 0x3e, 0x86, 0x2d, 0x43, 0xf4, 0x8c, 0xf8, 0x7e, 0x2a, 0xf8,
+	0x08, 0x6a, 0x9c, 0xf8, 0xfe, 0xf5, 0x62, 0x92, 0x66, 0x5f, 0xc0, 0x5d, 0x87, 0x0c, 0x28, 0x17,
+	0x24, 0xfa, 0x2f, 0xd7, 0x77, 0x02, 0x56, 0x4e, 0xf6, 0x1d, 0x56, 0xf8, 0x67, 0x05, 0x6e, 0xe4,
+	0x70, 0xf4, 0x10, 0x96, 0x65, 0x32, 0x6a, 0x85, 0xb2, 0xfb, 0xae, 0x48, 0xe8, 0x23, 0x58, 0xd7,
+	0xb7, 0x93, 0xd3, 0x41, 0x80, 0x45, 0x1c, 0x11, 0x7d, 0x7a, 0x4d, 0x85, 0x9f, 0xa5, 0x30, 0xda,
+	0x83, 0x26, 0x0d, 0xa8, 0xa0, 0xd8, 0xef, 0x8a, 0xab, 0xee, 0x10, 0xf3, 0xa1, 0x3e, 0xc9, 0x1b,
+	0x1a, 0x3e, 0xbf, 0x7a, 0x8e, 0xf9, 0xd0, 0x3e, 0x81, 0x3b, 0x69, 0x26, 0x1e, 0x61, 0x1f, 0x07,
+	0x7d, 0x32, 0x75, 0xad, 0x2c, 0xa9, 0x2b, 0x6f, 0x94, 0xd4, 0x1e, 0x58, 0x45, 0x29, 0x9d, 0xd8,
+	0x8f, 0x61, 0xb5, 0xa7, 0x31, 0x9d, 0xda, 0x56, 0x21, 0x54, 0x3d, 0xc9, 0x99, 0x32, 0x4b, 0x0c,
+	0xea, 0x15, 0xac, 0x99, 0xfc, 0x92, 0xfc, 0xbe, 0x0b, 0x75, 0x7c, 0x89, 0xa9, 0x8f, 0x7b, 0x7e,
+	0x9a, 0xe3, 0x19, 0x80, 0xb6, 0x60, 0xc5, 0x8b, 0xd8, 0xef, 0x24, 0x90, 0xbb, 0x52, 0x73, 0x74,
+	0xcf, 0xfe, 0x12, 0x20, 0x8b, 0x2c, 0x51, 0xf6, 0xe9, 0x98, 0x0a, 0xa9, 0x5c, 0x73, 0x54, 0x27,
+	0x99, 0xcb, 0x3c, 0x8f, 0x13, 0xa1, 0x65, 0x75, 0xcf, 0xfe, 0x0a, 0x1a, 0x87, 0xb1, 0x18, 0xa6,
+	0xdb, 0x97, 0x4c, 0x96, 0x79, 0xad, 0x97, 0x25, 0x3b, 0xa8, 0x05, 0xab, 0x21, 0xe6, 0xfc, 0x35,
+	0x8b, 0x5c, 0x7d, 0x74, 0xd3, 0xbe, 0x7d, 0x08, 0x6b, 0x4a, 0x40, 0x6f, 0xda, 0x3a, 0x54, 0x7f,
+	0x7d, 0x2d, 0xf4, 0xfc, 0xa4, 0x89, 0xee, 0x41, 0x83, 0x5c, 0x85, 0x34, 0x22, 0x5d, 0x17, 0x0b,
+	0x15, 0x56, 0xd5, 0x01, 0x05, 0x3d, 0xc5, 0x82, 0xd8, 0x4f, 0xa0, 0x99, 0x5e, 0xd6, 0xb7, 0x5f,
+	0xc7, 0x27, 0xb0, 0xa9, 0x32, 0x52, 0xf9, 0xc8, 0x42, 0x21, 0xfb, 0x10, 0x36, 0x24, 0x4d, 0x1e,
+	0x49, 0x4a, 0xfd, 0x57, 0xd7, 0xda, 0x3e, 0x02, 0x74, 0x11, 0x26, 0x01, 0xbd, 0x83, 0xc6, 0x09,
+	0x20, 0x87, 0x5c, 0xb2, 0x51, 0x5e, 0x63, 0x07, 0x40, 0xf9, 0x6c, 0x80, 0xc7, 0x44, 0xaf, 0xbb,
+	0x2e, 0x91, 0x6f, 0xf1, 0x98, 0x64, 0x11, 0x2d, 0x99, 0x11, 0xed, 0xc1, 0xba, 0x14, 0x91, 0x1e,
+	0xaf, 0x85, 0x10, 0xd4, 0x0c, 0x09, 0xd9, 0xb6, 0xff, 0x80, 0x0d, 0x83, 0xa7, 0xcf, 0x6c, 0x0e,
+	0xb1, 0xe4, 0xa9, 0xd9, 0x01, 0x50, 0xbe, 0x2e, 0xe8, 0x98, 0xc8, 0x6b, 0x58, 0x75, 0xea, 0x12,
+	0x39, 0xa7, 0x63, 0x82, 0xee, 0xc3, 0x9a, 0xce, 0x75, 0xf3, 0x29, 0xd1, 0xaf, 0x93, 0x7c, 0x19,
+	0x0e, 0xfe, 0x5a, 0x05, 0x70, 0xa6, 0x9b, 0x82, 0x7e, 0x84, 0x9b, 0xf9, 0xc2, 0x00, 0xdd, 0x37,
+	0xf7, 0x6c, 0x6e, 0x69, 0xd2, 0xb2, 0x17, 0x51, 0x74, 0x4c, 0x17, 0xe9, 0x7d, 0xc8, 0x7b, 0xd7,
+	0x9e, 0x39, 0xb5, 0xfc, 0x5d, 0x68, 0x6d, 0xb5, 0x55, 0xd1, 0xd4, 0x4e, 0x8b, 0xa6, 0xf6, 0xb3,
+	0xa4, 0x68, 0x42, 0xdf, 0x40, 0x73, 0xc6, 0xf8, 0x91, 0x5d, 0x22, 0x69, 0x78, 0x6e, 0xa9, 0xdc,
+	0x4b, 0xb8, 0x3d, 0xd7, 0xfe, 0xd1, 0xbe, 0x29, 0xba, 0xe8, 0x85, 0x28, 0x95, 0xfe, 0x1e, 0x36,
+	0x0a, 0x4f, 0x00, 0x7a, 0x50, 0x2a, 0xfb, 0x26, 0xab, 0xfd, 0x19, 0xd6, 0x67, 0xcd, 0x12, 0x7d,
+	0x30, 0xef, 0x2c, 0x66, 0x5c, 0xb9, 0xf5, 0x60, 0x31, 0x49, 0x1f, 0xd9, 0x53, 0x68, 0x26, 0x56,
+	0x72, 0x9e, 0x15, 0x1e, 0xe8, 0x8e, 0x39, 0xd1, 0x30, 0xaa, 0x96, 0x55, 0x1c, 0xd0, 0x2a, 0x5f,
+	0xc3, 0x66, 0x2e, 0x30, 0xad, 0xb4, 0x3d, 0x2f, 0xf2, 0xeb, 0x02, 0x9e, 0xd5, 0x52, 0xde, 0xf2,
+	0x76, 0x5a, 0xc7, 0xb0, 0x66, 0x1a, 0x14, 0xba, 0x57, 0xbc, 0x36, 0x39, 0xeb, 0x2a, 0x15, 0x7a,
+	0xa2, 0x6b, 0x25, 0xb9, 0x22, 0xb4, 0x53, 0xa8, 0xf3, 0x4c, 0x33, 0x29, 0x15, 0x79, 0x06, 0x0d,
+	0xc3, 0xbe, 0xd0, 0xfb, 0xa6, 0x4a, 0xd1, 0xd7, 0x16, 0xc9, 0x18, 0x0e, 0x96, 0x97, 0x29, 0x5a,
+	0xdb, 0x82, 0xbb, 0xba, 0x66, 0x96, 0xd6, 0xf9, 0xbd, 0x99, 0x53, 0xd8, 0xb7, 0x76, 0xcb, 0x09,
+	0xea, 0x1a, 0x1c, 0x7d, 0xfe, 0xea, 0xf1, 0x80, 0x8a, 0x61, 0xdc, 0x6b, 0xf7, 0xd9, 0xb8, 0x13,
+	0x8e, 0xc4, 0xa3, 0x3e, 0xe6, 0xc3, 0xa4, 0xe1, 0x76, 0xfc, 0x20, 0xf9, 0x45, 0x61, 0xbf, 0x53,
+	0xf8, 0x27, 0xd5, 0x5b, 0x91, 0xd0, 0xa7, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0x8d, 0xf3, 0x83,
+	0x0f, 0x65, 0x0d, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -989,6 +1354,17 @@ type ReplicatorClient interface {
 	// Verifies a user permitions to issue a token. Returns exceptions if
 	// passed user is not contained in issuer's db
 	VerifyIssuer(ctx context.Context, in *VerifyIssuerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// IssueToken — Issue new token with given data. Request data equal to
+	// token purchase data, because it is token offer.
+	IssueToken(ctx context.Context, in *IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// UpdateToken — Update token inforamtion with given data. Request data
+	// equal to token purchase data, because it is token offer.
+	UpdateToken(ctx context.Context, in *UpdateTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// RevokeToken — Delete information about token by his name.
+	RevokeToken(ctx context.Context, in *RevokeTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// GetTokenList — return list of issued token with infomation about
+	// expiration time and fix price.
+	GetTokenList(ctx context.Context, in *GetTokenListRequest, opts ...grpc.CallOption) (*GetTokenListResponse, error)
 }
 
 type replicatorClient struct {
@@ -1089,6 +1465,42 @@ func (c *replicatorClient) VerifyIssuer(ctx context.Context, in *VerifyIssuerReq
 	return out, nil
 }
 
+func (c *replicatorClient) IssueToken(ctx context.Context, in *IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/replicator.Replicator/IssueToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *replicatorClient) UpdateToken(ctx context.Context, in *UpdateTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/replicator.Replicator/UpdateToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *replicatorClient) RevokeToken(ctx context.Context, in *RevokeTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/replicator.Replicator/RevokeToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *replicatorClient) GetTokenList(ctx context.Context, in *GetTokenListRequest, opts ...grpc.CallOption) (*GetTokenListResponse, error) {
+	out := new(GetTokenListResponse)
+	err := c.cc.Invoke(ctx, "/replicator.Replicator/GetTokenList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReplicatorServer is the server API for Replicator service.
 type ReplicatorServer interface {
 	// Returns available token offers
@@ -1117,6 +1529,17 @@ type ReplicatorServer interface {
 	// Verifies a user permitions to issue a token. Returns exceptions if
 	// passed user is not contained in issuer's db
 	VerifyIssuer(context.Context, *VerifyIssuerRequest) (*empty.Empty, error)
+	// IssueToken — Issue new token with given data. Request data equal to
+	// token purchase data, because it is token offer.
+	IssueToken(context.Context, *IssueTokenRequest) (*empty.Empty, error)
+	// UpdateToken — Update token inforamtion with given data. Request data
+	// equal to token purchase data, because it is token offer.
+	UpdateToken(context.Context, *UpdateTokenRequest) (*empty.Empty, error)
+	// RevokeToken — Delete information about token by his name.
+	RevokeToken(context.Context, *RevokeTokenRequest) (*empty.Empty, error)
+	// GetTokenList — return list of issued token with infomation about
+	// expiration time and fix price.
+	GetTokenList(context.Context, *GetTokenListRequest) (*GetTokenListResponse, error)
 }
 
 // UnimplementedReplicatorServer can be embedded to have forward compatible implementations.
@@ -1152,6 +1575,18 @@ func (*UnimplementedReplicatorServer) RegisterTokenIssuer(ctx context.Context, r
 }
 func (*UnimplementedReplicatorServer) VerifyIssuer(ctx context.Context, req *VerifyIssuerRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyIssuer not implemented")
+}
+func (*UnimplementedReplicatorServer) IssueToken(ctx context.Context, req *IssueTokenRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IssueToken not implemented")
+}
+func (*UnimplementedReplicatorServer) UpdateToken(ctx context.Context, req *UpdateTokenRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateToken not implemented")
+}
+func (*UnimplementedReplicatorServer) RevokeToken(ctx context.Context, req *RevokeTokenRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeToken not implemented")
+}
+func (*UnimplementedReplicatorServer) GetTokenList(ctx context.Context, req *GetTokenListRequest) (*GetTokenListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenList not implemented")
 }
 
 func RegisterReplicatorServer(s *grpc.Server, srv ReplicatorServer) {
@@ -1338,6 +1773,78 @@ func _Replicator_VerifyIssuer_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Replicator_IssueToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IssueTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicatorServer).IssueToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/replicator.Replicator/IssueToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicatorServer).IssueToken(ctx, req.(*IssueTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Replicator_UpdateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicatorServer).UpdateToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/replicator.Replicator/UpdateToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicatorServer).UpdateToken(ctx, req.(*UpdateTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Replicator_RevokeToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicatorServer).RevokeToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/replicator.Replicator/RevokeToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicatorServer).RevokeToken(ctx, req.(*RevokeTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Replicator_GetTokenList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTokenListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicatorServer).GetTokenList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/replicator.Replicator/GetTokenList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicatorServer).GetTokenList(ctx, req.(*GetTokenListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Replicator_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "replicator.Replicator",
 	HandlerType: (*ReplicatorServer)(nil),
@@ -1381,6 +1888,22 @@ var _Replicator_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VerifyIssuer",
 			Handler:    _Replicator_VerifyIssuer_Handler,
+		},
+		{
+			MethodName: "IssueToken",
+			Handler:    _Replicator_IssueToken_Handler,
+		},
+		{
+			MethodName: "UpdateToken",
+			Handler:    _Replicator_UpdateToken_Handler,
+		},
+		{
+			MethodName: "RevokeToken",
+			Handler:    _Replicator_RevokeToken_Handler,
+		},
+		{
+			MethodName: "GetTokenList",
+			Handler:    _Replicator_GetTokenList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

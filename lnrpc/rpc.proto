@@ -540,8 +540,8 @@ service Lightning {
     // lncli: `gettokenlist`
     // Proxies initial request to the replicator for available issuer token
     // offers
-    rpc GetTokenList (issuer.GetTokenListRequest)
-        returns (issuer.GetTokenListResponse);
+    rpc GetTokenList (replicator.GetTokenListRequest)
+        returns (replicator.GetTokenListResponse);
 
     // lncli: `signtokenpurchase`
     // Proxies initial request to the issuer for a signature
@@ -594,12 +594,12 @@ service Lightning {
 
     // lncli: `issuetoken`
     // Proxies initial request to the issuer for register new token
-    rpc IssueToken(issuer.IssueTokenRequest)
+    rpc IssueToken(replicator.IssueTokenRequest)
         returns (google.protobuf.Empty);
 
     // lncli: `updatetoken`
     // Proxies initial request to the issuer for update token info
-    rpc UpdateToken(issuer.UpdateTokenRequest)
+    rpc UpdateToken(replicator.UpdateTokenRequest)
         returns (google.protobuf.Empty);
 
     // lncli: `revoketoken`

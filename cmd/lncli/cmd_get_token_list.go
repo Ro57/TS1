@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/pkt-cash/pktd/btcutil/er"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/urfave/cli"
 )
@@ -60,7 +59,7 @@ func getTokenList(ctx *cli.Context) er.R {
 	}
 
 	// Request offers
-	req := &issuer.GetTokenListRequest{
+	req := &replicator.GetTokenListRequest{
 		IssuerId: issuerID,
 		Params: &replicator.Pagination{
 			Limit:  limit,

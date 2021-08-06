@@ -2443,24 +2443,6 @@
         }
       }
     },
-    "issuerGetTokenListResponse": {
-      "type": "object",
-      "properties": {
-        "tokens": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/replicatorTokenOffer"
-          },
-          "title": "tokens list of registred tokens"
-        },
-        "total": {
-          "type": "integer",
-          "format": "int32",
-          "title": "total number of registered tokens, if the issued_id is passed, only \nits tokens are taken into account"
-        }
-      },
-      "title": "GetTokenListResponse — list of tokens with additional info"
-    },
     "issuerSignTokenPurchaseResponse": {
       "type": "object",
       "properties": {
@@ -5764,6 +5746,24 @@
           "format": "uint64"
         }
       }
+    },
+    "replicatorGetTokenListResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/replicatorTokenOffer"
+          },
+          "title": "tokens list of registred tokens"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32",
+          "title": "total number of registered tokens, if the issued_id is passed, only \nits tokens are taken into account"
+        }
+      },
+      "title": "GetTokenListResponse — list of tokens with additional info"
     },
     "replicatorGetTokenOffersResponse": {
       "type": "object",

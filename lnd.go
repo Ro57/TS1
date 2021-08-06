@@ -727,14 +727,14 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	}
 
 	issuerEvent := issuer_mock.IssunceEvents{
-		StopSig:     make(chan struct{}),
-		RevokeEvent: make(chan issuer_mock.RevokeSig),
+		StopSig: make(chan struct{}),
 	}
 
 	replicatorEvent := replicator_mock.ReplicatorEvents{
 		StopSig:          make(chan struct{}),
 		OpenChannelEvent: make(chan replicator_mock.OpenChannel),
 		OpenChannelError: make(chan error),
+		RevokeEvent:      make(chan replicator_mock.RevokeSig),
 	}
 
 	// On close pld node send stop signal to issuence server
@@ -768,7 +768,7 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	go func() {
 		for {
 			select {
-			case revoke := <-issuerEvent.RevokeEvent:
+			case revoke := <-replicatorEvent.RevokeEvent:
 				log.Debugf("Get revoke event %v", revoke)
 
 				rpcServer.SendMany(context.Background(), &lnrpc.SendManyRequest{

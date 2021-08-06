@@ -7034,7 +7034,7 @@ func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBal
 	return resp, nil
 }
 
-func (r *rpcServer) GetTokenList(ctx context.Context, req *issuer.GetTokenListRequest) (*issuer.GetTokenListResponse, error) {
+func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	resp, err := r.issuanceClient.GetTokenList(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("querying token offers: %s", err)
@@ -7077,7 +7077,7 @@ func (r *rpcServer) RegisterTokenIssuer(ctx context.Context, req *replicator.Reg
 	return resp, nil
 }
 
-func (r *rpcServer) IssueToken(ctx context.Context, req *issuer.IssueTokenRequest) (*empty.Empty, error) {
+func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
 
 	resp, err := r.issuanceClient.IssueToken(ctx, req)
 	if err != nil {
@@ -7086,7 +7086,7 @@ func (r *rpcServer) IssueToken(ctx context.Context, req *issuer.IssueTokenReques
 	return resp, nil
 }
 
-func (r *rpcServer) UpdateToken(ctx context.Context, req *issuer.UpdateTokenRequest) (*empty.Empty, error) {
+func (r *rpcServer) UpdateToken(ctx context.Context, req *replicator.UpdateTokenRequest) (*empty.Empty, error) {
 
 	resp, err := r.issuanceClient.UpdateToken(ctx, req)
 	if err != nil {
@@ -7097,7 +7097,7 @@ func (r *rpcServer) UpdateToken(ctx context.Context, req *issuer.UpdateTokenRequ
 
 func (r *rpcServer) RevokeToken(ctx context.Context, req *lnrpc.RevokeTokenRequest) (*empty.Empty, error) {
 
-	revokeReq := &issuer.RevokeTokenRequest{
+	revokeReq := &replicator.RevokeTokenRequest{
 		TokenName: req.TokenName,
 		Login:     req.Login,
 	}
@@ -7166,10 +7166,10 @@ func JWTInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServer
 		getTokenBalancesReq := req.(*lnrpc.GetTokenBalancesRequest)
 		holderLogin = getTokenBalancesReq.Login
 	case "/lnrpc.Lightning/IssueToken":
-		getTokenBalancesReq := req.(*issuer.IssueTokenRequest)
+		getTokenBalancesReq := req.(*replicator.IssueTokenRequest)
 		holderLogin = getTokenBalancesReq.Offer.TokenHolderLogin
 	case "/lnrpc.Lightning/UpdateToken":
-		getTokenBalancesReq := req.(*issuer.UpdateTokenRequest)
+		getTokenBalancesReq := req.(*replicator.UpdateTokenRequest)
 		holderLogin = getTokenBalancesReq.Offer.TokenHolderLogin
 	case "/lnrpc.Lightning/RevokeToken":
 		getTokenBalancesReq := req.(*lnrpc.RevokeTokenRequest)

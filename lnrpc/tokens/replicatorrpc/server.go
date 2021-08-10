@@ -336,9 +336,6 @@ func (s *Server) GetTokenOffers(ctx context.Context, req *replicator.GetTokenOff
 
 // Override method of unimplemented server
 func (s *Server) GetTokenBalances(ctx context.Context, req *replicator.GetTokenBalancesRequest) (*replicator.GetTokenBalancesResponse, error) {
-	const (
-		tokensNum = 100
-	)
 
 	meta, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -360,7 +357,7 @@ func (s *Server) GetTokenBalances(ctx context.Context, req *replicator.GetTokenB
 	}
 
 	if innerJWT.ExpireDate.Before(time.Now()) {
-		return nil, status.Error(codes.ResourceExhausted, fmt.Sprintf("session expired"))
+		return nil, status.Error(codes.ResourceExhausted, "session expired")
 	}
 
 	v, ok := s.users.Load(innerJWT.HolderLogin)
@@ -536,7 +533,12 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 
 	PKTPrice := req.Purchase.Offer.Price / issuedTokenInfo.price
 
-	v, ok := s.users.Load(login)
+	buyer, ok := s.users.Load(login)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", login))
+	}
+
+	issuer, ok := s.users.Load(issuedTokenInfo.issuerLogin)
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", login))
 	}
@@ -550,18 +552,34 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 		int64(req.Purchase.Offer.GetPrice()),
 	}
 
-	info := v.(userInfo)
+	buyerInfo := buyer.(userInfo)
+	issuerInfo := issuer.(userInfo)
 
-	info.balances.AppendOrUpdate([]*replicator.TokenBalance{{
+	issuerBalance, err := issuerInfo.balances.Get(req.Purchase.Offer.Token)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if PKTPrice > issuerBalance.Available {
+		return nil, status.Error(codes.InvalidArgument, "Issuer does not have enough funds")
+	}
+
+	buyerInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Purchase.Offer.Token,
 		Available: PKTPrice,
 		Frozen:    0,
 	}})
 
-	s.users.Store(login, info)
+	issuerInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
+		Token:     req.Purchase.Offer.Token,
+		Available: -PKTPrice,
+		Frozen:    PKTPrice,
+	}})
+
+	s.users.Store(login, buyerInfo)
 
 	// TODO: Replace error hanlder before store a new balance
-	err := <-s.events.OpenChannelError
+	err = <-s.events.OpenChannelError
 
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "registrete purchase token: %v", err)

@@ -78,6 +78,7 @@ func (s *TokenHolderBalancesStore) appendOrUpdate(balance *replicator.TokenBalan
 
 	s.Append([]*replicator.TokenBalance{balance})
 }
+
 func (s *TokenHolderBalancesStore) Upadte(token TokenName, balance *replicator.TokenBalance) error {
 	for i, v := range s.store {
 		if v.Token == token {

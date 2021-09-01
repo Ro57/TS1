@@ -11,7 +11,7 @@ import (
 )
 
 var issueTokenCommand = cli.Command{
-	Name:        "issuetoken",
+	Name:        "issue-token",
 	Category:    "Tokens",
 	Usage:       "Issue new token",
 	Description: "Issue new token. This command is only allowed users with issuer role",
@@ -33,17 +33,9 @@ var issueTokenFlags = []cli.Flag{
 		Name:  flagTokenPrice,
 		Usage: "token price per unit",
 	},
-	cli.StringFlag{
-		Name:  flagTokenIssuerLogin,
-		Usage: "issuer identity, a token createor",
-	},
 	cli.Int64Flag{
 		Name:  flagIssuerOfferValidUntilSeconds,
 		Usage: "issuer's token offer term's time constraint",
-	},
-	cli.StringFlag{
-		Name:  flagIssuerID,
-		Usage: "issuer identity to buy target token from",
 	},
 	cli.StringFlag{
 		Name:  flagCount,
@@ -63,6 +55,7 @@ func issueToken(ctx *cli.Context) er.R {
 	issuerTokenReq := &replicator.IssueTokenRequest{
 		Offer: offer,
 	}
+
 	_, err := client.IssueToken(context.TODO(), issuerTokenReq)
 	if err != nil {
 		return er.Errorf("requesting token issue: %s", err)
@@ -87,11 +80,6 @@ func extractTokenIssue(ctx *cli.Context) (*replicator.TokenOffer, er.R) {
 		return nil, er.Errorf("empty %q argument provided", flagTokenPrice)
 	}
 
-	offer.TokenHolderLogin = ctx.String(flagTokenIssuerLogin)
-	if offer.TokenHolderLogin == "" {
-		return nil, er.Errorf("empty %q argument provided", flagTokenIssuerLogin)
-	}
-
 	offer.Count = ctx.Uint64(flagCount)
 	if offer.Count == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagCount)
@@ -102,16 +90,6 @@ func extractTokenIssue(ctx *cli.Context) (*replicator.TokenOffer, er.R) {
 	if expDate := time.Unix(offer.ValidUntilSeconds, 0).UTC(); expDate.Before(time.Now().UTC()) {
 		return nil, er.Errorf("%q argument provided is in the past or empty", flagIssuerOfferValidUntilSeconds)
 	}
-
-	// Extract token offer issuer data
-	issuerInfo := &replicator.IssuerInfo{}
-
-	issuerInfo.Id = ctx.String(flagIssuerID)
-	if issuerInfo.Id == "" {
-		return nil, er.Errorf("empty %q argument provided", flagIssuerID)
-	}
-
-	offer.IssuerInfo = issuerInfo
 
 	return offer, nil
 }

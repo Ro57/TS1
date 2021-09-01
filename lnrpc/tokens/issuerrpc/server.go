@@ -248,17 +248,7 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
-	replicatorReq := &replicator.VerifyIssuerRequest{
-		Login: req.Offer.TokenHolderLogin,
-	}
-
-	_, err := s.Client.VerifyIssuer(ctx, replicatorReq)
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.Client.IssueToken(ctx, req)
+	_, err := s.Client.IssueToken(ctx, req)
 	if err != nil {
 		return nil, err
 	}

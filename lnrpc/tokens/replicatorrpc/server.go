@@ -106,9 +106,8 @@ type loginCliams struct {
 }
 
 type token struct {
-	price       uint64
-	validTime   int64
-	issuerLogin string
+	price     uint64
+	validTime int64
 }
 
 // New returns a new instance of the replicatorrpc Repicator sub-server. We also return
@@ -538,11 +537,6 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", login))
 	}
 
-	issuer, ok := s.users.Load(issuedTokenInfo.issuerLogin)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", login))
-	}
-
 	s.events.OpenChannelEvent <- OpenChannel{
 		lnrpc.LightningAddress{
 			Pubkey: req.Purchase.Offer.IssuerInfo.IdentityPubkey,
@@ -553,37 +547,12 @@ func (s *Server) RegisterTokenPurchase(ctx context.Context, req *replicator.Regi
 	}
 
 	buyerInfo := buyer.(userInfo)
-	issuerInfo := issuer.(userInfo)
-
-	issuerBalance, err := issuerInfo.balances.Get(req.Purchase.Offer.Token)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if PKTPrice > issuerBalance.Available {
-		return nil, status.Error(codes.InvalidArgument, "Issuer does not have enough funds")
-	}
 
 	buyerInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
 		Token:     req.Purchase.Offer.Token,
 		Available: PKTPrice,
 		Frozen:    0,
 	}})
-
-	issuerInfo.balances.AppendOrUpdate([]*replicator.TokenBalance{{
-		Token:     req.Purchase.Offer.Token,
-		Available: -PKTPrice,
-		Frozen:    PKTPrice,
-	}})
-
-	s.users.Store(login, buyerInfo)
-
-	// TODO: Replace error hanlder before store a new balance
-	err = <-s.events.OpenChannelError
-
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "registrete purchase token: %v", err)
-	}
 
 	return &empty.Empty{}, nil
 }
@@ -801,25 +770,9 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	}
 
 	tokens.Store(req.Offer.Token, token{
-		issuerLogin: req.Offer.TokenHolderLogin,
-		price:       req.Offer.Price,
-		validTime:   req.Offer.ValidUntilSeconds,
+		price:     req.Offer.Price,
+		validTime: req.Offer.ValidUntilSeconds,
 	})
-
-	v, ok := s.users.Load(req.Offer.TokenHolderLogin)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", req.Offer.TokenHolderLogin))
-	}
-
-	issuer := v.(userInfo)
-
-	issuer.balances.AppendOrUpdate([]*replicator.TokenBalance{{
-		Token:     req.Offer.Token,
-		Available: req.Offer.Count,
-		Frozen:    0,
-	}})
-
-	s.users.Store(req.Offer.TokenHolderLogin, issuer)
 
 	return &emptypb.Empty{}, nil
 }
@@ -868,11 +821,7 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 	var tokenList []*replicator.TokenOffer
 	var err error
 
-	if req.IssuerId != "" {
-		tokenList, err = s.issuerTokens(ctx, req.IssuerId)
-	} else {
-		tokenList, err = s.allTokens()
-	}
+	tokenList, err = s.allTokens()
 
 	if err != nil {
 		return nil, err
@@ -885,54 +834,12 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 
 }
 
-func (s *Server) issuerTokens(ctx context.Context, login string) ([]*replicator.TokenOffer, error) {
-	resultList := []*replicator.TokenOffer{}
-
-	replicatorReq := &replicator.VerifyIssuerRequest{
-		Login: login,
-	}
-
-	_, err := s.VerifyIssuer(ctx, replicatorReq)
-
-	if err != nil {
-		return nil, err
-	}
-
-	tokens.Range(func(key, value interface{}) bool {
-		t := value.(token)
-
-		if t.issuerLogin == login {
-			resultList = append(resultList, &replicator.TokenOffer{
-				Token:             key.(string),
-				Price:             t.price,
-				ValidUntilSeconds: t.validTime,
-				IssuerInfo: &replicator.IssuerInfo{
-					Id: login,
-				},
-			})
-		}
-
-		return true
-	})
-
-	return resultList, nil
-}
-
+// TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses
 func (s *Server) allTokens() ([]*replicator.TokenOffer, error) {
 	resultList := []*replicator.TokenOffer{}
 
 	tokens.Range(func(key, value interface{}) bool {
-		t := value.(token)
-
-		resultList = append(resultList, &replicator.TokenOffer{
-			Token:             key.(string),
-			Price:             t.price,
-			ValidUntilSeconds: t.validTime,
-			IssuerInfo: &replicator.IssuerInfo{
-				Id: t.issuerLogin,
-			},
-		})
-
+		// TODO: Fill the resultList with token information
 		return true
 	})
 

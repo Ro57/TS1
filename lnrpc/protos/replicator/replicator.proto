@@ -16,11 +16,6 @@ service Replicator {
     // Returns available token offers
     rpc GetTokenOffers (GetTokenOffersRequest) returns (GetTokenOffersResponse);
 
-    // Verifies a signature of an issuer for this token purchase. This
-    // method should be called before channel initialization
-    rpc VerifyTokenPurchase (VerifyTokenPurchaseRequest)
-        returns (google.protobuf.Empty);
-
     // Returns current token balances
     rpc GetTokenBalances (GetTokenBalancesRequest)
         returns (GetTokenBalancesResponse);
@@ -116,24 +111,6 @@ message IssuerInfo {
     // Is used to establish client connection to the issuer's node during some
     // RPC calls
     string host = 3;
-}
-
-message VerifyTokenPurchaseRequest {
-    TokenPurchase purchase = 1;
-}
-
-message TokenPurchase {
-    TokenOffer offer = 1;
-
-    // Presents signature of an offer. This signature is used to identify,
-    // that issuer accepts terms described in the offer and is responsible
-    // to follow them in this transaction. If signature is not valid, then
-    // channel should be closed. Otherwise, Replicator registers token
-    // purchase details provided and tracks blockchain for a closing transaction
-    // in order to determine if the issuer were not break terms
-    string issuer_signature = 2;
-
-    string initial_tx_hash = 3;
 }
 
 // NOTE: we don't provide any token holder identification since the reqeuest is

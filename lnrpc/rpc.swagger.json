@@ -5852,21 +5852,6 @@
         }
       }
     },
-    "replicatorTokenPurchase": {
-      "type": "object",
-      "properties": {
-        "offer": {
-          "$ref": "#/definitions/replicatorTokenOffer"
-        },
-        "issuer_signature": {
-          "type": "string",
-          "title": "Presents signature of an offer. This signature is used to identify,\nthat issuer accepts terms described in the offer and is responsible\nto follow them in this transaction. If signature is not valid, then\nchannel should be closed. Otherwise, Replicator registers token\npurchase details provided and tracks blockchain for a closing transaction\nin order to determine if the issuer were not break terms"
-        },
-        "initial_tx_hash": {
-          "type": "string"
-        }
-      }
-    },
     "runtimeError": {
       "type": "object",
       "properties": {

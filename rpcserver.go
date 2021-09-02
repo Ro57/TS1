@@ -519,10 +519,6 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "write",
 		}},
-		"/lnrpc.Lightning/RegisterTokenSell": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
 		"/lnrpc.Lightning/RegisterTokenHolder": {{
 			Entity: "proxy",
 			Action: "write",
@@ -6998,14 +6994,6 @@ func (r *rpcServer) RegisterTokenPurchase(ctx context.Context, req *replicator.R
 	resp, err := r.replicatorClient.RegisterTokenPurchase(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("registering token purchase: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) RegisterTokenSell(ctx context.Context, req *replicator.RegisterTokenSellRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.RegisterTokenSell(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("registering token sell: %s", err)
 	}
 	return resp, nil
 }

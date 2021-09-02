@@ -565,12 +565,6 @@ service Lightning {
     rpc RegisterTokenPurchase (replicator.RegisterTokenPurchaseRequest)
         returns (google.protobuf.Empty);
 
-    // lncli: `registertokensell`
-    // Proxies initial request to the replicator for a token purchase
-    // registration and further monitoring
-    rpc RegisterTokenSell (replicator.RegisterTokenSellRequest)
-        returns (google.protobuf.Empty);
-
     // lncli: `authrokenholder`
     // Proxies initial request to the replicator for authorize user
     rpc AuthTokenHolder (replicator.AuthRequest)

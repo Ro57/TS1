@@ -524,25 +524,6 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) RevokeToken(ctx context.Context, req *replicator.RevokeTokenRequest) (*empty.Empty, error) {
-	_, ok := tokens.Load(req.TokenName)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "token with this name does not exist")
-	}
-
-	amountToAddr := s.payoutCalculate()
-
-	sig := RevokeSig{
-		Token:        req.TokenName,
-		AddrToAmount: amountToAddr,
-	}
-
-	s.events.RevokeEvent <- sig
-	tokens.Delete(req.TokenName)
-
-	return &emptypb.Empty{}, nil
-}
-
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	var tokenList []*replicator.TokenOffer
 	var err error

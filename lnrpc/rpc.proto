@@ -578,12 +578,6 @@ service Lightning {
     // Proxies initial request to the issuer for register new token
     rpc IssueToken(replicator.IssueTokenRequest)
         returns (google.protobuf.Empty);
-
-    // lncli: `revoketoken`
-    // Proxies initial request to the issuer for revoke token
-    rpc RevokeToken(RevokeTokenRequest)
-        returns (google.protobuf.Empty);
-
 }
 
 message Utxo {
@@ -3829,10 +3823,4 @@ message Op {
 message GetTokenBalancesRequest {
     replicator.Pagination params = 1;
     string login = 2;
-}
-
-message RevokeTokenRequest {
-    string token_name = 1;
-    string login = 2;
-    string issuer_host = 3;
 }

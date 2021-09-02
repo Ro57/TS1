@@ -252,24 +252,6 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) RevokeToken(ctx context.Context, req *replicator.RevokeTokenRequest) (*empty.Empty, error) {
-	replicatorReq := &replicator.VerifyIssuerRequest{
-		Login: req.Login,
-	}
-
-	_, err := s.Client.VerifyIssuer(ctx, replicatorReq)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.Client.RevokeToken(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	return &emptypb.Empty{}, nil
-}
-
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	return s.Client.GetTokenList(ctx, req)
 }

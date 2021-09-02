@@ -29,10 +29,6 @@ service IssuerService {
     rpc IssueToken(replicator.IssueTokenRequest) 
         returns (google.protobuf.Empty);
 
-    // RevokeToken — delete information about token by his name.
-    rpc RevokeToken(replicator.RevokeTokenRequest) 
-        returns (google.protobuf.Empty);
-
     // GetTokenList — return list of issued token with infomation about 
     // expiration time and fix price.
     rpc GetTokenList(replicator.GetTokenListRequest) 

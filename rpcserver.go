@@ -531,10 +531,6 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "write",
 		}},
-		"/lnrpc.Lightning/RevokeToken": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
 	}
 }
 
@@ -7046,20 +7042,6 @@ func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRe
 	return resp, nil
 }
 
-func (r *rpcServer) RevokeToken(ctx context.Context, req *lnrpc.RevokeTokenRequest) (*empty.Empty, error) {
-
-	revokeReq := &replicator.RevokeTokenRequest{
-		TokenName: req.TokenName,
-		Login:     req.Login,
-	}
-
-	resp, err := r.issuanceClient.RevokeToken(ctx, revokeReq)
-	if err != nil {
-		return nil, fmt.Errorf("requesting token sell signature: %s", err)
-	}
-	return resp, nil
-}
-
 // TODO: optimize
 // 	? Move replication server client connection to the rpc server initialization stage, to keep connection in a persistent way.
 //	  This could be done in the following manner: connection reopening/closing for a while, after some time of inactivity
@@ -7109,9 +7091,6 @@ func JWTInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServer
 	switch info.FullMethod {
 	case "/lnrpc.Lightning/GetTokenBalances":
 		getTokenBalancesReq := req.(*lnrpc.GetTokenBalancesRequest)
-		holderLogin = getTokenBalancesReq.Login
-	case "/lnrpc.Lightning/RevokeToken":
-		getTokenBalancesReq := req.(*lnrpc.RevokeTokenRequest)
 		holderLogin = getTokenBalancesReq.Login
 	default:
 		return handler(ctx, req)

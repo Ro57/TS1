@@ -370,7 +370,6 @@ func main() {
 		signTokenSaleCommand,
 		registerTokenIssuerCommand,
 		issueTokenCommand,
-		revokeTokenCommand,
 	}
 
 	// Add any extra commands determined by build flags.

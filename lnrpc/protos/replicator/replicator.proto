@@ -43,9 +43,6 @@ service Replicator {
     // token purchase data, because it is token offer.
     rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
 
-    // RevokeToken — Delete information about token by his name.
-    rpc RevokeToken(RevokeTokenRequest) returns (google.protobuf.Empty);
-
     // GetTokenList — return list of issued token with infomation about
     // expiration time and fix price.
     rpc GetTokenList(GetTokenListRequest)
@@ -195,14 +192,6 @@ message IssueTokenRequest {
     TokenOffer offer = 1;
 }
 
-// RevokeTokenRequest — request on delete info about token
-message RevokeTokenRequest {
-    // token_name  name of the deleted token
-    string token_name = 1;
-    // login of user issued this token
-    string login = 2;
-}
-
 // TokenInfoRequest — contain name of requested token
 message TokenInfoRequest {
     // name of the token
@@ -214,7 +203,7 @@ message TokenInfoRequest {
 message TokenInfoResponse {
     // name of the token
     string name = 1;
-    
+
     // price of token in pkt
     // TODO: discuss
     //  ? Should we assume decimal prices

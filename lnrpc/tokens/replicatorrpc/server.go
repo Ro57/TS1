@@ -2,7 +2,6 @@ package replicatorrpc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -18,7 +17,6 @@ import (
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/encoder"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/jwtstore"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
@@ -412,68 +410,6 @@ func (s *Server) VerifyTokenPurchase(ctx context.Context, req *replicator.Verify
 	}
 	if req.Purchase.Offer.IssuerInfo.Host == "" {
 		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
-	}
-
-	return &empty.Empty{}, nil
-}
-
-func (s *Server) VerifyTokenSell(ctx context.Context, req *replicator.VerifyTokenSellRequest) (*empty.Empty, error) {
-	// NOTE: is expected to be empty
-	if req.Sell.InitialTxHash != "" {
-		return nil, status.Error(codes.InvalidArgument, "initial tx hash is provided")
-	}
-
-	if req.Sell.IssuerSignature == "" {
-		return nil, status.Error(codes.InvalidArgument, "issuer signature not provided")
-	}
-
-	if req.Sell.Offer == nil {
-		return nil, status.Error(codes.InvalidArgument, "offer's not provided")
-	}
-	if req.Sell.Offer.Token == "" {
-		return nil, status.Error(codes.InvalidArgument, "offer's token name not provided")
-	}
-	if req.Sell.Offer.Price == 0 {
-		return nil, status.Error(codes.InvalidArgument, "offer's token price not provided")
-	}
-	if req.Sell.Offer.TokenHolderLogin == "" {
-		return nil, status.Error(codes.InvalidArgument, "offer's token holder login not provided")
-	}
-	if req.Sell.Offer.TokenBuyerLogin == "" {
-		return nil, status.Error(codes.InvalidArgument, "offer's token buyer login not provided")
-	}
-	if req.Sell.Offer.ValidUntilSeconds == 0 {
-		return nil, status.Error(codes.InvalidArgument, "offer's validity until seconds not provided")
-	}
-
-	if req.Sell.Offer.IssuerInfo == nil {
-		return nil, status.Error(codes.InvalidArgument, "offer's issuer info not provided")
-	}
-	if req.Sell.Offer.IssuerInfo.Id == "" {
-		return nil, status.Error(codes.InvalidArgument, "offer's issuer id not provided")
-	}
-	if req.Sell.Offer.IssuerInfo.IdentityPubkey == "" {
-		return nil, status.Error(codes.InvalidArgument, "offer's issuer identity pubkey not provided")
-	}
-	if req.Sell.Offer.IssuerInfo.Host == "" {
-		return nil, status.Error(codes.InvalidArgument, "offer's issuer host not provided")
-	}
-
-	tokenSell := encoder.TokenSell{
-		Token:          req.Sell.Offer.Token,
-		Price:          req.Sell.Offer.Price,
-		ValidUntilTime: req.Sell.Offer.ValidUntilSeconds,
-	}
-
-	bytes, err := json.Marshal(tokenSell)
-	if err != nil {
-		return nil, errors.WithMessage(err, "marshalling request")
-	}
-
-	hash := encoder.CreateHash(bytes)
-
-	if fmt.Sprintf("%x", hash) != req.Sell.IssuerSignature {
-		return nil, status.Error(codes.InvalidArgument, fmt.Sprint("Expect hash ", fmt.Sprintf("%x", hash), " but got ", req.Sell.IssuerSignature))
 	}
 
 	return &empty.Empty{}, nil

@@ -21,11 +21,6 @@ service Replicator {
     rpc VerifyTokenPurchase (VerifyTokenPurchaseRequest)
         returns (google.protobuf.Empty);
 
-    // Verifies a signature of an issuer for this token sell. This
-    // method should be called before channel initialization
-    rpc VerifyTokenSell (VerifyTokenSellRequest)
-        returns (google.protobuf.Empty);
-
     // Registers token purchase to be tracked on the blockchain
     // right after some necessary token purchase checks
     rpc RegisterTokenPurchase (RegisterTokenPurchaseRequest)
@@ -54,20 +49,20 @@ service Replicator {
     // passed user is not contained in issuer's db
     rpc VerifyIssuer (VerifyIssuerRequest) returns (google.protobuf.Empty);
 
-    // IssueToken — Issue new token with given data. Request data equal to 
+    // IssueToken — Issue new token with given data. Request data equal to
     // token purchase data, because it is token offer.
     rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
 
-    // UpdateToken — Update token inforamtion with given data. Request data 
+    // UpdateToken — Update token inforamtion with given data. Request data
     // equal to token purchase data, because it is token offer.
     rpc UpdateToken(UpdateTokenRequest) returns (google.protobuf.Empty);
 
     // RevokeToken — Delete information about token by his name.
     rpc RevokeToken(RevokeTokenRequest) returns (google.protobuf.Empty);
 
-    // GetTokenList — return list of issued token with infomation about 
+    // GetTokenList — return list of issued token with infomation about
     // expiration time and fix price.
-    rpc GetTokenList(GetTokenListRequest) 
+    rpc GetTokenList(GetTokenListRequest)
         returns(GetTokenListResponse);
 }
 
@@ -93,7 +88,7 @@ message GetTokenListRequest {
 message GetTokenListResponse {
     // tokens list of registred tokens
     repeated replicator.TokenOffer tokens = 1;
-    // total number of registered tokens, if the issued_id is passed, only 
+    // total number of registered tokens, if the issued_id is passed, only
     // its tokens are taken into account
     int32 total = 2;
 }
@@ -150,9 +145,6 @@ message VerifyTokenPurchaseRequest {
     TokenPurchase purchase = 1;
 }
 
-message VerifyTokenSellRequest {
-    TokenPurchase sell = 1;
-}
 
 message RegisterTokenPurchaseRequest {
     TokenPurchase purchase = 1;

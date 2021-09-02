@@ -415,22 +415,6 @@ func (s *Server) VerifyTokenPurchase(ctx context.Context, req *replicator.Verify
 	return &empty.Empty{}, nil
 }
 
-func (s *Server) RegisterTokenIssuer(ctx context.Context, req *replicator.RegisterRequest) (*empty.Empty, error) {
-	_, ok := s.users.Load(req.Login)
-	if ok {
-		return nil, status.Error(codes.InvalidArgument, "user with this login already exists")
-	}
-	roles := make(map[string]struct{})
-	roles["issuer"] = struct{}{}
-
-	s.users.Store(req.Login, userInfo{
-		password: req.Password,
-		roles:    roles,
-	})
-
-	return &empty.Empty{}, nil
-}
-
 func (s *Server) AuthTokenHolder(ctx context.Context, req *replicator.AuthRequest) (*replicator.AuthResponse, error) {
 	user, ok := s.users.Load(req.Login)
 

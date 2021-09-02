@@ -29,9 +29,6 @@ service Replicator {
     // Call it method after unlock pkt wallet
     rpc AuthTokenHolder (AuthRequest) returns (AuthResponse);
 
-    // Register new issuer user with passed password and login
-    rpc RegisterTokenIssuer (RegisterRequest) returns (google.protobuf.Empty);
-
     // Verifies a user permitions to issue a token. Returns exceptions if
     // passed user is not contained in issuer's db
     rpc VerifyIssuer (VerifyIssuerRequest) returns (google.protobuf.Empty);
@@ -172,11 +169,6 @@ message AuthRequest {
 message AuthResponse {
     string jwt = 1;
     int64 expire_date = 2;
-}
-
-message RegisterRequest {
-    string login = 1;
-    string password = 2;
 }
 
 message VerifyIssuerRequest {

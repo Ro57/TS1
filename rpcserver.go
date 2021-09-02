@@ -515,10 +515,6 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "read",
 		}},
-		"/lnrpc.Lightning/RegisterTokenIssuer": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
 		"/lnrpc.Lightning/IssueToken": {{
 			Entity: "proxy",
 			Action: "write",
@@ -6999,14 +6995,6 @@ func (r *rpcServer) AuthTokenHolder(ctx context.Context, req *replicator.AuthReq
 	jwtStore.Append(jwt)
 
 	return &empty.Empty{}, nil
-}
-
-func (r *rpcServer) RegisterTokenIssuer(ctx context.Context, req *replicator.RegisterRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.RegisterTokenIssuer(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("token holder registration: %s", err)
-	}
-	return resp, nil
 }
 
 func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {

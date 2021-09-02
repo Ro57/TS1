@@ -156,7 +156,7 @@ type IssuerServiceClient interface {
 	// IssueToken — Issue new token with given data. Request data equal to
 	// token purchase data, because it is token offer.
 	IssueToken(ctx context.Context, in *replicator.IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// GetTokenList — return list of issued token with infomation about
+	// GetTokenList — return list of issued token with information about
 	// expiration time and fix price.
 	GetTokenList(ctx context.Context, in *replicator.GetTokenListRequest, opts ...grpc.CallOption) (*replicator.GetTokenListResponse, error)
 }
@@ -204,7 +204,7 @@ type IssuerServiceServer interface {
 	// IssueToken — Issue new token with given data. Request data equal to
 	// token purchase data, because it is token offer.
 	IssueToken(context.Context, *replicator.IssueTokenRequest) (*empty.Empty, error)
-	// GetTokenList — return list of issued token with infomation about
+	// GetTokenList — return list of issued token with information about
 	// expiration time and fix price.
 	GetTokenList(context.Context, *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error)
 }

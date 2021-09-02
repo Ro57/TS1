@@ -2443,16 +2443,6 @@
         }
       }
     },
-    "issuerSignTokenPurchaseResponse": {
-      "type": "object",
-      "properties": {
-        "issuer_signature": {
-          "type": "string",
-          "title": "issuer_signature signature on purchase offer"
-        }
-      },
-      "title": "SignTokenPurchaseResponse — info about sign offer"
-    },
     "issuerSignTokenSellResponse": {
       "type": "object",
       "properties": {

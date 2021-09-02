@@ -543,11 +543,6 @@ service Lightning {
     rpc GetTokenList (replicator.GetTokenListRequest)
         returns (replicator.GetTokenListResponse);
 
-    // lncli: `signtokenpurchase`
-    // Proxies initial request to the issuer for a signature
-    rpc SignTokenPurchase (issuer.SignTokenPurchaseRequest)
-        returns (issuer.SignTokenPurchaseResponse);
-
     // lncli: `signtokensell`
     // Proxies initial request to the issuer for a signature
     rpc SignTokenSell (issuer.SignTokenSellRequest)

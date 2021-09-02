@@ -503,10 +503,6 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "read",
 		}},
-		"/lnrpc.Lightning/SignTokenPurchase": {{
-			Entity: "proxy",
-			Action: "generate",
-		}},
 		"/lnrpc.Lightning/SignTokenSell": {{
 			Entity: "proxy",
 			Action: "generate",
@@ -6951,14 +6947,6 @@ func (r *rpcServer) GetTokenOffers(ctx context.Context, req *replicator.GetToken
 		return nil, fmt.Errorf("querying token offers: %s", err)
 	}
 
-	return resp, nil
-}
-
-func (r *rpcServer) SignTokenPurchase(ctx context.Context, req *issuer.SignTokenPurchaseRequest) (*issuer.SignTokenPurchaseResponse, error) {
-	resp, err := r.issuanceClient.SignTokenPurchase(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("requesting token purchase signature: %s", err)
-	}
 	return resp, nil
 }
 

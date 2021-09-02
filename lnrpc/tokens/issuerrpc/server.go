@@ -2,7 +2,6 @@ package issueancerpc
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -203,22 +202,6 @@ func (s *Server) RegisterWithRestServer(ctx context.Context,
 	// notation. Implementation of RegisterWithRestServer can be found in
 	// other services, such as the signature service.
 	return nil
-}
-
-// Override method of unimplemented server
-func (s *Server) SignTokenPurchase(ctx context.Context, req *issuer.SignTokenPurchaseRequest) (*issuer.SignTokenPurchaseResponse, error) {
-	bytes, err := json.Marshal(req)
-	if err != nil {
-		return nil, errors.WithMessage(err, "marshalling request")
-	}
-
-	hash := sha256.Sum256(bytes)
-
-	resp := &issuer.SignTokenPurchaseResponse{
-		IssuerSignature: fmt.Sprintf("%x", hash),
-	}
-
-	return resp, nil
 }
 
 func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {

@@ -10,8 +10,15 @@ import (
 	"github.com/urfave/cli"
 )
 
+// COMMENT ABOUT LOCKING FORM CALEB
+// Perhaps we should use the LOCK_TOKEN justification hash as the ID to simplify validation. <— yes
+// In this example, if after blocking 50 out of 100 tokens, someone wants to block more than 50 tokens, we can immediately refuse to block, since we will have data that the funds are already blocked for another user. <— yes, immediate rejection, no discredit needed
+// This is a "simple" rejection
+// Generally speaking, we should use "simple" rejection anywhere that the block can be known to be invalid only by looking at the chain. We should only use discredit in case of attacks such as duplicate block or fake timestamp
+// This will very much reduce the risk of a discredit over a software bug or accident
+
 var signTokenSaleCommand = cli.Command{
-	Name:        "maketokensellsignature",
+	Name:        "lock-tokens-for-transfer",
 	Category:    "Tokens",
 	Usage:       "Create token sell signature intent ",
 	Description: "Create token sell signature intent by requesting open channel to sell from one user to another",
@@ -21,6 +28,7 @@ var signTokenSaleCommand = cli.Command{
 
 const (
 	flagTokenBuyerLogin = "token-buyer-login"
+	flagTokenCount      = "count"
 )
 
 var signTokenSaleFlags = []cli.Flag{
@@ -32,29 +40,17 @@ var signTokenSaleFlags = []cli.Flag{
 		Name:  flagTokenPrice,
 		Usage: "token price per unit",
 	},
-	cli.StringFlag{
-		Name:  flagTokenHolderLogin,
-		Usage: "seller identity, a current token holder",
-	},
-	cli.StringFlag{
-		Name:  flagTokenBuyerLogin,
-		Usage: "buyer identity, a future bought token holder",
-	},
 	cli.Int64Flag{
 		Name:  flagIssuerOfferValidUntilSeconds,
 		Usage: "issuer's token offer term's time constraint",
 	},
 	cli.StringFlag{
-		Name:  flagIssuerID,
-		Usage: "issuer identity to buy target token from",
-	},
-	cli.StringFlag{
 		Name:  flagIssuerIdentityPubKey,
 		Usage: "issuer node's pubkey to initialize a channel",
 	},
-	cli.StringFlag{
-		Name:  flagIssuerHost,
-		Usage: "issuer node's host to initialize a channel",
+	cli.Int64Flag{
+		Name:  flagTokenCount,
+		Usage: "number of tokens issued",
 	},
 }
 
@@ -92,17 +88,12 @@ func extractTokenSell(ctx *cli.Context) (*replicator.TokenOffer, er.R) {
 		return nil, er.E(err)
 	}
 
-	tokenHolderLogin, err := parseRequiredString(ctx, flagTokenHolderLogin)
-	if err != nil {
-		return nil, er.E(err)
-	}
-
-	tokenBuyerLogin, err := parseRequiredString(ctx, flagTokenBuyerLogin)
-	if err != nil {
-		return nil, er.E(err)
-	}
-
 	validUntilSeconds, err := parseRequiredInt64(ctx, flagIssuerOfferValidUntilSeconds)
+	if err != nil {
+		return nil, er.E(err)
+	}
+
+	count, err := parseRequiredUint64(ctx, flagTokenCount)
 	if err != nil {
 		return nil, er.E(err)
 	}
@@ -111,35 +102,12 @@ func extractTokenSell(ctx *cli.Context) (*replicator.TokenOffer, er.R) {
 		return nil, er.Errorf("%q argument provided is in the past or empty", flagIssuerOfferValidUntilSeconds)
 	}
 
-	ID, err := parseRequiredString(ctx, flagIssuerID)
-	if err != nil {
-		return nil, er.E(err)
-	}
-
-	identityPubkey, err := parseRequiredString(ctx, flagIssuerIdentityPubKey)
-	if err != nil {
-		return nil, er.E(err)
-	}
-
-	host, err := parseRequiredString(ctx, flagIssuerHost)
-	if err != nil {
-		return nil, er.E(err)
-	}
-
 	// Extract general token offer data
 	offer := &replicator.TokenOffer{
 		Token:             token,
 		Price:             price,
-		TokenHolderLogin:  tokenHolderLogin,
-		TokenBuyerLogin:   tokenBuyerLogin,
 		ValidUntilSeconds: validUntilSeconds,
-
-		// Extract token offer issuer data
-		IssuerInfo: &replicator.IssuerInfo{
-			Id:             ID,
-			IdentityPubkey: identityPubkey,
-			Host:           host,
-		},
+		Count:             count,
 	}
 
 	return offer, nil

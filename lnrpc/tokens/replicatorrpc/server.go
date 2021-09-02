@@ -460,14 +460,9 @@ func (s *Server) VerifyTokenSell(ctx context.Context, req *replicator.VerifyToke
 	}
 
 	tokenSell := encoder.TokenSell{
-		Token:            req.Sell.Offer.Token,
-		Price:            req.Sell.Offer.Price,
-		ID:               req.Sell.Offer.IssuerInfo.Id,
-		Identity_pubkey:  req.Sell.Offer.IssuerInfo.IdentityPubkey,
-		Host:             req.Sell.Offer.IssuerInfo.Host,
-		TokenHolderLogin: req.Sell.Offer.TokenHolderLogin,
-		TokenBuyerLogin:  req.Sell.Offer.TokenBuyerLogin,
-		ValidUntilTime:   req.Sell.Offer.ValidUntilSeconds,
+		Token:          req.Sell.Offer.Token,
+		Price:          req.Sell.Offer.Price,
+		ValidUntilTime: req.Sell.Offer.ValidUntilSeconds,
 	}
 
 	bytes, err := json.Marshal(tokenSell)

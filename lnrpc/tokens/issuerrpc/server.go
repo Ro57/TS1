@@ -223,14 +223,10 @@ func (s *Server) SignTokenPurchase(ctx context.Context, req *issuer.SignTokenPur
 
 func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {
 	tokenSell := encoder.TokenSell{
-		Token:            req.Offer.Token,
-		Price:            req.Offer.Price,
-		ID:               req.Offer.IssuerInfo.Id,
-		Identity_pubkey:  req.Offer.IssuerInfo.IdentityPubkey,
-		Host:             req.Offer.IssuerInfo.Host,
-		TokenHolderLogin: req.Offer.TokenHolderLogin,
-		TokenBuyerLogin:  req.Offer.TokenBuyerLogin,
-		ValidUntilTime:   req.Offer.ValidUntilSeconds,
+		Token:          req.Offer.Token,
+		Price:          req.Offer.Price,
+		ValidUntilTime: req.Offer.ValidUntilSeconds,
+		Count:          req.Offer.Count,
 	}
 
 	bytes, err := json.Marshal(tokenSell)

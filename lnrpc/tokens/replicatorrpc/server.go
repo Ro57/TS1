@@ -524,27 +524,6 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) UpdateToken(ctx context.Context, req *replicator.UpdateTokenRequest) (*empty.Empty, error) {
-	t, ok := tokens.Load(req.Offer.Token)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "token with this name does not exist")
-	}
-
-	newToken := t.(token)
-
-	if req.Offer.Price != 0 {
-		newToken.price = req.Offer.Price
-	}
-
-	if req.Offer.ValidUntilSeconds != 0 {
-		newToken.validTime = req.Offer.ValidUntilSeconds
-	}
-
-	tokens.Store(req.Offer.Token, newToken)
-
-	return &emptypb.Empty{}, nil
-}
-
 func (s *Server) RevokeToken(ctx context.Context, req *replicator.RevokeTokenRequest) (*empty.Empty, error) {
 	_, ok := tokens.Load(req.TokenName)
 	if !ok {

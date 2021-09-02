@@ -370,7 +370,6 @@ func main() {
 		signTokenSaleCommand,
 		registerTokenIssuerCommand,
 		issueTokenCommand,
-		updateTokenCommand,
 		revokeTokenCommand,
 	}
 

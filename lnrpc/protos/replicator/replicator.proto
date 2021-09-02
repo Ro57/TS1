@@ -43,10 +43,6 @@ service Replicator {
     // token purchase data, because it is token offer.
     rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
 
-    // UpdateToken — Update token inforamtion with given data. Request data
-    // equal to token purchase data, because it is token offer.
-    rpc UpdateToken(UpdateTokenRequest) returns (google.protobuf.Empty);
-
     // RevokeToken — Delete information about token by his name.
     rpc RevokeToken(RevokeTokenRequest) returns (google.protobuf.Empty);
 
@@ -196,12 +192,6 @@ message VerifyIssuerRequest {
 // IssueTokenRequest — info about token will be issued
 message IssueTokenRequest {
     // offer on token issue
-    TokenOffer offer = 1;
-}
-
-// UpdateTokenRequest — update info about current token
-message UpdateTokenRequest {
-    // offer with new data
     TokenOffer offer = 1;
 }
 

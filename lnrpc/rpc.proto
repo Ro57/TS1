@@ -579,11 +579,6 @@ service Lightning {
     rpc IssueToken(replicator.IssueTokenRequest)
         returns (google.protobuf.Empty);
 
-    // lncli: `updatetoken`
-    // Proxies initial request to the issuer for update token info
-    rpc UpdateToken(replicator.UpdateTokenRequest)
-        returns (google.protobuf.Empty);
-
     // lncli: `revoketoken`
     // Proxies initial request to the issuer for revoke token
     rpc RevokeToken(RevokeTokenRequest)

@@ -531,10 +531,6 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "write",
 		}},
-		"/lnrpc.Lightning/UpdateToken": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
 		"/lnrpc.Lightning/RevokeToken": {{
 			Entity: "proxy",
 			Action: "write",
@@ -7050,15 +7046,6 @@ func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRe
 	return resp, nil
 }
 
-func (r *rpcServer) UpdateToken(ctx context.Context, req *replicator.UpdateTokenRequest) (*empty.Empty, error) {
-
-	resp, err := r.issuanceClient.UpdateToken(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("requesting token sell signature: %s", err)
-	}
-	return resp, nil
-}
-
 func (r *rpcServer) RevokeToken(ctx context.Context, req *lnrpc.RevokeTokenRequest) (*empty.Empty, error) {
 
 	revokeReq := &replicator.RevokeTokenRequest{
@@ -7123,9 +7110,6 @@ func JWTInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServer
 	case "/lnrpc.Lightning/GetTokenBalances":
 		getTokenBalancesReq := req.(*lnrpc.GetTokenBalancesRequest)
 		holderLogin = getTokenBalancesReq.Login
-	case "/lnrpc.Lightning/UpdateToken":
-		getTokenBalancesReq := req.(*replicator.UpdateTokenRequest)
-		holderLogin = getTokenBalancesReq.Offer.TokenHolderLogin
 	case "/lnrpc.Lightning/RevokeToken":
 		getTokenBalancesReq := req.(*lnrpc.RevokeTokenRequest)
 		holderLogin = getTokenBalancesReq.Login

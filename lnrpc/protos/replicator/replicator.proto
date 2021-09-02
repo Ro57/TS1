@@ -21,11 +21,6 @@ service Replicator {
     rpc VerifyTokenPurchase (VerifyTokenPurchaseRequest)
         returns (google.protobuf.Empty);
 
-    // Registers token purchase to be tracked on the blockchain
-    // right after some necessary token purchase checks
-    rpc RegisterTokenPurchase (RegisterTokenPurchaseRequest)
-        returns (google.protobuf.Empty);
-
     // Returns current token balances
     rpc GetTokenBalances (GetTokenBalancesRequest)
         returns (GetTokenBalancesResponse);
@@ -137,11 +132,6 @@ message IssuerInfo {
 }
 
 message VerifyTokenPurchaseRequest {
-    TokenPurchase purchase = 1;
-}
-
-
-message RegisterTokenPurchaseRequest {
     TokenPurchase purchase = 1;
 }
 

@@ -28,7 +28,6 @@ service IssuerService {
     // expiration time and fix price.
     rpc GetTokenList(replicator.GetTokenListRequest) 
         returns(replicator.GetTokenListResponse);
-
 }
 
 // SignTokenSellRequest — info about sell token

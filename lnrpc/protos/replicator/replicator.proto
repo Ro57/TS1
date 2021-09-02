@@ -29,9 +29,6 @@ service Replicator {
     // Call it method after unlock pkt wallet
     rpc AuthTokenHolder (AuthRequest) returns (AuthResponse);
 
-    // Register new token holder user with passed password and login
-    rpc RegisterTokenHolder (RegisterRequest) returns (google.protobuf.Empty);
-
     // Register new issuer user with passed password and login
     rpc RegisterTokenIssuer (RegisterRequest) returns (google.protobuf.Empty);
 

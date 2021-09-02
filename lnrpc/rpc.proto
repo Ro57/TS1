@@ -559,11 +559,6 @@ service Lightning {
     rpc AuthTokenHolder (replicator.AuthRequest)
         returns (google.protobuf.Empty);
 
-    // lncli: `registertokenholder`
-    // Proxies initial request to the replicator for register user
-    rpc RegisterTokenHolder (replicator.RegisterRequest)
-        returns (google.protobuf.Empty);
-
     // lncli: `registertokenissuer`
     // Proxies initial request to the replicator for register user
     rpc RegisterTokenIssuer (replicator.RegisterRequest)

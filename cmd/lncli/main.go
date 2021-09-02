@@ -365,7 +365,6 @@ func main() {
 		getTokenListCommand,
 		getTokenBalancesCommand,
 		authTokenHolderCommand,
-		registerTokenHolderCoomand,
 		signTokenSaleCommand,
 		registerTokenIssuerCommand,
 		issueTokenCommand,

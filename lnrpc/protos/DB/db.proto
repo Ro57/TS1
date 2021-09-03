@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package db;
+package tokendb;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB";
 
@@ -11,6 +11,7 @@ import "google/protobuf/any.proto";
 // copied into an Accusation
 message Block {
     // header — data to identify this block
+    // Caleb: Block header should contain the height of the block
     BlockHeader header = 1;
     // justification — one of justification structure with payload information.
     // TODO: After implement type of justification, change Any type to oneof
@@ -60,15 +61,17 @@ message Token {
     // creation — date of token creation in unix time format
     int64 creation = 3;
     // urls — set of urls for access to blockchain
-    repeated string urls = 4;
+    string url = 4;
 }
 
 // BlockHeader contain reference on previus block and creation time.
 // Hash of this structure will be used as a key in key-value storage
-// Caleb: Block header should contain the height of the block
 message BlockHeader {
     // prev_block — hash of previous block 
     string prev_block = 1;
     // creation — date of block creation in unix time format
-    int64 creation = 2;    
+    int64 creation = 2;
+    // issuer_address — issuer wallet address to transaction.
+    // Update information about token will be by URL.
+    string issuer_address = 3;
 }

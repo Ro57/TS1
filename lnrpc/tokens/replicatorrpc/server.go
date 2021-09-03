@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/jwtstore"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
@@ -407,10 +408,10 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	var tokenList []*replicator.TokenOffer
+	var tokenList []*DB.Token
 	var err error
 
-	tokenList, err = s.allTokens()
+	tokenList, err = s.allTokensFromIssuer(req.IssuerId)
 
 	if err != nil {
 		return nil, err
@@ -424,8 +425,8 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 }
 
 // TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses
-func (s *Server) allTokens() ([]*replicator.TokenOffer, error) {
-	resultList := []*replicator.TokenOffer{}
+func (s *Server) allTokensFromIssuer(issuer string) ([]*DB.Token, error) {
+	resultList := []*DB.Token{}
 
 	tokens.Range(func(key, value interface{}) bool {
 		// TODO: Fill the resultList with token information

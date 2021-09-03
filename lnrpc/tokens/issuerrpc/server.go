@@ -236,6 +236,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
+	//TODO: not call client, should call DB methods
 	return s.Client.GetTokenList(ctx, req)
 }
 

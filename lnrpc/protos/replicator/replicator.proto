@@ -4,6 +4,7 @@ package replicator;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator";
 
+import "protos/DB/db.proto";
 import "google/protobuf/empty.proto";
 
 // Is mainly used to generate compatible querier (client)
@@ -55,7 +56,7 @@ message GetTokenListRequest {
 // GetTokenListResponse — list of tokens with additional info
 message GetTokenListResponse {
     // tokens list of registred tokens
-    repeated replicator.TokenOffer tokens = 1;
+    repeated db.Token tokens = 1;
     // total number of registered tokens, if the issued_id is passed, only
     // its tokens are taken into account
     int32 total = 2;

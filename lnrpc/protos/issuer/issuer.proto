@@ -15,11 +15,6 @@ import "protos/replicator/replicator.proto";
 //  - to test generated client implementation by mocking generated server
 //
 service IssuerService {
-    // SignTokenPurchase Returns token purchase signature for further 
-    //registration along with offer via Replication Server
-    rpc SignTokenPurchase (SignTokenPurchaseRequest) 
-        returns (SignTokenPurchaseResponse);
-
     // SignTokenSell Returns token sell signature for further
     // registration along with offer via Replication Server
     rpc SignTokenSell (SignTokenSellRequest) returns (SignTokenSellResponse);
@@ -29,32 +24,10 @@ service IssuerService {
     rpc IssueToken(replicator.IssueTokenRequest) 
         returns (google.protobuf.Empty);
 
-    // UpdateToken — Update token inforamtion with given data. Request data 
-    // equal to token purchase data, because it is token offer.
-    rpc UpdateToken(replicator.UpdateTokenRequest) 
-        returns (google.protobuf.Empty);
-
-    // RevokeToken — delete information about token by his name.
-    rpc RevokeToken(replicator.RevokeTokenRequest) 
-        returns (google.protobuf.Empty);
-
-    // GetTokenList — return list of issued token with infomation about 
+    // GetTokenList — return list of issued token with information about
     // expiration time and fix price.
     rpc GetTokenList(replicator.GetTokenListRequest) 
         returns(replicator.GetTokenListResponse);
-
-}
-
-// SignTokenPurchaseRequest — info about token offer 
-message SignTokenPurchaseRequest {
-    // offer on buy token
-    replicator.TokenOffer offer = 1;
-}
-
-// SignTokenPurchaseResponse — info about sign offer
-message SignTokenPurchaseResponse {
-    // issuer_signature signature on purchase offer
-    string issuer_signature = 1;
 }
 
 // SignTokenSellRequest — info about sell token

@@ -27,8 +27,15 @@ var signTokenSaleCommand = cli.Command{
 }
 
 const (
-	flagTokenBuyerLogin = "token-buyer-login"
-	flagTokenCount      = "count"
+	flagTokenBuyerLogin              = "token-buyer-login"
+	flagTokenCount                   = "count"
+	flagTokenName                    = "token"
+	flagTokenPrice                   = "price"
+	flagTokenHolderLogin             = "token-holder-login"
+	flagIssuerOfferValidUntilSeconds = "issuer-offer-valid-until-seconds"
+	flagIssuerID                     = "issuer-id"
+	flagIssuerIdentityPubKey         = "issuer-identity-pubkey"
+	flagIssuerHost                   = "issuer-host"
 )
 
 var signTokenSaleFlags = []cli.Flag{
@@ -67,12 +74,12 @@ func signTokenSell(ctx *cli.Context) er.R {
 		Offer: offer,
 	}
 
-	signTokenPurchaseResp, err := client.SignTokenSell(context.TODO(), signTokenSellReq)
+	signTokenSellResponse, err := client.SignTokenSell(context.TODO(), signTokenSellReq)
 	if err != nil {
 		return er.Errorf("requesting token purchase signature: %s", err)
 	}
 
-	printRespJSON(signTokenPurchaseResp)
+	printRespJSON(signTokenSellResponse)
 
 	return nil
 }

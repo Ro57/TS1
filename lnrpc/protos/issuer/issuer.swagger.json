@@ -12,16 +12,6 @@
   ],
   "paths": {},
   "definitions": {
-    "issuerSignTokenPurchaseResponse": {
-      "type": "object",
-      "properties": {
-        "issuer_signature": {
-          "type": "string",
-          "title": "issuer_signature signature on purchase offer"
-        }
-      },
-      "title": "SignTokenPurchaseResponse — info about sign offer"
-    },
     "issuerSignTokenSellResponse": {
       "type": "object",
       "properties": {
@@ -57,7 +47,7 @@
         "total": {
           "type": "integer",
           "format": "int32",
-          "title": "total number of registered tokens, if the issued_id is passed, only \nits tokens are taken into account"
+          "title": "total number of registered tokens, if the issued_id is passed, only\nits tokens are taken into account"
         }
       },
       "title": "GetTokenListResponse — list of tokens with additional info"

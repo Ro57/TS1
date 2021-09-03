@@ -364,14 +364,8 @@ func main() {
 		getTokenOffersCommand,
 		getTokenListCommand,
 		getTokenBalancesCommand,
-		signTokenPurchaseCommand,
-		authTokenHolderCommand,
-		registerTokenHolderCoomand,
 		signTokenSaleCommand,
-		registerTokenIssuerCommand,
 		issueTokenCommand,
-		updateTokenCommand,
-		revokeTokenCommand,
 	}
 
 	// Add any extra commands determined by build flags.

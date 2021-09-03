@@ -2443,16 +2443,6 @@
         }
       }
     },
-    "issuerSignTokenPurchaseResponse": {
-      "type": "object",
-      "properties": {
-        "issuer_signature": {
-          "type": "string",
-          "title": "issuer_signature signature on purchase offer"
-        }
-      },
-      "title": "SignTokenPurchaseResponse — info about sign offer"
-    },
     "issuerSignTokenSellResponse": {
       "type": "object",
       "properties": {
@@ -5760,7 +5750,7 @@
         "total": {
           "type": "integer",
           "format": "int32",
-          "title": "total number of registered tokens, if the issued_id is passed, only \nits tokens are taken into account"
+          "title": "total number of registered tokens, if the issued_id is passed, only\nits tokens are taken into account"
         }
       },
       "title": "GetTokenListResponse — list of tokens with additional info"
@@ -5859,21 +5849,6 @@
           "type": "string",
           "format": "uint64",
           "title": "count — the number of tokens to be issued"
-        }
-      }
-    },
-    "replicatorTokenPurchase": {
-      "type": "object",
-      "properties": {
-        "offer": {
-          "$ref": "#/definitions/replicatorTokenOffer"
-        },
-        "issuer_signature": {
-          "type": "string",
-          "title": "Presents signature of an offer. This signature is used to identify,\nthat issuer accepts terms described in the offer and is responsible\nto follow them in this transaction. If signature is not valid, then\nchannel should be closed. Otherwise, Replicator registers token\npurchase details provided and tracks blockchain for a closing transaction\nin order to determine if the issuer were not break terms"
-        },
-        "initial_tx_hash": {
-          "type": "string"
         }
       }
     },

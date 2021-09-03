@@ -503,51 +503,11 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "read",
 		}},
-		"/lnrpc.Lightning/SignTokenPurchase": {{
-			Entity: "proxy",
-			Action: "generate",
-		}},
 		"/lnrpc.Lightning/SignTokenSell": {{
 			Entity: "proxy",
 			Action: "generate",
 		}},
-		"/lnrpc.Lightning/VerifyTokenPurchase": {{
-			Entity: "proxy",
-			Action: "read",
-		}},
-		"/lnrpc.Lightning/VerifyTokenSell": {{
-			Entity: "proxy",
-			Action: "read",
-		}},
-		"/lnrpc.Lightning/RegisterTokenPurchase": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
-		"/lnrpc.Lightning/RegisterTokenSell": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
-		"/lnrpc.Lightning/RegisterTokenHolder": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
-		"/lnrpc.Lightning/AuthTokenHolder": {{
-			Entity: "proxy",
-			Action: "read",
-		}},
-		"/lnrpc.Lightning/RegisterTokenIssuer": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
 		"/lnrpc.Lightning/IssueToken": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
-		"/lnrpc.Lightning/UpdateToken": {{
-			Entity: "proxy",
-			Action: "write",
-		}},
-		"/lnrpc.Lightning/RevokeToken": {{
 			Entity: "proxy",
 			Action: "write",
 		}},
@@ -6974,50 +6934,10 @@ func (r *rpcServer) GetTokenOffers(ctx context.Context, req *replicator.GetToken
 	return resp, nil
 }
 
-func (r *rpcServer) SignTokenPurchase(ctx context.Context, req *issuer.SignTokenPurchaseRequest) (*issuer.SignTokenPurchaseResponse, error) {
-	resp, err := r.issuanceClient.SignTokenPurchase(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("requesting token purchase signature: %s", err)
-	}
-	return resp, nil
-}
-
 func (r *rpcServer) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {
 	resp, err := r.issuanceClient.SignTokenSell(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("requesting token sell signature: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) VerifyTokenPurchase(ctx context.Context, req *replicator.VerifyTokenPurchaseRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.VerifyTokenPurchase(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("verifying token purchase signature: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) VerifyTokenSell(ctx context.Context, req *replicator.VerifyTokenSellRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.VerifyTokenSell(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("verifying token sell signature: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) RegisterTokenPurchase(ctx context.Context, req *replicator.RegisterTokenPurchaseRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.RegisterTokenPurchase(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("registering token purchase: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) RegisterTokenSell(ctx context.Context, req *replicator.RegisterTokenSellRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.RegisterTokenSell(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("registering token sell: %s", err)
 	}
 	return resp, nil
 }
@@ -7043,66 +6963,9 @@ func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenLi
 	return resp, nil
 }
 
-func (r *rpcServer) AuthTokenHolder(ctx context.Context, req *replicator.AuthRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.AuthTokenHolder(ctx, req)
-
-	if err != nil {
-		return nil, fmt.Errorf("authentication token holder: %s", err)
-	}
-
-	jwt := jwtstore.JWT{
-		HolderLogin: req.Login,
-		Token:       resp.Jwt,
-		ExpireDate:  time.Unix(resp.ExpireDate, 0),
-	}
-
-	jwtStore.Append(jwt)
-
-	return &empty.Empty{}, nil
-}
-
-func (r *rpcServer) RegisterTokenHolder(ctx context.Context, req *replicator.RegisterRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.RegisterTokenHolder(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("token holder registration: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) RegisterTokenIssuer(ctx context.Context, req *replicator.RegisterRequest) (*empty.Empty, error) {
-	resp, err := r.replicatorClient.RegisterTokenIssuer(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("token holder registration: %s", err)
-	}
-	return resp, nil
-}
-
 func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
 
 	resp, err := r.issuanceClient.IssueToken(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("requesting token sell signature: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) UpdateToken(ctx context.Context, req *replicator.UpdateTokenRequest) (*empty.Empty, error) {
-
-	resp, err := r.issuanceClient.UpdateToken(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("requesting token sell signature: %s", err)
-	}
-	return resp, nil
-}
-
-func (r *rpcServer) RevokeToken(ctx context.Context, req *lnrpc.RevokeTokenRequest) (*empty.Empty, error) {
-
-	revokeReq := &replicator.RevokeTokenRequest{
-		TokenName: req.TokenName,
-		Login:     req.Login,
-	}
-
-	resp, err := r.issuanceClient.RevokeToken(ctx, revokeReq)
 	if err != nil {
 		return nil, fmt.Errorf("requesting token sell signature: %s", err)
 	}
@@ -7158,12 +7021,6 @@ func JWTInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServer
 	switch info.FullMethod {
 	case "/lnrpc.Lightning/GetTokenBalances":
 		getTokenBalancesReq := req.(*lnrpc.GetTokenBalancesRequest)
-		holderLogin = getTokenBalancesReq.Login
-	case "/lnrpc.Lightning/UpdateToken":
-		getTokenBalancesReq := req.(*replicator.UpdateTokenRequest)
-		holderLogin = getTokenBalancesReq.Offer.TokenHolderLogin
-	case "/lnrpc.Lightning/RevokeToken":
-		getTokenBalancesReq := req.(*lnrpc.RevokeTokenRequest)
 		holderLogin = getTokenBalancesReq.Login
 	default:
 		return handler(ctx, req)

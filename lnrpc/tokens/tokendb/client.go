@@ -17,8 +17,10 @@ const (
 	dbName = "channel.db"
 )
 
-// TODO: Change to config data
-
+// Function executed before every transaction
+func before() {
+	fmt.Println("Transaction")
+}
 func GetClient() channeldb.DB {
 	return client
 }
@@ -42,7 +44,7 @@ func Close() {
 func Ping() er.R {
 	return client.View(func(tx walletdb.ReadTx) er.R {
 		return nil
-	}, func() {})
+	}, before)
 }
 
 // Clear all database structure with buckets and their content
@@ -56,59 +58,10 @@ func Clear() er.R {
 	return nil
 }
 
-// DB example
-// func ExampleDB() {
+func Update(f func(tx walletdb.ReadWriteTx) er.R) er.R {
+	return client.Update(f, before)
+}
 
-// 	client, errr := channeldb.Open(home + path + name)
-// 	if errr != nil {
-// 		log.Fatal(errr.Native().Error())
-// 	}
-// 	defer db.Close()
-
-// 	db.Update(func(tx walletdb.ReadWriteTx) er.R {
-// 		b, err := tx.CreateTopLevelBucket([]byte("Business"))
-// 		if err != nil {
-// 			return er.Errorf("create bucket: %s", err)
-// 		}
-
-// 		_, err = b.CreateBucket([]byte("Employee"))
-// 		if err != nil {
-// 			return er.Errorf("create bucket: %s", err)
-// 		}
-
-// 		return nil
-
-// 	}, func() {
-// 		fmt.Println("create busket structure")
-// 	})
-
-// 	db.Update(func(tx walletdb.ReadWriteTx) er.R {
-// 		b := tx.ReadWriteBucket([]byte("Business"))
-// 		emp := b.NestedReadWriteBucket([]byte("Employee"))
-
-// 		err := b.Put([]byte("Emp1"), []byte("Number 100"))
-
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		err = emp.Put([]byte("Time"), []byte("180h"))
-
-// 		return err
-// 	}, func() {
-// 		fmt.Println("Put Emp1")
-// 	})
-
-// 	db.View(func(tx walletdb.ReadTx) er.R {
-// 		b := tx.ReadBucket([]byte("Business"))
-// 		emp := b.NestedReadBucket([]byte("Employee"))
-
-// 		empNum := b.Get([]byte("Emp1"))
-
-// 		empTime := emp.Get([]byte("Time"))
-// 		fmt.Printf("Hello %s your working time %s", empNum, empTime)
-
-// 		return nil
-// 	}, func() {
-// 	})
-// }
+func View(f func(tx walletdb.ReadTx) er.R) er.R {
+	return client.View(f, before)
+}

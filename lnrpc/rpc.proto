@@ -548,11 +548,6 @@ service Lightning {
     rpc SignTokenSell (issuer.SignTokenSellRequest)
         returns (issuer.SignTokenSellResponse);
 
-    // lncli: `authrokenholder`
-    // Proxies initial request to the replicator for authorize user
-    rpc AuthTokenHolder (replicator.AuthRequest)
-        returns (google.protobuf.Empty);
-
     // lncli: `issuetoken`
     // Proxies initial request to the issuer for register new token
     rpc IssueToken(replicator.IssueTokenRequest)

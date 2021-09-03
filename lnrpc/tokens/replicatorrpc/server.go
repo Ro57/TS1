@@ -372,48 +372,6 @@ func (s *Server) GetTokenBalances(ctx context.Context, req *replicator.GetTokenB
 	return resp, nil
 }
 
-func (s *Server) AuthTokenHolder(ctx context.Context, req *replicator.AuthRequest) (*replicator.AuthResponse, error) {
-	user, ok := s.users.Load(req.Login)
-
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "token holder not registered")
-	}
-
-	ui := user.(userInfo)
-
-	if ui.password != req.Password {
-		return nil, status.Error(codes.InvalidArgument, "invalid password")
-	}
-
-	expire := time.Now().Add(time.Minute * 30)
-
-	claims := loginCliams{
-		req.Login,
-		jwt.StandardClaims{
-			ExpiresAt: jwt.NewTime(float64(expire.Unix())),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signedToken, err := token.SignedString(signingKey)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	jwtStore.Append(jwtstore.JWT{
-		Token:       signedToken,
-		ExpireDate:  expire,
-		HolderLogin: req.Login,
-	})
-
-	return &replicator.AuthResponse{
-		Jwt:        signedToken,
-		ExpireDate: expire.Unix(),
-	}, nil
-
-}
-
 func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerRequest) (*empty.Empty, error) {
 	if req.Login == "" {
 		return nil, status.Error(codes.InvalidArgument, "user login not presented")

@@ -24,19 +24,6 @@
         }
       }
     },
-    "replicatorAuthResponse": {
-      "type": "object",
-      "properties": {
-        "jwt": {
-          "type": "string"
-        },
-        "expire_date": {
-          "type": "string",
-          "format": "int64"
-        }
-      },
-      "description": "We need this dataset to validate jwt which will be needed later when we will\nhandle request with required login data. For this we save in memory jwt."
-    },
     "replicatorGetTokenBalancesResponse": {
       "type": "object",
       "properties": {

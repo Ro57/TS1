@@ -543,70 +543,15 @@ service Lightning {
     rpc GetTokenList (replicator.GetTokenListRequest)
         returns (replicator.GetTokenListResponse);
 
-    // lncli: `signtokenpurchase`
-    // Proxies initial request to the issuer for a signature
-    rpc SignTokenPurchase (issuer.SignTokenPurchaseRequest)
-        returns (issuer.SignTokenPurchaseResponse);
-
     // lncli: `signtokensell`
     // Proxies initial request to the issuer for a signature
     rpc SignTokenSell (issuer.SignTokenSellRequest)
         returns (issuer.SignTokenSellResponse);
 
-    // lncli: `verifytokenpurchase`
-    // Proxies initial request to the replicator for an issuer's signature
-    // verification
-    rpc VerifyTokenPurchase (replicator.VerifyTokenPurchaseRequest)
-        returns (google.protobuf.Empty);
-
-    // lncli: `verifytokensell`
-    // Proxies initial request to the replicator for an issuer's signature
-    // verification
-    rpc VerifyTokenSell (replicator.VerifyTokenSellRequest)
-        returns (google.protobuf.Empty);
-
-    // lncli: `registertokenpurchase`
-    // Proxies initial request to the replicator for a token purchase
-    // registration and further monitoring
-    rpc RegisterTokenPurchase (replicator.RegisterTokenPurchaseRequest)
-        returns (google.protobuf.Empty);
-
-    // lncli: `registertokensell`
-    // Proxies initial request to the replicator for a token purchase
-    // registration and further monitoring
-    rpc RegisterTokenSell (replicator.RegisterTokenSellRequest)
-        returns (google.protobuf.Empty);
-
-    // lncli: `authrokenholder`
-    // Proxies initial request to the replicator for authorize user
-    rpc AuthTokenHolder (replicator.AuthRequest)
-        returns (google.protobuf.Empty);
-
-    // lncli: `registertokenholder`
-    // Proxies initial request to the replicator for register user
-    rpc RegisterTokenHolder (replicator.RegisterRequest)
-        returns (google.protobuf.Empty);
-
-    // lncli: `registertokenissuer`
-    // Proxies initial request to the replicator for register user
-    rpc RegisterTokenIssuer (replicator.RegisterRequest)
-        returns (google.protobuf.Empty);
-
     // lncli: `issuetoken`
     // Proxies initial request to the issuer for register new token
     rpc IssueToken(replicator.IssueTokenRequest)
         returns (google.protobuf.Empty);
-
-    // lncli: `updatetoken`
-    // Proxies initial request to the issuer for update token info
-    rpc UpdateToken(replicator.UpdateTokenRequest)
-        returns (google.protobuf.Empty);
-
-    // lncli: `revoketoken`
-    // Proxies initial request to the issuer for revoke token
-    rpc RevokeToken(RevokeTokenRequest)
-        returns (google.protobuf.Empty);
-
 }
 
 message Utxo {
@@ -3852,10 +3797,4 @@ message Op {
 message GetTokenBalancesRequest {
     replicator.Pagination params = 1;
     string login = 2;
-}
-
-message RevokeTokenRequest {
-    string token_name = 1;
-    string login = 2;
-    string issuer_host = 3;
 }

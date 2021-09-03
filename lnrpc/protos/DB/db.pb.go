@@ -378,6 +378,58 @@ func (m *BlockHeader) GetIssuerAddress() string {
 	return ""
 }
 
+// BlockHeader contain reference on previus block and creation time.
+// Hash of this structure will be used as a key in key-value storage
+// Caleb: Block header should contain the height of the block
+type BlockHeader struct {
+	// prev_block — hash of previous block
+	PrevBlock string `protobuf:"bytes,1,opt,name=prev_block,json=prevBlock,proto3" json:"prev_block,omitempty"`
+	// creation — date of block creation in unix time format
+	Creation             int64    `protobuf:"varint,2,opt,name=creation,proto3" json:"creation,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BlockHeader) Reset()         { *m = BlockHeader{} }
+func (m *BlockHeader) String() string { return proto.CompactTextString(m) }
+func (*BlockHeader) ProtoMessage()    {}
+func (*BlockHeader) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2899384ae3d1f0cf, []int{4}
+}
+
+func (m *BlockHeader) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BlockHeader.Unmarshal(m, b)
+}
+func (m *BlockHeader) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BlockHeader.Marshal(b, m, deterministic)
+}
+func (m *BlockHeader) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BlockHeader.Merge(m, src)
+}
+func (m *BlockHeader) XXX_Size() int {
+	return xxx_messageInfo_BlockHeader.Size(m)
+}
+func (m *BlockHeader) XXX_DiscardUnknown() {
+	xxx_messageInfo_BlockHeader.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BlockHeader proto.InternalMessageInfo
+
+func (m *BlockHeader) GetPrevBlock() string {
+	if m != nil {
+		return m.PrevBlock
+	}
+	return ""
+}
+
+func (m *BlockHeader) GetCreation() int64 {
+	if m != nil {
+		return m.Creation
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*Block)(nil), "tokendb.Block")
 	proto.RegisterType((*Lock)(nil), "tokendb.Lock")

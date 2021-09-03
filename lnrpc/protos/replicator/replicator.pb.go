@@ -386,223 +386,6 @@ func (m *IssuerInfo) GetHost() string {
 	return ""
 }
 
-type VerifyTokenPurchaseRequest struct {
-	Purchase             *TokenPurchase `protobuf:"bytes,1,opt,name=purchase,proto3" json:"purchase,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
-}
-
-func (m *VerifyTokenPurchaseRequest) Reset()         { *m = VerifyTokenPurchaseRequest{} }
-func (m *VerifyTokenPurchaseRequest) String() string { return proto.CompactTextString(m) }
-func (*VerifyTokenPurchaseRequest) ProtoMessage()    {}
-func (*VerifyTokenPurchaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{6}
-}
-
-func (m *VerifyTokenPurchaseRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_VerifyTokenPurchaseRequest.Unmarshal(m, b)
-}
-func (m *VerifyTokenPurchaseRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_VerifyTokenPurchaseRequest.Marshal(b, m, deterministic)
-}
-func (m *VerifyTokenPurchaseRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VerifyTokenPurchaseRequest.Merge(m, src)
-}
-func (m *VerifyTokenPurchaseRequest) XXX_Size() int {
-	return xxx_messageInfo_VerifyTokenPurchaseRequest.Size(m)
-}
-func (m *VerifyTokenPurchaseRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_VerifyTokenPurchaseRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_VerifyTokenPurchaseRequest proto.InternalMessageInfo
-
-func (m *VerifyTokenPurchaseRequest) GetPurchase() *TokenPurchase {
-	if m != nil {
-		return m.Purchase
-	}
-	return nil
-}
-
-type VerifyTokenSellRequest struct {
-	Sell                 *TokenPurchase `protobuf:"bytes,1,opt,name=sell,proto3" json:"sell,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
-}
-
-func (m *VerifyTokenSellRequest) Reset()         { *m = VerifyTokenSellRequest{} }
-func (m *VerifyTokenSellRequest) String() string { return proto.CompactTextString(m) }
-func (*VerifyTokenSellRequest) ProtoMessage()    {}
-func (*VerifyTokenSellRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{7}
-}
-
-func (m *VerifyTokenSellRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_VerifyTokenSellRequest.Unmarshal(m, b)
-}
-func (m *VerifyTokenSellRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_VerifyTokenSellRequest.Marshal(b, m, deterministic)
-}
-func (m *VerifyTokenSellRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VerifyTokenSellRequest.Merge(m, src)
-}
-func (m *VerifyTokenSellRequest) XXX_Size() int {
-	return xxx_messageInfo_VerifyTokenSellRequest.Size(m)
-}
-func (m *VerifyTokenSellRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_VerifyTokenSellRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_VerifyTokenSellRequest proto.InternalMessageInfo
-
-func (m *VerifyTokenSellRequest) GetSell() *TokenPurchase {
-	if m != nil {
-		return m.Sell
-	}
-	return nil
-}
-
-type RegisterTokenPurchaseRequest struct {
-	Purchase             *TokenPurchase `protobuf:"bytes,1,opt,name=purchase,proto3" json:"purchase,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
-}
-
-func (m *RegisterTokenPurchaseRequest) Reset()         { *m = RegisterTokenPurchaseRequest{} }
-func (m *RegisterTokenPurchaseRequest) String() string { return proto.CompactTextString(m) }
-func (*RegisterTokenPurchaseRequest) ProtoMessage()    {}
-func (*RegisterTokenPurchaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{8}
-}
-
-func (m *RegisterTokenPurchaseRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RegisterTokenPurchaseRequest.Unmarshal(m, b)
-}
-func (m *RegisterTokenPurchaseRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RegisterTokenPurchaseRequest.Marshal(b, m, deterministic)
-}
-func (m *RegisterTokenPurchaseRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RegisterTokenPurchaseRequest.Merge(m, src)
-}
-func (m *RegisterTokenPurchaseRequest) XXX_Size() int {
-	return xxx_messageInfo_RegisterTokenPurchaseRequest.Size(m)
-}
-func (m *RegisterTokenPurchaseRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_RegisterTokenPurchaseRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RegisterTokenPurchaseRequest proto.InternalMessageInfo
-
-func (m *RegisterTokenPurchaseRequest) GetPurchase() *TokenPurchase {
-	if m != nil {
-		return m.Purchase
-	}
-	return nil
-}
-
-type RegisterTokenSellRequest struct {
-	Sell                 *TokenPurchase `protobuf:"bytes,1,opt,name=sell,proto3" json:"sell,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
-}
-
-func (m *RegisterTokenSellRequest) Reset()         { *m = RegisterTokenSellRequest{} }
-func (m *RegisterTokenSellRequest) String() string { return proto.CompactTextString(m) }
-func (*RegisterTokenSellRequest) ProtoMessage()    {}
-func (*RegisterTokenSellRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{9}
-}
-
-func (m *RegisterTokenSellRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RegisterTokenSellRequest.Unmarshal(m, b)
-}
-func (m *RegisterTokenSellRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RegisterTokenSellRequest.Marshal(b, m, deterministic)
-}
-func (m *RegisterTokenSellRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RegisterTokenSellRequest.Merge(m, src)
-}
-func (m *RegisterTokenSellRequest) XXX_Size() int {
-	return xxx_messageInfo_RegisterTokenSellRequest.Size(m)
-}
-func (m *RegisterTokenSellRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_RegisterTokenSellRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RegisterTokenSellRequest proto.InternalMessageInfo
-
-func (m *RegisterTokenSellRequest) GetSell() *TokenPurchase {
-	if m != nil {
-		return m.Sell
-	}
-	return nil
-}
-
-type TokenPurchase struct {
-	Offer *TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
-	// Presents signature of an offer. This signature is used to identify,
-	// that issuer accepts terms described in the offer and is responsible
-	// to follow them in this transaction. If signature is not valid, then
-	// channel should be closed. Otherwise, Replicator registers token
-	// purchase details provided and tracks blockchain for a closing transaction
-	// in order to determine if the issuer were not break terms
-	IssuerSignature      string   `protobuf:"bytes,2,opt,name=issuer_signature,json=issuerSignature,proto3" json:"issuer_signature,omitempty"`
-	InitialTxHash        string   `protobuf:"bytes,3,opt,name=initial_tx_hash,json=initialTxHash,proto3" json:"initial_tx_hash,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *TokenPurchase) Reset()         { *m = TokenPurchase{} }
-func (m *TokenPurchase) String() string { return proto.CompactTextString(m) }
-func (*TokenPurchase) ProtoMessage()    {}
-func (*TokenPurchase) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{10}
-}
-
-func (m *TokenPurchase) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_TokenPurchase.Unmarshal(m, b)
-}
-func (m *TokenPurchase) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TokenPurchase.Marshal(b, m, deterministic)
-}
-func (m *TokenPurchase) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TokenPurchase.Merge(m, src)
-}
-func (m *TokenPurchase) XXX_Size() int {
-	return xxx_messageInfo_TokenPurchase.Size(m)
-}
-func (m *TokenPurchase) XXX_DiscardUnknown() {
-	xxx_messageInfo_TokenPurchase.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TokenPurchase proto.InternalMessageInfo
-
-func (m *TokenPurchase) GetOffer() *TokenOffer {
-	if m != nil {
-		return m.Offer
-	}
-	return nil
-}
-
-func (m *TokenPurchase) GetIssuerSignature() string {
-	if m != nil {
-		return m.IssuerSignature
-	}
-	return ""
-}
-
-func (m *TokenPurchase) GetInitialTxHash() string {
-	if m != nil {
-		return m.InitialTxHash
-	}
-	return ""
-}
-
 // NOTE: we don't provide any token holder identification since the reqeuest is
 // authorized with JWT applied to the request metadata. It means, that
 // replicator is capable to extract all data needed to process the request
@@ -617,7 +400,7 @@ func (m *GetTokenBalancesRequest) Reset()         { *m = GetTokenBalancesRequest
 func (m *GetTokenBalancesRequest) String() string { return proto.CompactTextString(m) }
 func (*GetTokenBalancesRequest) ProtoMessage()    {}
 func (*GetTokenBalancesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{11}
+	return fileDescriptor_f2f15fabe54a973d, []int{6}
 }
 
 func (m *GetTokenBalancesRequest) XXX_Unmarshal(b []byte) error {
@@ -657,7 +440,7 @@ func (m *GetTokenBalancesResponse) Reset()         { *m = GetTokenBalancesRespon
 func (m *GetTokenBalancesResponse) String() string { return proto.CompactTextString(m) }
 func (*GetTokenBalancesResponse) ProtoMessage()    {}
 func (*GetTokenBalancesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{12}
+	return fileDescriptor_f2f15fabe54a973d, []int{7}
 }
 
 func (m *GetTokenBalancesResponse) XXX_Unmarshal(b []byte) error {
@@ -705,7 +488,7 @@ func (m *TokenBalance) Reset()         { *m = TokenBalance{} }
 func (m *TokenBalance) String() string { return proto.CompactTextString(m) }
 func (*TokenBalance) ProtoMessage()    {}
 func (*TokenBalance) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{13}
+	return fileDescriptor_f2f15fabe54a973d, []int{8}
 }
 
 func (m *TokenBalance) XXX_Unmarshal(b []byte) error {
@@ -759,7 +542,7 @@ func (m *Pagination) Reset()         { *m = Pagination{} }
 func (m *Pagination) String() string { return proto.CompactTextString(m) }
 func (*Pagination) ProtoMessage()    {}
 func (*Pagination) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{14}
+	return fileDescriptor_f2f15fabe54a973d, []int{9}
 }
 
 func (m *Pagination) XXX_Unmarshal(b []byte) error {
@@ -794,149 +577,6 @@ func (m *Pagination) GetOffset() uint64 {
 	return 0
 }
 
-type AuthRequest struct {
-	Login                string   `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
-	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *AuthRequest) Reset()         { *m = AuthRequest{} }
-func (m *AuthRequest) String() string { return proto.CompactTextString(m) }
-func (*AuthRequest) ProtoMessage()    {}
-func (*AuthRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{15}
-}
-
-func (m *AuthRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AuthRequest.Unmarshal(m, b)
-}
-func (m *AuthRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AuthRequest.Marshal(b, m, deterministic)
-}
-func (m *AuthRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AuthRequest.Merge(m, src)
-}
-func (m *AuthRequest) XXX_Size() int {
-	return xxx_messageInfo_AuthRequest.Size(m)
-}
-func (m *AuthRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_AuthRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AuthRequest proto.InternalMessageInfo
-
-func (m *AuthRequest) GetLogin() string {
-	if m != nil {
-		return m.Login
-	}
-	return ""
-}
-
-func (m *AuthRequest) GetPassword() string {
-	if m != nil {
-		return m.Password
-	}
-	return ""
-}
-
-// We need this dataset to validate jwt which will be needed later when we will
-// handle request with required login data. For this we save in memory jwt.
-type AuthResponse struct {
-	Jwt                  string   `protobuf:"bytes,1,opt,name=jwt,proto3" json:"jwt,omitempty"`
-	ExpireDate           int64    `protobuf:"varint,2,opt,name=expire_date,json=expireDate,proto3" json:"expire_date,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *AuthResponse) Reset()         { *m = AuthResponse{} }
-func (m *AuthResponse) String() string { return proto.CompactTextString(m) }
-func (*AuthResponse) ProtoMessage()    {}
-func (*AuthResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{16}
-}
-
-func (m *AuthResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AuthResponse.Unmarshal(m, b)
-}
-func (m *AuthResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AuthResponse.Marshal(b, m, deterministic)
-}
-func (m *AuthResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AuthResponse.Merge(m, src)
-}
-func (m *AuthResponse) XXX_Size() int {
-	return xxx_messageInfo_AuthResponse.Size(m)
-}
-func (m *AuthResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_AuthResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AuthResponse proto.InternalMessageInfo
-
-func (m *AuthResponse) GetJwt() string {
-	if m != nil {
-		return m.Jwt
-	}
-	return ""
-}
-
-func (m *AuthResponse) GetExpireDate() int64 {
-	if m != nil {
-		return m.ExpireDate
-	}
-	return 0
-}
-
-type RegisterRequest struct {
-	Login                string   `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
-	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *RegisterRequest) Reset()         { *m = RegisterRequest{} }
-func (m *RegisterRequest) String() string { return proto.CompactTextString(m) }
-func (*RegisterRequest) ProtoMessage()    {}
-func (*RegisterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{17}
-}
-
-func (m *RegisterRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RegisterRequest.Unmarshal(m, b)
-}
-func (m *RegisterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RegisterRequest.Marshal(b, m, deterministic)
-}
-func (m *RegisterRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RegisterRequest.Merge(m, src)
-}
-func (m *RegisterRequest) XXX_Size() int {
-	return xxx_messageInfo_RegisterRequest.Size(m)
-}
-func (m *RegisterRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_RegisterRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RegisterRequest proto.InternalMessageInfo
-
-func (m *RegisterRequest) GetLogin() string {
-	if m != nil {
-		return m.Login
-	}
-	return ""
-}
-
-func (m *RegisterRequest) GetPassword() string {
-	if m != nil {
-		return m.Password
-	}
-	return ""
-}
-
 type VerifyIssuerRequest struct {
 	Login                string   `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -948,7 +588,7 @@ func (m *VerifyIssuerRequest) Reset()         { *m = VerifyIssuerRequest{} }
 func (m *VerifyIssuerRequest) String() string { return proto.CompactTextString(m) }
 func (*VerifyIssuerRequest) ProtoMessage()    {}
 func (*VerifyIssuerRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{18}
+	return fileDescriptor_f2f15fabe54a973d, []int{10}
 }
 
 func (m *VerifyIssuerRequest) XXX_Unmarshal(b []byte) error {
@@ -989,7 +629,7 @@ func (m *IssueTokenRequest) Reset()         { *m = IssueTokenRequest{} }
 func (m *IssueTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*IssueTokenRequest) ProtoMessage()    {}
 func (*IssueTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{19}
+	return fileDescriptor_f2f15fabe54a973d, []int{11}
 }
 
 func (m *IssueTokenRequest) XXX_Unmarshal(b []byte) error {
@@ -1017,97 +657,6 @@ func (m *IssueTokenRequest) GetOffer() *TokenOffer {
 	return nil
 }
 
-// UpdateTokenRequest — update info about current token
-type UpdateTokenRequest struct {
-	// offer with new data
-	Offer                *TokenOffer `protobuf:"bytes,1,opt,name=offer,proto3" json:"offer,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
-}
-
-func (m *UpdateTokenRequest) Reset()         { *m = UpdateTokenRequest{} }
-func (m *UpdateTokenRequest) String() string { return proto.CompactTextString(m) }
-func (*UpdateTokenRequest) ProtoMessage()    {}
-func (*UpdateTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{20}
-}
-
-func (m *UpdateTokenRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UpdateTokenRequest.Unmarshal(m, b)
-}
-func (m *UpdateTokenRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UpdateTokenRequest.Marshal(b, m, deterministic)
-}
-func (m *UpdateTokenRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateTokenRequest.Merge(m, src)
-}
-func (m *UpdateTokenRequest) XXX_Size() int {
-	return xxx_messageInfo_UpdateTokenRequest.Size(m)
-}
-func (m *UpdateTokenRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateTokenRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateTokenRequest proto.InternalMessageInfo
-
-func (m *UpdateTokenRequest) GetOffer() *TokenOffer {
-	if m != nil {
-		return m.Offer
-	}
-	return nil
-}
-
-// RevokeTokenRequest — request on delete info about token
-type RevokeTokenRequest struct {
-	// token_name  name of the deleted token
-	TokenName string `protobuf:"bytes,1,opt,name=token_name,json=tokenName,proto3" json:"token_name,omitempty"`
-	// login of user issued this token
-	Login                string   `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *RevokeTokenRequest) Reset()         { *m = RevokeTokenRequest{} }
-func (m *RevokeTokenRequest) String() string { return proto.CompactTextString(m) }
-func (*RevokeTokenRequest) ProtoMessage()    {}
-func (*RevokeTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{21}
-}
-
-func (m *RevokeTokenRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RevokeTokenRequest.Unmarshal(m, b)
-}
-func (m *RevokeTokenRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RevokeTokenRequest.Marshal(b, m, deterministic)
-}
-func (m *RevokeTokenRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RevokeTokenRequest.Merge(m, src)
-}
-func (m *RevokeTokenRequest) XXX_Size() int {
-	return xxx_messageInfo_RevokeTokenRequest.Size(m)
-}
-func (m *RevokeTokenRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_RevokeTokenRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RevokeTokenRequest proto.InternalMessageInfo
-
-func (m *RevokeTokenRequest) GetTokenName() string {
-	if m != nil {
-		return m.TokenName
-	}
-	return ""
-}
-
-func (m *RevokeTokenRequest) GetLogin() string {
-	if m != nil {
-		return m.Login
-	}
-	return ""
-}
-
 // TokenInfoRequest — contain name of requested token
 type TokenInfoRequest struct {
 	// name of the token
@@ -1121,7 +670,7 @@ func (m *TokenInfoRequest) Reset()         { *m = TokenInfoRequest{} }
 func (m *TokenInfoRequest) String() string { return proto.CompactTextString(m) }
 func (*TokenInfoRequest) ProtoMessage()    {}
 func (*TokenInfoRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{22}
+	return fileDescriptor_f2f15fabe54a973d, []int{12}
 }
 
 func (m *TokenInfoRequest) XXX_Unmarshal(b []byte) error {
@@ -1172,7 +721,7 @@ func (m *TokenInfoResponse) Reset()         { *m = TokenInfoResponse{} }
 func (m *TokenInfoResponse) String() string { return proto.CompactTextString(m) }
 func (*TokenInfoResponse) ProtoMessage()    {}
 func (*TokenInfoResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{23}
+	return fileDescriptor_f2f15fabe54a973d, []int{13}
 }
 
 func (m *TokenInfoResponse) XXX_Unmarshal(b []byte) error {
@@ -1228,22 +777,12 @@ func init() {
 	proto.RegisterType((*GetTokenListResponse)(nil), "replicator.GetTokenListResponse")
 	proto.RegisterType((*TokenOffer)(nil), "replicator.TokenOffer")
 	proto.RegisterType((*IssuerInfo)(nil), "replicator.IssuerInfo")
-	proto.RegisterType((*VerifyTokenPurchaseRequest)(nil), "replicator.VerifyTokenPurchaseRequest")
-	proto.RegisterType((*VerifyTokenSellRequest)(nil), "replicator.VerifyTokenSellRequest")
-	proto.RegisterType((*RegisterTokenPurchaseRequest)(nil), "replicator.RegisterTokenPurchaseRequest")
-	proto.RegisterType((*RegisterTokenSellRequest)(nil), "replicator.RegisterTokenSellRequest")
-	proto.RegisterType((*TokenPurchase)(nil), "replicator.TokenPurchase")
 	proto.RegisterType((*GetTokenBalancesRequest)(nil), "replicator.GetTokenBalancesRequest")
 	proto.RegisterType((*GetTokenBalancesResponse)(nil), "replicator.GetTokenBalancesResponse")
 	proto.RegisterType((*TokenBalance)(nil), "replicator.TokenBalance")
 	proto.RegisterType((*Pagination)(nil), "replicator.Pagination")
-	proto.RegisterType((*AuthRequest)(nil), "replicator.AuthRequest")
-	proto.RegisterType((*AuthResponse)(nil), "replicator.AuthResponse")
-	proto.RegisterType((*RegisterRequest)(nil), "replicator.RegisterRequest")
 	proto.RegisterType((*VerifyIssuerRequest)(nil), "replicator.VerifyIssuerRequest")
 	proto.RegisterType((*IssueTokenRequest)(nil), "replicator.IssueTokenRequest")
-	proto.RegisterType((*UpdateTokenRequest)(nil), "replicator.UpdateTokenRequest")
-	proto.RegisterType((*RevokeTokenRequest)(nil), "replicator.RevokeTokenRequest")
 	proto.RegisterType((*TokenInfoRequest)(nil), "replicator.TokenInfoRequest")
 	proto.RegisterType((*TokenInfoResponse)(nil), "replicator.TokenInfoResponse")
 }
@@ -1253,76 +792,55 @@ func init() {
 }
 
 var fileDescriptor_f2f15fabe54a973d = []byte{
-	// 1103 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x57, 0x61, 0x73, 0xdb, 0x34,
-	0x18, 0xbe, 0x34, 0x69, 0x69, 0xde, 0x74, 0x4d, 0xab, 0x6e, 0x9d, 0x49, 0x57, 0xd6, 0x99, 0x5d,
-	0x29, 0xb0, 0x25, 0x77, 0x65, 0xc0, 0x1d, 0x5f, 0xb8, 0x76, 0xdb, 0x75, 0xe5, 0x06, 0x14, 0xb7,
-	0x85, 0xdb, 0x0e, 0xc8, 0x29, 0xb1, 0x9c, 0x88, 0x3a, 0x96, 0xb1, 0xe4, 0xae, 0xe1, 0x0b, 0x7f,
-	0x01, 0x7e, 0x24, 0xff, 0x83, 0xb3, 0x24, 0xc7, 0x72, 0x1c, 0xa7, 0x63, 0x63, 0x1f, 0x72, 0x27,
-	0xbd, 0x7a, 0xf4, 0x58, 0x8f, 0xa4, 0xf7, 0xd1, 0x1b, 0xb0, 0xc3, 0x88, 0x09, 0xc6, 0x3b, 0x11,
-	0x09, 0x7d, 0xda, 0xc7, 0x82, 0x45, 0x46, 0xb3, 0x2d, 0x07, 0x11, 0x64, 0x91, 0xd6, 0xd6, 0x80,
-	0xb1, 0x81, 0x4f, 0x3a, 0x72, 0xa4, 0x17, 0x7b, 0x1d, 0x32, 0x0a, 0xc5, 0x58, 0x01, 0x6d, 0x17,
-	0x6e, 0x1d, 0x11, 0x71, 0xc6, 0x2e, 0x48, 0xf0, 0xbd, 0xe7, 0x91, 0x88, 0x3b, 0xe4, 0xf7, 0x98,
-	0x70, 0x81, 0xb6, 0xa0, 0x4e, 0x39, 0x8f, 0x49, 0xd4, 0xa5, 0xae, 0x55, 0xd9, 0xa9, 0xec, 0xd5,
-	0x9d, 0x65, 0x15, 0x38, 0x76, 0x51, 0x1b, 0x96, 0x42, 0x1c, 0xe1, 0x11, 0xb7, 0x16, 0x76, 0x2a,
-	0x7b, 0x8d, 0xfd, 0xcd, 0xb6, 0xb1, 0x82, 0x13, 0x3c, 0xa0, 0x01, 0x16, 0x94, 0x05, 0x8e, 0x46,
-	0xd9, 0xbf, 0xc2, 0xe6, 0xf4, 0x57, 0x78, 0xc8, 0x02, 0x4e, 0x12, 0x26, 0x26, 0x23, 0x56, 0x65,
-	0xa7, 0x3a, 0xcd, 0x94, 0x4d, 0x70, 0x34, 0x0a, 0xdd, 0x84, 0x45, 0xc1, 0x04, 0xf6, 0xe5, 0x87,
-	0x6b, 0x8e, 0xea, 0xd8, 0x3d, 0xd8, 0x48, 0xf9, 0x9f, 0x53, 0x2e, 0xde, 0x89, 0x86, 0x9f, 0xe1,
-	0x66, 0xfe, 0x1b, 0x99, 0x02, 0x91, 0x04, 0xaf, 0x55, 0xa0, 0x50, 0x79, 0x05, 0x8b, 0xa9, 0x82,
-	0xbf, 0x17, 0x00, 0x32, 0xb0, 0x02, 0x5d, 0x90, 0x40, 0xaf, 0x5a, 0x75, 0x92, 0x68, 0x18, 0xd1,
-	0x3e, 0x49, 0xc5, 0xcb, 0x0e, 0xfa, 0x12, 0x1a, 0xa9, 0xca, 0xc0, 0x63, 0x56, 0xb5, 0xa8, 0xe6,
-	0x58, 0x69, 0x0e, 0x3c, 0xe6, 0x00, 0x9d, 0xb4, 0xd1, 0x03, 0x40, 0x92, 0xb7, 0x3b, 0x64, 0xbe,
-	0x4b, 0xa2, 0xae, 0xcf, 0x06, 0x34, 0xb0, 0x6a, 0xf2, 0x8b, 0x6b, 0x72, 0xe4, 0x99, 0x1c, 0x78,
-	0x9e, 0xc4, 0xd1, 0x27, 0xb0, 0xae, 0xd0, 0xbd, 0x78, 0x3c, 0x01, 0x2f, 0x4a, 0x70, 0x53, 0x0e,
-	0x1c, 0x26, 0x71, 0x85, 0x6d, 0xc3, 0xc6, 0x25, 0xf6, 0xa9, 0xdb, 0x8d, 0x03, 0x41, 0xfd, 0x2e,
-	0x27, 0x7d, 0x16, 0xb8, 0xdc, 0x5a, 0xda, 0xa9, 0xec, 0x55, 0x9d, 0x75, 0x39, 0x74, 0x9e, 0x8c,
-	0x9c, 0xaa, 0x81, 0x44, 0x58, 0x9f, 0xc5, 0x81, 0xb0, 0xde, 0x53, 0xc2, 0x64, 0xc7, 0x7e, 0x01,
-	0x90, 0xad, 0x1c, 0xad, 0xc2, 0xc2, 0xe4, 0x14, 0x17, 0xa8, 0x8b, 0x3e, 0x82, 0x26, 0x75, 0x49,
-	0x20, 0xa8, 0x18, 0x77, 0xc3, 0xb8, 0x77, 0x41, 0xc6, 0x72, 0x5b, 0xea, 0xce, 0x6a, 0x1a, 0x3e,
-	0x91, 0x51, 0x84, 0xa0, 0x36, 0x64, 0x5c, 0xc8, 0x8d, 0xa9, 0x3b, 0xb2, 0x6d, 0x9f, 0x42, 0xeb,
-	0x47, 0x12, 0x51, 0x6f, 0x2c, 0xf7, 0xfc, 0x24, 0x8e, 0xfa, 0x43, 0xcc, 0x49, 0x7a, 0x6f, 0x3e,
-	0x87, 0xe5, 0x50, 0x87, 0xe4, 0x07, 0x1b, 0xfb, 0xef, 0x17, 0x0e, 0x75, 0x32, 0x67, 0x02, 0xb5,
-	0x8f, 0x60, 0xd3, 0x20, 0x3d, 0x25, 0xbe, 0x9f, 0x12, 0x3e, 0x84, 0x1a, 0x27, 0xbe, 0x7f, 0x3d,
-	0x99, 0x84, 0xd9, 0xe7, 0x70, 0xc7, 0x21, 0x03, 0xca, 0x05, 0x89, 0xfe, 0xcf, 0xf5, 0x1d, 0x83,
-	0x95, 0xa3, 0x7d, 0x8b, 0x15, 0xfe, 0x55, 0x81, 0x1b, 0xb9, 0x38, 0x7a, 0x00, 0x8b, 0x32, 0x45,
-	0x35, 0x43, 0x59, 0x16, 0x28, 0x10, 0xfa, 0x18, 0xd6, 0xf4, 0x9d, 0xe5, 0x74, 0x10, 0x60, 0x11,
-	0x47, 0x44, 0x9f, 0x5e, 0x53, 0xc5, 0x4f, 0xd3, 0x30, 0xda, 0x85, 0x26, 0x0d, 0xa8, 0xa0, 0xd8,
-	0xef, 0x8a, 0xab, 0xee, 0x10, 0xf3, 0xa1, 0x3e, 0xc9, 0x1b, 0x3a, 0x7c, 0x76, 0xf5, 0x0c, 0xf3,
-	0xa1, 0x7d, 0x0c, 0xb7, 0xd3, 0xfc, 0x3c, 0xc4, 0x3e, 0x0e, 0xfa, 0x64, 0xe2, 0x65, 0x59, 0xaa,
-	0x57, 0x5e, 0x2b, 0xd5, 0x3d, 0xb0, 0x8a, 0x54, 0x3a, 0xdd, 0x1f, 0xc1, 0x72, 0x4f, 0xc7, 0x74,
-	0xc2, 0x5b, 0x05, 0xa9, 0x7a, 0x92, 0x33, 0x41, 0x96, 0xd8, 0xd6, 0x4b, 0x58, 0x31, 0xf1, 0x25,
-	0x59, 0x7f, 0x07, 0xea, 0xf8, 0x12, 0x53, 0x1f, 0xf7, 0xfc, 0x34, 0xf3, 0xb3, 0x00, 0xda, 0x84,
-	0x25, 0x2f, 0x62, 0x7f, 0x90, 0x40, 0xee, 0x4a, 0xcd, 0xd1, 0x3d, 0xfb, 0x2b, 0x80, 0x4c, 0x59,
-	0xc2, 0xec, 0xd3, 0x11, 0x15, 0x92, 0xb9, 0xe6, 0xa8, 0x4e, 0x32, 0x97, 0x79, 0x1e, 0x27, 0x42,
-	0xd3, 0xea, 0x9e, 0xfd, 0x35, 0x34, 0x0e, 0x62, 0x31, 0x4c, 0xb7, 0x2f, 0x99, 0x2c, 0xb3, 0x5d,
-	0x2f, 0x4b, 0x76, 0x50, 0x0b, 0x96, 0x43, 0xcc, 0xf9, 0x2b, 0x16, 0xb9, 0xfa, 0xe8, 0x26, 0x7d,
-	0xfb, 0x00, 0x56, 0x14, 0x81, 0xde, 0xb4, 0x35, 0xa8, 0xfe, 0xf6, 0x4a, 0xe8, 0xf9, 0x49, 0x13,
-	0xdd, 0x85, 0x06, 0xb9, 0x0a, 0x69, 0x44, 0xba, 0x2e, 0x16, 0x4a, 0x56, 0xd5, 0x01, 0x15, 0x7a,
-	0x82, 0x05, 0xb1, 0x1f, 0x43, 0x33, 0xbd, 0xac, 0x6f, 0xbe, 0x8e, 0x4f, 0x61, 0x43, 0x65, 0xa4,
-	0xf2, 0x91, 0xb9, 0x44, 0xf6, 0x01, 0xac, 0x4b, 0x98, 0x3c, 0x92, 0x14, 0xfa, 0x9f, 0xae, 0xb5,
-	0x7d, 0x08, 0xe8, 0x3c, 0x4c, 0x04, 0xbd, 0x05, 0xc7, 0x31, 0x20, 0x87, 0x5c, 0xb2, 0x8b, 0x3c,
-	0xc7, 0x36, 0x80, 0x72, 0xdf, 0x00, 0x8f, 0x88, 0x5e, 0x77, 0x5d, 0x46, 0xbe, 0xc3, 0x23, 0x92,
-	0x29, 0x5a, 0x30, 0x15, 0xed, 0xc2, 0x9a, 0x24, 0x91, 0xce, 0xaf, 0x89, 0x10, 0xd4, 0x0c, 0x0a,
-	0xd9, 0xb6, 0xff, 0x84, 0x75, 0x03, 0xa7, 0xcf, 0x6c, 0x06, 0xb0, 0xe4, 0x01, 0xda, 0x06, 0x50,
-	0x6e, 0x2f, 0xe8, 0x88, 0xc8, 0x6b, 0x58, 0x75, 0xea, 0x32, 0x72, 0x46, 0x47, 0x04, 0xdd, 0x83,
-	0x15, 0x9d, 0xeb, 0xe6, 0x03, 0xa3, 0xdf, 0x2c, 0xf9, 0x5e, 0xec, 0xff, 0xb3, 0x0c, 0xe0, 0x4c,
-	0x36, 0x05, 0xfd, 0x04, 0xab, 0xf9, 0x72, 0x01, 0xdd, 0x33, 0xf7, 0x6c, 0x66, 0xc1, 0xd2, 0xb2,
-	0xe7, 0x41, 0xb4, 0xa6, 0xf3, 0xf4, 0x3e, 0xe4, 0xbd, 0x6b, 0xd7, 0x9c, 0x5a, 0xfe, 0x2e, 0xb4,
-	0x36, 0xdb, 0xaa, 0x94, 0x6a, 0xa7, 0xa5, 0x54, 0xfb, 0x69, 0x52, 0x4a, 0xa1, 0x6f, 0xa1, 0x39,
-	0x65, 0xfc, 0xc8, 0x2e, 0xa1, 0x34, 0x3c, 0xb7, 0x94, 0xee, 0x05, 0xdc, 0x9a, 0x69, 0xff, 0x68,
-	0xcf, 0x24, 0x9d, 0xf7, 0x42, 0x94, 0x52, 0xff, 0x00, 0xeb, 0x85, 0x27, 0x00, 0xdd, 0x2f, 0xa5,
-	0x7d, 0x9d, 0xd5, 0xfe, 0x02, 0x6b, 0xd3, 0x66, 0x89, 0x3e, 0x9c, 0x75, 0x16, 0x53, 0xae, 0xdc,
-	0xba, 0x3f, 0x1f, 0xa4, 0x8f, 0xec, 0x09, 0x34, 0x13, 0x2b, 0x39, 0xcb, 0xca, 0x11, 0x74, 0xdb,
-	0x9c, 0x68, 0x18, 0x55, 0xcb, 0x2a, 0x0e, 0x68, 0x96, 0x6f, 0x60, 0x23, 0x27, 0x4c, 0x33, 0x6d,
-	0xcd, 0x52, 0x7e, 0x9d, 0xe0, 0x69, 0x2e, 0xe5, 0x2d, 0x6f, 0xc6, 0x75, 0x04, 0x2b, 0xa6, 0x41,
-	0xa1, 0xbb, 0xc5, 0x6b, 0x93, 0xb3, 0xae, 0x52, 0xa2, 0xc7, 0xba, 0x56, 0x92, 0x2b, 0x42, 0xdb,
-	0x85, 0xea, 0xcf, 0x34, 0x93, 0x52, 0x92, 0xa7, 0xd0, 0x30, 0xec, 0x0b, 0x7d, 0x60, 0xb2, 0x14,
-	0x7d, 0x6d, 0x1e, 0x8d, 0xe1, 0x60, 0x79, 0x9a, 0xa2, 0xb5, 0xcd, 0xb9, 0xab, 0x2b, 0x66, 0xc1,
-	0x9d, 0xdf, 0x9b, 0x19, 0xe5, 0x7e, 0x6b, 0xa7, 0x1c, 0xa0, 0xae, 0xc1, 0xe1, 0x17, 0x2f, 0x1f,
-	0x0d, 0xa8, 0x18, 0xc6, 0xbd, 0x76, 0x9f, 0x8d, 0x3a, 0xe1, 0x85, 0x78, 0xd8, 0xc7, 0x7c, 0x98,
-	0x34, 0xdc, 0x8e, 0x1f, 0x24, 0xbf, 0x28, 0xec, 0x77, 0x0a, 0xff, 0xaf, 0x7a, 0x4b, 0x32, 0xf4,
-	0xd9, 0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xdc, 0xaa, 0x38, 0x70, 0x7b, 0x0d, 0x00, 0x00,
+	// 756 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0x5d, 0x6f, 0xdb, 0x36,
+	0x14, 0x85, 0x3f, 0x17, 0xdf, 0x18, 0x49, 0xcc, 0x64, 0x9e, 0xe0, 0x2c, 0x98, 0xa3, 0x0d, 0x5b,
+	0xb0, 0x65, 0x32, 0x90, 0x05, 0x1b, 0xb0, 0xb7, 0x65, 0x28, 0xd2, 0x00, 0x01, 0x9a, 0xaa, 0x69,
+	0x8b, 0x06, 0x6d, 0x0d, 0x7d, 0x50, 0x36, 0x61, 0x99, 0x54, 0x25, 0x2a, 0x80, 0xfb, 0xd2, 0xdf,
+	0xd0, 0x1f, 0xd1, 0xff, 0x59, 0xe8, 0x92, 0xb2, 0xe4, 0xaf, 0xb4, 0x2f, 0x7d, 0x10, 0xc0, 0x7b,
+	0xee, 0xe1, 0x25, 0x0f, 0x79, 0xae, 0x08, 0x66, 0x14, 0x0b, 0x29, 0x92, 0x41, 0x4c, 0xa3, 0x90,
+	0x79, 0x8e, 0x14, 0x71, 0x69, 0x68, 0x61, 0x92, 0x40, 0x81, 0xf4, 0x0e, 0x47, 0x42, 0x8c, 0x42,
+	0x3a, 0xc0, 0x8c, 0x9b, 0x06, 0x03, 0x3a, 0x8d, 0xe4, 0x4c, 0x11, 0x4d, 0x1f, 0xbe, 0xbf, 0xa4,
+	0xf2, 0x56, 0x4c, 0x28, 0x7f, 0x12, 0x04, 0x34, 0x4e, 0x6c, 0xfa, 0x2e, 0xa5, 0x89, 0x24, 0x87,
+	0xd0, 0x62, 0x49, 0x92, 0xd2, 0x78, 0xc8, 0x7c, 0xa3, 0xd2, 0xaf, 0x9c, 0xb4, 0xec, 0x2d, 0x05,
+	0x5c, 0xf9, 0xc4, 0x82, 0x66, 0xe4, 0xc4, 0xce, 0x34, 0x31, 0xaa, 0xfd, 0xca, 0xc9, 0xf6, 0x59,
+	0xd7, 0x2a, 0xed, 0xe0, 0xc6, 0x19, 0x31, 0xee, 0x48, 0x26, 0xb8, 0xad, 0x59, 0xe6, 0x5b, 0xe8,
+	0x2e, 0xaf, 0x92, 0x44, 0x82, 0x27, 0x34, 0xab, 0x24, 0x10, 0x31, 0x2a, 0xfd, 0xda, 0x72, 0xa5,
+	0x62, 0x82, 0xad, 0x59, 0xe4, 0x00, 0x1a, 0x52, 0x48, 0x27, 0xc4, 0x85, 0xeb, 0xb6, 0x0a, 0x4c,
+	0x17, 0xf6, 0xf3, 0xfa, 0xd7, 0x2c, 0x91, 0xdf, 0x44, 0xc3, 0x6b, 0x38, 0x58, 0x5c, 0xa3, 0x50,
+	0x20, 0x33, 0xf0, 0x8b, 0x0a, 0x14, 0x6b, 0x51, 0x41, 0x23, 0x57, 0xf0, 0xb1, 0x0a, 0x50, 0x90,
+	0x15, 0x69, 0x42, 0xb9, 0xde, 0xb5, 0x0a, 0x32, 0x34, 0x8a, 0x99, 0x47, 0x73, 0xf1, 0x18, 0x90,
+	0x7f, 0x60, 0x3b, 0x57, 0xc9, 0x03, 0x61, 0xd4, 0x56, 0xd5, 0x5c, 0x29, 0xcd, 0x3c, 0x10, 0x36,
+	0xb0, 0xf9, 0x98, 0x9c, 0x02, 0xc1, 0xba, 0xc3, 0xb1, 0x08, 0x7d, 0x1a, 0x0f, 0x43, 0x31, 0x62,
+	0xdc, 0xa8, 0xe3, 0x8a, 0x7b, 0x98, 0x79, 0x8c, 0x89, 0xeb, 0x0c, 0x27, 0xbf, 0x43, 0x47, 0xb1,
+	0xdd, 0x74, 0x36, 0x27, 0x37, 0x90, 0xbc, 0x8b, 0x89, 0x8b, 0x0c, 0x57, 0x5c, 0x0b, 0xf6, 0xef,
+	0x9d, 0x90, 0xf9, 0xc3, 0x94, 0x4b, 0x16, 0x0e, 0x13, 0xea, 0x09, 0xee, 0x27, 0x46, 0xb3, 0x5f,
+	0x39, 0xa9, 0xd9, 0x1d, 0x4c, 0x3d, 0xcf, 0x32, 0xcf, 0x54, 0x22, 0x13, 0xe6, 0x89, 0x94, 0x4b,
+	0xe3, 0x3b, 0x25, 0x0c, 0x03, 0xf3, 0x15, 0x40, 0xb1, 0x73, 0xb2, 0x03, 0xd5, 0xf9, 0x2d, 0x56,
+	0x99, 0x4f, 0x7e, 0x83, 0x5d, 0xe6, 0x53, 0x2e, 0x99, 0x9c, 0x0d, 0xa3, 0xd4, 0x9d, 0xd0, 0x19,
+	0x1e, 0x4b, 0xcb, 0xde, 0xc9, 0xe1, 0x1b, 0x44, 0x09, 0x81, 0xfa, 0x58, 0x24, 0x12, 0x0f, 0xa6,
+	0x65, 0xe3, 0xd8, 0xbc, 0x82, 0x1f, 0xf2, 0xcb, 0xbc, 0x70, 0x42, 0x87, 0x7b, 0x74, 0x6e, 0xfc,
+	0xc2, 0x17, 0x95, 0xaf, 0xf2, 0x45, 0x00, 0xc6, 0x6a, 0x29, 0xed, 0x8d, 0x73, 0xd8, 0x72, 0x35,
+	0xa6, 0xdd, 0x61, 0xac, 0xb8, 0x43, 0x4f, 0xb2, 0xe7, 0xcc, 0x0d, 0x1e, 0xbf, 0x83, 0x76, 0x99,
+	0xbf, 0xc1, 0x22, 0x3f, 0x42, 0xcb, 0xb9, 0x77, 0x58, 0xe8, 0xb8, 0x61, 0x6e, 0x93, 0x02, 0x20,
+	0x5d, 0x68, 0x06, 0xb1, 0x78, 0x4f, 0x39, 0x1e, 0x46, 0xdd, 0xd6, 0x91, 0xf9, 0x2f, 0x40, 0xa1,
+	0x2c, 0xab, 0x1c, 0xb2, 0x29, 0x93, 0x58, 0xb9, 0x6e, 0xab, 0x20, 0x9b, 0x2b, 0x82, 0x20, 0xa1,
+	0x52, 0x97, 0xd5, 0x91, 0xf9, 0x07, 0xec, 0xbf, 0xa0, 0x31, 0x0b, 0x66, 0xea, 0xae, 0xf2, 0x63,
+	0xcc, 0x8a, 0xa0, 0x45, 0xf4, 0xf6, 0x30, 0x30, 0xff, 0x83, 0x0e, 0xd2, 0x50, 0x49, 0x4e, 0x3d,
+	0x85, 0x06, 0x76, 0xf7, 0xba, 0x03, 0x2f, 0x35, 0x90, 0x22, 0x99, 0xbf, 0xc2, 0x1e, 0x82, 0x68,
+	0x67, 0x5d, 0x81, 0x40, 0x9d, 0x3b, 0x53, 0xaa, 0xd7, 0xc2, 0xb1, 0xf9, 0x01, 0x3a, 0x25, 0x9e,
+	0xbe, 0x90, 0x35, 0xc4, 0x0d, 0x5d, 0x75, 0x04, 0xa0, 0x2c, 0x2c, 0xd9, 0x94, 0xe2, 0x71, 0xd5,
+	0xec, 0x16, 0x22, 0xb7, 0x6c, 0x4a, 0xc9, 0x31, 0xb4, 0x75, 0xd3, 0x95, 0xbb, 0x46, 0x37, 0x22,
+	0x36, 0xc1, 0xd9, 0xa7, 0x1a, 0x80, 0x3d, 0x57, 0x42, 0x5e, 0xc2, 0xce, 0xe2, 0x3f, 0x90, 0x1c,
+	0x97, 0x85, 0xae, 0xfd, 0x0b, 0xf7, 0xcc, 0x87, 0x28, 0x5a, 0xd3, 0x1b, 0xd8, 0x5b, 0x36, 0x20,
+	0xf9, 0x79, 0xdd, 0xbc, 0x25, 0xa7, 0xf7, 0x7e, 0x79, 0x98, 0xa4, 0xcb, 0x5f, 0x42, 0xbb, 0x7c,
+	0xbf, 0xe4, 0xa7, 0xf2, 0xac, 0x35, 0x37, 0xdf, 0xeb, 0x5a, 0xea, 0xc1, 0xb1, 0xf2, 0x07, 0xc7,
+	0x7a, 0x94, 0x3d, 0x38, 0xe4, 0x7f, 0xdd, 0xce, 0xb8, 0x0c, 0x39, 0x5a, 0xf9, 0x41, 0x95, 0x3d,
+	0xb1, 0xb1, 0xc8, 0x53, 0x68, 0x97, 0xff, 0xc2, 0x8b, 0xbb, 0x59, 0xf3, 0x06, 0xf4, 0xfa, 0x9b,
+	0x09, 0x4a, 0xe0, 0xc5, 0xdf, 0x77, 0xe7, 0x23, 0x26, 0xc7, 0xa9, 0x6b, 0x79, 0x62, 0x3a, 0x88,
+	0x26, 0xf2, 0x4f, 0xcf, 0x49, 0xc6, 0xd9, 0xc0, 0x1f, 0x84, 0x3c, 0xfb, 0xe2, 0xc8, 0x1b, 0xac,
+	0x3c, 0xba, 0x6e, 0x13, 0xa1, 0xbf, 0x3e, 0x07, 0x00, 0x00, 0xff, 0xff, 0xca, 0x44, 0x7b, 0x70,
+	0x90, 0x07, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1339,38 +857,14 @@ const _ = grpc.SupportPackageIsVersion4
 type ReplicatorClient interface {
 	// Returns available token offers
 	GetTokenOffers(ctx context.Context, in *GetTokenOffersRequest, opts ...grpc.CallOption) (*GetTokenOffersResponse, error)
-	// Verifies a signature of an issuer for this token purchase. This
-	// method should be called before channel initialization
-	VerifyTokenPurchase(ctx context.Context, in *VerifyTokenPurchaseRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// Verifies a signature of an issuer for this token sell. This
-	// method should be called before channel initialization
-	VerifyTokenSell(ctx context.Context, in *VerifyTokenSellRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// Registers token purchase to be tracked on the blockchain
-	// right after some necessary token purchase checks
-	RegisterTokenPurchase(ctx context.Context, in *RegisterTokenPurchaseRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// Registers token sell to be tracked on the blockchain
-	// right after some necessary token sell checks
-	RegisterTokenSell(ctx context.Context, in *RegisterTokenSellRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Returns current token balances
 	GetTokenBalances(ctx context.Context, in *GetTokenBalancesRequest, opts ...grpc.CallOption) (*GetTokenBalancesResponse, error)
-	// Authentication user by login password pair, and generate jwt
-	// Call it method after unlock pkt wallet
-	AuthTokenHolder(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	// Register new token holder user with passed password and login
-	RegisterTokenHolder(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// Register new issuer user with passed password and login
-	RegisterTokenIssuer(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Verifies a user permitions to issue a token. Returns exceptions if
 	// passed user is not contained in issuer's db
 	VerifyIssuer(ctx context.Context, in *VerifyIssuerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// IssueToken — Issue new token with given data. Request data equal to
 	// token purchase data, because it is token offer.
 	IssueToken(ctx context.Context, in *IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// UpdateToken — Update token inforamtion with given data. Request data
-	// equal to token purchase data, because it is token offer.
-	UpdateToken(ctx context.Context, in *UpdateTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// RevokeToken — Delete information about token by his name.
-	RevokeToken(ctx context.Context, in *RevokeTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// GetTokenList — return list of issued token with infomation about
 	// expiration time and fix price.
 	GetTokenList(ctx context.Context, in *GetTokenListRequest, opts ...grpc.CallOption) (*GetTokenListResponse, error)
@@ -1393,72 +887,9 @@ func (c *replicatorClient) GetTokenOffers(ctx context.Context, in *GetTokenOffer
 	return out, nil
 }
 
-func (c *replicatorClient) VerifyTokenPurchase(ctx context.Context, in *VerifyTokenPurchaseRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/VerifyTokenPurchase", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) VerifyTokenSell(ctx context.Context, in *VerifyTokenSellRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/VerifyTokenSell", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) RegisterTokenPurchase(ctx context.Context, in *RegisterTokenPurchaseRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/RegisterTokenPurchase", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) RegisterTokenSell(ctx context.Context, in *RegisterTokenSellRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/RegisterTokenSell", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *replicatorClient) GetTokenBalances(ctx context.Context, in *GetTokenBalancesRequest, opts ...grpc.CallOption) (*GetTokenBalancesResponse, error) {
 	out := new(GetTokenBalancesResponse)
 	err := c.cc.Invoke(ctx, "/replicator.Replicator/GetTokenBalances", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) AuthTokenHolder(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
-	out := new(AuthResponse)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/AuthTokenHolder", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) RegisterTokenHolder(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/RegisterTokenHolder", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) RegisterTokenIssuer(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/RegisterTokenIssuer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1483,24 +914,6 @@ func (c *replicatorClient) IssueToken(ctx context.Context, in *IssueTokenRequest
 	return out, nil
 }
 
-func (c *replicatorClient) UpdateToken(ctx context.Context, in *UpdateTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/UpdateToken", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) RevokeToken(ctx context.Context, in *RevokeTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/RevokeToken", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *replicatorClient) GetTokenList(ctx context.Context, in *GetTokenListRequest, opts ...grpc.CallOption) (*GetTokenListResponse, error) {
 	out := new(GetTokenListResponse)
 	err := c.cc.Invoke(ctx, "/replicator.Replicator/GetTokenList", in, out, opts...)
@@ -1514,38 +927,14 @@ func (c *replicatorClient) GetTokenList(ctx context.Context, in *GetTokenListReq
 type ReplicatorServer interface {
 	// Returns available token offers
 	GetTokenOffers(context.Context, *GetTokenOffersRequest) (*GetTokenOffersResponse, error)
-	// Verifies a signature of an issuer for this token purchase. This
-	// method should be called before channel initialization
-	VerifyTokenPurchase(context.Context, *VerifyTokenPurchaseRequest) (*empty.Empty, error)
-	// Verifies a signature of an issuer for this token sell. This
-	// method should be called before channel initialization
-	VerifyTokenSell(context.Context, *VerifyTokenSellRequest) (*empty.Empty, error)
-	// Registers token purchase to be tracked on the blockchain
-	// right after some necessary token purchase checks
-	RegisterTokenPurchase(context.Context, *RegisterTokenPurchaseRequest) (*empty.Empty, error)
-	// Registers token sell to be tracked on the blockchain
-	// right after some necessary token sell checks
-	RegisterTokenSell(context.Context, *RegisterTokenSellRequest) (*empty.Empty, error)
 	// Returns current token balances
 	GetTokenBalances(context.Context, *GetTokenBalancesRequest) (*GetTokenBalancesResponse, error)
-	// Authentication user by login password pair, and generate jwt
-	// Call it method after unlock pkt wallet
-	AuthTokenHolder(context.Context, *AuthRequest) (*AuthResponse, error)
-	// Register new token holder user with passed password and login
-	RegisterTokenHolder(context.Context, *RegisterRequest) (*empty.Empty, error)
-	// Register new issuer user with passed password and login
-	RegisterTokenIssuer(context.Context, *RegisterRequest) (*empty.Empty, error)
 	// Verifies a user permitions to issue a token. Returns exceptions if
 	// passed user is not contained in issuer's db
 	VerifyIssuer(context.Context, *VerifyIssuerRequest) (*empty.Empty, error)
 	// IssueToken — Issue new token with given data. Request data equal to
 	// token purchase data, because it is token offer.
 	IssueToken(context.Context, *IssueTokenRequest) (*empty.Empty, error)
-	// UpdateToken — Update token inforamtion with given data. Request data
-	// equal to token purchase data, because it is token offer.
-	UpdateToken(context.Context, *UpdateTokenRequest) (*empty.Empty, error)
-	// RevokeToken — Delete information about token by his name.
-	RevokeToken(context.Context, *RevokeTokenRequest) (*empty.Empty, error)
 	// GetTokenList — return list of issued token with infomation about
 	// expiration time and fix price.
 	GetTokenList(context.Context, *GetTokenListRequest) (*GetTokenListResponse, error)
@@ -1558,41 +947,14 @@ type UnimplementedReplicatorServer struct {
 func (*UnimplementedReplicatorServer) GetTokenOffers(ctx context.Context, req *GetTokenOffersRequest) (*GetTokenOffersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenOffers not implemented")
 }
-func (*UnimplementedReplicatorServer) VerifyTokenPurchase(ctx context.Context, req *VerifyTokenPurchaseRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyTokenPurchase not implemented")
-}
-func (*UnimplementedReplicatorServer) VerifyTokenSell(ctx context.Context, req *VerifyTokenSellRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyTokenSell not implemented")
-}
-func (*UnimplementedReplicatorServer) RegisterTokenPurchase(ctx context.Context, req *RegisterTokenPurchaseRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterTokenPurchase not implemented")
-}
-func (*UnimplementedReplicatorServer) RegisterTokenSell(ctx context.Context, req *RegisterTokenSellRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterTokenSell not implemented")
-}
 func (*UnimplementedReplicatorServer) GetTokenBalances(ctx context.Context, req *GetTokenBalancesRequest) (*GetTokenBalancesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenBalances not implemented")
-}
-func (*UnimplementedReplicatorServer) AuthTokenHolder(ctx context.Context, req *AuthRequest) (*AuthResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AuthTokenHolder not implemented")
-}
-func (*UnimplementedReplicatorServer) RegisterTokenHolder(ctx context.Context, req *RegisterRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterTokenHolder not implemented")
-}
-func (*UnimplementedReplicatorServer) RegisterTokenIssuer(ctx context.Context, req *RegisterRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterTokenIssuer not implemented")
 }
 func (*UnimplementedReplicatorServer) VerifyIssuer(ctx context.Context, req *VerifyIssuerRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyIssuer not implemented")
 }
 func (*UnimplementedReplicatorServer) IssueToken(ctx context.Context, req *IssueTokenRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueToken not implemented")
-}
-func (*UnimplementedReplicatorServer) UpdateToken(ctx context.Context, req *UpdateTokenRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateToken not implemented")
-}
-func (*UnimplementedReplicatorServer) RevokeToken(ctx context.Context, req *RevokeTokenRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RevokeToken not implemented")
 }
 func (*UnimplementedReplicatorServer) GetTokenList(ctx context.Context, req *GetTokenListRequest) (*GetTokenListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenList not implemented")
@@ -1620,78 +982,6 @@ func _Replicator_GetTokenOffers_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Replicator_VerifyTokenPurchase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VerifyTokenPurchaseRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).VerifyTokenPurchase(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/VerifyTokenPurchase",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).VerifyTokenPurchase(ctx, req.(*VerifyTokenPurchaseRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_VerifyTokenSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VerifyTokenSellRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).VerifyTokenSell(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/VerifyTokenSell",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).VerifyTokenSell(ctx, req.(*VerifyTokenSellRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_RegisterTokenPurchase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterTokenPurchaseRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).RegisterTokenPurchase(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/RegisterTokenPurchase",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).RegisterTokenPurchase(ctx, req.(*RegisterTokenPurchaseRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_RegisterTokenSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterTokenSellRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).RegisterTokenSell(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/RegisterTokenSell",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).RegisterTokenSell(ctx, req.(*RegisterTokenSellRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Replicator_GetTokenBalances_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetTokenBalancesRequest)
 	if err := dec(in); err != nil {
@@ -1706,60 +996,6 @@ func _Replicator_GetTokenBalances_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReplicatorServer).GetTokenBalances(ctx, req.(*GetTokenBalancesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_AuthTokenHolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AuthRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).AuthTokenHolder(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/AuthTokenHolder",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).AuthTokenHolder(ctx, req.(*AuthRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_RegisterTokenHolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).RegisterTokenHolder(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/RegisterTokenHolder",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).RegisterTokenHolder(ctx, req.(*RegisterRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_RegisterTokenIssuer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).RegisterTokenIssuer(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/RegisterTokenIssuer",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).RegisterTokenIssuer(ctx, req.(*RegisterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1800,42 +1036,6 @@ func _Replicator_IssueToken_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Replicator_UpdateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateTokenRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).UpdateToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/UpdateToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).UpdateToken(ctx, req.(*UpdateTokenRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_RevokeToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RevokeTokenRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).RevokeToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/RevokeToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).RevokeToken(ctx, req.(*RevokeTokenRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Replicator_GetTokenList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetTokenListRequest)
 	if err := dec(in); err != nil {
@@ -1863,36 +1063,8 @@ var _Replicator_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Replicator_GetTokenOffers_Handler,
 		},
 		{
-			MethodName: "VerifyTokenPurchase",
-			Handler:    _Replicator_VerifyTokenPurchase_Handler,
-		},
-		{
-			MethodName: "VerifyTokenSell",
-			Handler:    _Replicator_VerifyTokenSell_Handler,
-		},
-		{
-			MethodName: "RegisterTokenPurchase",
-			Handler:    _Replicator_RegisterTokenPurchase_Handler,
-		},
-		{
-			MethodName: "RegisterTokenSell",
-			Handler:    _Replicator_RegisterTokenSell_Handler,
-		},
-		{
 			MethodName: "GetTokenBalances",
 			Handler:    _Replicator_GetTokenBalances_Handler,
-		},
-		{
-			MethodName: "AuthTokenHolder",
-			Handler:    _Replicator_AuthTokenHolder_Handler,
-		},
-		{
-			MethodName: "RegisterTokenHolder",
-			Handler:    _Replicator_RegisterTokenHolder_Handler,
-		},
-		{
-			MethodName: "RegisterTokenIssuer",
-			Handler:    _Replicator_RegisterTokenIssuer_Handler,
 		},
 		{
 			MethodName: "VerifyIssuer",
@@ -1901,14 +1073,6 @@ var _Replicator_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IssueToken",
 			Handler:    _Replicator_IssueToken_Handler,
-		},
-		{
-			MethodName: "UpdateToken",
-			Handler:    _Replicator_UpdateToken_Handler,
-		},
-		{
-			MethodName: "RevokeToken",
-			Handler:    _Replicator_RevokeToken_Handler,
 		},
 		{
 			MethodName: "GetTokenList",

@@ -2,7 +2,6 @@ package issueancerpc
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -205,22 +204,6 @@ func (s *Server) RegisterWithRestServer(ctx context.Context,
 	return nil
 }
 
-// Override method of unimplemented server
-func (s *Server) SignTokenPurchase(ctx context.Context, req *issuer.SignTokenPurchaseRequest) (*issuer.SignTokenPurchaseResponse, error) {
-	bytes, err := json.Marshal(req)
-	if err != nil {
-		return nil, errors.WithMessage(err, "marshalling request")
-	}
-
-	hash := sha256.Sum256(bytes)
-
-	resp := &issuer.SignTokenPurchaseResponse{
-		IssuerSignature: fmt.Sprintf("%x", hash),
-	}
-
-	return resp, nil
-}
-
 func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {
 	tokenSell := encoder.TokenSell{
 		Token:          req.Offer.Token,
@@ -245,42 +228,6 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
 	_, err := s.Client.IssueToken(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	return &emptypb.Empty{}, nil
-}
-
-func (s *Server) UpdateToken(ctx context.Context, req *replicator.UpdateTokenRequest) (*empty.Empty, error) {
-	replicatorReq := &replicator.VerifyIssuerRequest{
-		Login: req.Offer.TokenHolderLogin,
-	}
-
-	_, err := s.Client.VerifyIssuer(ctx, replicatorReq)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.Client.UpdateToken(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	return &emptypb.Empty{}, nil
-}
-
-func (s *Server) RevokeToken(ctx context.Context, req *replicator.RevokeTokenRequest) (*empty.Empty, error) {
-	replicatorReq := &replicator.VerifyIssuerRequest{
-		Login: req.Login,
-	}
-
-	_, err := s.Client.VerifyIssuer(ctx, replicatorReq)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.Client.RevokeToken(ctx, req)
 	if err != nil {
 		return nil, err
 	}

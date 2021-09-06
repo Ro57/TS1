@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/pkt-cash/pktd/btcutil/er"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/urfave/cli"
 )
@@ -20,26 +21,23 @@ var issueTokenCommand = cli.Command{
 }
 
 const (
-	flagTokenIssuerLogin = "token-issuer-login"
-	flagCount            = "count"
+	flagUrl                   = "url"
+	flagCount                 = "count"
+	flagExpirationBlockNumber = "expiration-block-number"
 )
 
 var issueTokenFlags = []cli.Flag{
-	cli.StringFlag{
-		Name:  flagTokenName,
-		Usage: "target token identity to buy",
-	},
-	cli.Uint64Flag{
-		Name:  flagTokenPrice,
-		Usage: "token price per unit",
-	},
 	cli.Int64Flag{
-		Name:  flagIssuerOfferValidUntilSeconds,
-		Usage: "issuer's token offer term's time constraint",
-	},
-	cli.StringFlag{
 		Name:  flagCount,
 		Usage: "number of issued token",
+	},
+	cli.Int64Flag{
+		Name:  flagExpirationBlockNumber,
+		Usage: "number of PKT block after which the token expires",
+	},
+	cli.StringFlag{
+		Name:  flagUrl,
+		Usage: "urls for access to blockchain",
 	},
 }
 
@@ -61,35 +59,31 @@ func issueToken(ctx *cli.Context) er.R {
 		return er.Errorf("requesting token issue: %s", err)
 	}
 
-	fmt.Println("issue succesful!")
+	fmt.Println("issue successful!")
 
 	return nil
 }
 
-func extractTokenIssue(ctx *cli.Context) (*replicator.TokenOffer, er.R) {
+func extractTokenIssue(ctx *cli.Context) (*DB.Token, er.R) {
 	// Extract general token offer data
-	offer := &replicator.TokenOffer{}
+	offer := &DB.Token{}
 
-	offer.Token = ctx.String(flagTokenName)
-	if offer.Token == "" {
-		return nil, er.Errorf("empty %q argument provided", flagTokenName)
-	}
-
-	offer.Price = ctx.Uint64(flagTokenPrice)
-	if offer.Price == 0 {
-		return nil, er.Errorf("empty %q argument provided", flagTokenPrice)
-	}
-
-	offer.Count = ctx.Uint64(flagCount)
+	offer.Count = ctx.Int64(flagCount)
 	if offer.Count == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagCount)
 	}
 
-	offer.ValidUntilSeconds = ctx.Int64(flagIssuerOfferValidUntilSeconds)
-
-	if expDate := time.Unix(offer.ValidUntilSeconds, 0).UTC(); expDate.Before(time.Now().UTC()) {
-		return nil, er.Errorf("%q argument provided is in the past or empty", flagIssuerOfferValidUntilSeconds)
+	offer.Expiration = int32(ctx.Int64(flagExpirationBlockNumber))
+	if offer.Expiration == 0 {
+		return nil, er.Errorf("empty %q argument provided", flagExpirationBlockNumber)
 	}
+
+	offer.Url = ctx.String(flagUrl)
+	if offer.Url == "" {
+		return nil, er.Errorf("empty %q argument provided", flagUrl)
+	}
+
+	offer.Creation = time.Now().Unix()
 
 	return offer, nil
 }

@@ -394,16 +394,7 @@ func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerR
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
-	_, ok := tokens.Load(req.Offer.Token)
-	if ok {
-		return nil, status.Error(codes.InvalidArgument, "token with this name already exists")
-	}
-
-	tokens.Store(req.Offer.Token, token{
-		price:     req.Offer.Price,
-		validTime: req.Offer.ValidUntilSeconds,
-	})
-
+	//TODO: write logic for save token in database
 	return &emptypb.Empty{}, nil
 }
 

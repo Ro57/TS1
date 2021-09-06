@@ -27,13 +27,11 @@ var signTokenSaleCommand = cli.Command{
 }
 
 const (
-	flagTokenBuyerLogin              = "token-buyer-login"
 	flagTokenCount                   = "count"
 	flagTokenName                    = "token"
 	flagTokenPrice                   = "price"
 	flagTokenHolderLogin             = "token-holder-login"
 	flagIssuerOfferValidUntilSeconds = "issuer-offer-valid-until-seconds"
-	flagIssuerID                     = "issuer-id"
 	flagIssuerIdentityPubKey         = "issuer-identity-pubkey"
 	flagIssuerHost                   = "issuer-host"
 )

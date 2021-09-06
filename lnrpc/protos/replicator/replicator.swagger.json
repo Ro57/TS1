@@ -12,34 +12,6 @@
   ],
   "paths": {},
   "definitions": {
-    "dbToken": {
-      "type": "object",
-      "properties": {
-        "count": {
-          "type": "string",
-          "format": "int64",
-          "title": "count — number of issued tokens;"
-        },
-        "expiration": {
-          "type": "integer",
-          "format": "int32",
-          "title": "expiration — number of PKT block after which the token expires"
-        },
-        "creation": {
-          "type": "string",
-          "format": "int64",
-          "title": "creation — date of token creation in unix time format"
-        },
-        "urls": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "title": "urls — set of urls for access to blockchain"
-        }
-      },
-      "title": "Token contain information about token"
-    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -76,7 +48,7 @@
         "tokens": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/dbToken"
+            "$ref": "#/definitions/tokendbToken"
           },
           "title": "tokens list of registred tokens"
         },
@@ -205,6 +177,31 @@
           }
         }
       }
+    },
+    "tokendbToken": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "string",
+          "format": "int64",
+          "title": "count — number of issued tokens;"
+        },
+        "expiration": {
+          "type": "integer",
+          "format": "int32",
+          "title": "expiration — number of PKT block after which the token expires"
+        },
+        "creation": {
+          "type": "string",
+          "format": "int64",
+          "title": "creation — date of token creation in unix time format"
+        },
+        "url": {
+          "type": "string",
+          "title": "urls — set of urls for access to blockchain"
+        }
+      },
+      "title": "Token contain information about token"
     }
   }
 }

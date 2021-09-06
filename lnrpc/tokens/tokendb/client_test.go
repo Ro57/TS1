@@ -1,4 +1,4 @@
-package tokendb
+package client
 
 import (
 	"crypto/sha256"
@@ -9,12 +9,11 @@ import (
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/pktwallet/walletdb"
-	"google.golang.org/protobuf/types/known/anypb"
 )
 
 const (
 	path = "/.lnd/data/chain/pkt"
-	name = "/tokens"
+	name = "/test"
 )
 
 func TestCreateDB(t *testing.T) {
@@ -128,9 +127,8 @@ func TestTockenBlock(t *testing.T) {
 
 	wantBlock := DB.Block{
 		// TODO: Change on real justification structure after declaration
-		Justification:  &anypb.Any{Value: []byte("LOCK_TOKEN")},
+		Justification:  &DB.Block_Transfer{},
 		Signature:      "SomeSig",
-		State:          "SomeHash",
 		AvailableCount: 200,
 		Locks: []*DB.Lock{
 			{
@@ -147,6 +145,7 @@ func TestTockenBlock(t *testing.T) {
 				Count:        1,
 			},
 		},
+		Header: &DB.BlockHeader{},
 	}
 
 	var lastBlock [sha256.Size]byte

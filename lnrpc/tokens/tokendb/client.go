@@ -1,4 +1,4 @@
-package tokendb
+package client
 
 import (
 	"fmt"
@@ -21,6 +21,7 @@ const (
 func before() {
 	fmt.Println("Transaction")
 }
+
 func GetClient() channeldb.DB {
 	return client
 }

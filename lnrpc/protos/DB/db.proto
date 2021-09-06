@@ -4,7 +4,7 @@ package tokendb;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB";
 
-import "google/protobuf/any.proto";
+import "protos/justifications/justifications.proto";
 
 // Block is struct of block in blockchain
 // Caleb: We should have a "block header" which is small and can be 
@@ -13,26 +13,31 @@ message Block {
     // header — data to identify this block
     // Caleb: Block header should contain the height of the block
     BlockHeader header = 1;
-    // justification — one of justification structure with payload information.
-    // TODO: After implement type of justification, change Any type to oneof
-    google.protobuf.Any justification = 2;
     // signature — issuer ID, needed for validate. If signature incorrect block
     // is not valid
-    string signature = 3;
-    // state — hash of current state of database
-    string state = 4;
+    string signature = 2;
     // available_count — number available tokens for buying
-    int64 available_count = 5;
+    int64 available_count = 4;
     // locks — set of lock structures 
-    repeated Lock locks = 6;
+    repeated Lock locks = 5;
     // owners — a set of structures with addresses and their balances
-    repeated Owner owners = 7;
+    repeated Owner owners = 6;
+    // justification — one of justification structure with payload information.
+    oneof justification{
+        // lock — payload with lock
+        justifications.LockToken lock = 7;
+        // transfer — payload with transaction info
+        justifications.TranferToken transfer = 8;
+        // lock_over — payload with lock time over
+        justifications.LockTimeOver lock_over = 9;
+    }
 }
 
 // Lock contain information about tokens and contract for transferring
 message Lock {
-    // id — identifactor of lock. It will be send as response on 
-    // lock_tokens_for_transfer method
+    // id — hash identifactor of lock. It will be send as response on 
+    // lock_tokens_for_transfer method, It will be used as signature generated
+    // from LockToken justification.
     string id = 1;
     // count — number of sending tokens
     int64 count = 2;
@@ -42,6 +47,10 @@ message Lock {
     string htlc = 4;
     // proof_count — lock expiration time in PKT blocks
     int32 proof_count = 5;
+    // timeover_pkt — block height of PKT block when this lock will over
+    int32 timeover_pkt= 6;
+    // creation_height — creation height in token blockchain
+    uint64 creation_height = 7;
 }
 
 // Owner contains information about the holders' wallets and their balances
@@ -74,4 +83,12 @@ message BlockHeader {
     // issuer_address — issuer wallet address to transaction.
     // Update information about token will be by URL.
     string issuer_address = 3;
+    // state — hash of current state of database
+    string state = 4;
+    // pkt_block_hash —  the hash of the most recent PKT block
+    string pkt_block_hash = 5;
+    // pkt_block_height — the height of the most recent PKT block
+    int32 pkt_block_height = 6;
+    // height — the current height of this TokenStrike chain
+    uint64 height  = 7;
 }

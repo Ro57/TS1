@@ -139,8 +139,9 @@ message VerifyIssuerRequest {
 
 // IssueTokenRequest — info about token will be issued
 message IssueTokenRequest {
+    string name = 1;
     // offer on token issue
-    tokendb.Token offer = 1;
+    tokendb.Token offer = 2;
 }
 
 // TokenInfoRequest — contain name of requested token

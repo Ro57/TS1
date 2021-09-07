@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/pkt-cash/pktd/btcutil/er"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/urfave/cli"
 )
@@ -27,6 +26,10 @@ const (
 )
 
 var issueTokenFlags = []cli.Flag{
+	cli.StringFlag{
+		Name:  flagTokenName,
+		Usage: "target token identity to issue",
+	},
 	cli.Int64Flag{
 		Name:  flagCount,
 		Usage: "number of issued token",
@@ -45,13 +48,9 @@ func issueToken(ctx *cli.Context) er.R {
 	client, cleanUp := getClient(ctx)
 	defer cleanUp()
 
-	offer, _err := extractTokenIssue(ctx)
+	issuerTokenReq, _err := extractTokenIssue(ctx)
 	if _err != nil {
 		return _err
-	}
-
-	issuerTokenReq := &replicator.IssueTokenRequest{
-		Offer: offer,
 	}
 
 	_, err := client.IssueToken(context.TODO(), issuerTokenReq)
@@ -64,26 +63,31 @@ func issueToken(ctx *cli.Context) er.R {
 	return nil
 }
 
-func extractTokenIssue(ctx *cli.Context) (*DB.Token, er.R) {
+func extractTokenIssue(ctx *cli.Context) (*replicator.IssueTokenRequest, er.R) {
 	// Extract general token offer data
-	offer := &DB.Token{}
+	offer := &replicator.IssueTokenRequest{}
 
-	offer.Count = ctx.Int64(flagCount)
-	if offer.Count == 0 {
+	offer.Name = ctx.String(flagTokenName)
+	if offer.Name == "" {
+		return nil, er.Errorf("empty %q argument provided", flagTokenName)
+	}
+
+	offer.Offer.Count = ctx.Int64(flagCount)
+	if offer.Offer.Count == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagCount)
 	}
 
-	offer.Expiration = int32(ctx.Int64(flagExpirationBlockNumber))
-	if offer.Expiration == 0 {
+	offer.Offer.Expiration = int32(ctx.Int64(flagExpirationBlockNumber))
+	if offer.Offer.Expiration == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagExpirationBlockNumber)
 	}
 
-	offer.Url = ctx.String(flagUrl)
-	if offer.Url == "" {
+	offer.Offer.Url = ctx.String(flagUrl)
+	if offer.Offer.Url == "" {
 		return nil, er.Errorf("empty %q argument provided", flagUrl)
 	}
 
-	offer.Creation = time.Now().Unix()
+	offer.Offer.Creation = time.Now().Unix()
 
 	return offer, nil
 }

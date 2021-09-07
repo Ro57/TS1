@@ -17,8 +17,10 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/encoder"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/tokendb"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
+	"github.com/pkt-cash/pktd/pktwallet/walletdb"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gopkg.in/macaroon-bakery.v2/bakery"
@@ -51,6 +53,11 @@ var (
 	// that we expect to find via a file handle within the main
 	// configuration file in this package.
 	DefaultIssuanceMacFilename = "issuance.macaroon"
+
+	infoKey     = []byte("info")
+	chainKey    = []byte("chain")
+	tokensKey   = []byte("tokens")
+	rootHashKey = []byte("rootHash")
 )
 
 type IssunceEvents struct {
@@ -227,7 +234,12 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
-	_, err := s.Client.IssueToken(ctx, req)
+	err := issueTokenDB(req).Native()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.Client.IssueToken(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -257,4 +269,33 @@ func connectReplicatorClient(ctx context.Context, replicationHost string) (_ rep
 		return nil, nil, errors.WithMessage(err, "dialing")
 	}
 	return replicator.NewReplicatorClient(conn), conn.Close, nil
+}
+
+func issueTokenDB(req *replicator.IssueTokenRequest) er.R {
+	return tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
+		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
+		if err != nil {
+			return err
+		}
+
+		tokenBucket, err := rootBucket.CreateBucket([]byte(req.Name))
+		if err != nil {
+			return err
+		}
+
+		// if information about token did not exist then create
+		if tokenBucket.Get(infoKey) == nil {
+			tokenBytes, err := json.Marshal(req.Offer)
+			if err != nil {
+				return er.E(err)
+			}
+
+			errPut := tokenBucket.Put(infoKey, tokenBytes)
+			if errPut != nil {
+				return errPut
+			}
+		}
+
+		return nil
+	})
 }

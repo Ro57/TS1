@@ -1,4 +1,4 @@
-package client
+package tokendb
 
 import (
 	"crypto/sha256"

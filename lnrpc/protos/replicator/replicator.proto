@@ -56,10 +56,18 @@ message GetTokenListRequest {
 // GetTokenListResponse — list of tokens with additional info
 message GetTokenListResponse {
     // tokens list of registred tokens
-    repeated tokendb.Token tokens = 1;
+    repeated Token tokens = 1;
     // total number of registered tokens, if the issued_id is passed, only
     // its tokens are taken into account
     int32 total = 2;
+}
+
+message Token {
+    string name = 1;
+    // offer on token issue
+    tokendb.Token token = 2;
+
+    string root = 3;
 }
 
 message TokenOffer {

@@ -43,7 +43,7 @@
         "tokens": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/tokendbToken"
+            "$ref": "#/definitions/replicatorToken"
           },
           "title": "tokens list of registred tokens"
         },
@@ -82,6 +82,21 @@
         "offset": {
           "type": "string",
           "format": "uint64"
+        }
+      }
+    },
+    "replicatorToken": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "token": {
+          "$ref": "#/definitions/tokendbToken",
+          "title": "offer on token issue"
+        },
+        "root": {
+          "type": "string"
         }
       }
     },

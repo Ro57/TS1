@@ -2,6 +2,7 @@ package replicatorrpc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -19,8 +20,10 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/jwtstore"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/tokendb"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
+	"github.com/pkt-cash/pktd/pktwallet/walletdb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -61,6 +64,11 @@ var (
 	// that we expect to find via a file handle within the main
 	// configuration file in this package.
 	DefaultReplicatorMacFilename = "replicator.macaroon"
+
+	infoKey     = []byte("info")
+	chainKey    = []byte("chain")
+	tokensKey   = []byte("tokens")
+	rootHashKey = []byte("rootHash")
 )
 
 type userInfo struct {
@@ -394,7 +402,32 @@ func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerR
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
-	//TODO: write logic for save token in database
+	tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
+		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
+		if err != nil {
+			return err
+		}
+
+		tokenBucket, err := rootBucket.CreateBucket([]byte(req.Name))
+		if err != nil {
+			return err
+		}
+
+		// if information about token did not exist then create
+		if tokenBucket.Get(infoKey) == nil {
+			tokenBytes, err := json.Marshal(req.Offer)
+			if err != nil {
+				return er.E(err)
+			}
+
+			errPut := tokenBucket.Put(infoKey, tokenBytes)
+			if errPut != nil {
+				return errPut
+			}
+		}
+
+		return nil
+	})
 	return &emptypb.Empty{}, nil
 }
 

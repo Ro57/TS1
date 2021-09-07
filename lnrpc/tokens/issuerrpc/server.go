@@ -3,6 +3,7 @@ package issueancerpc
 import (
 	"context"
 	"fmt"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"io/ioutil"
 	"net"
 	"os"
@@ -248,8 +249,37 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	//TODO: not call client, should call DB methods
-	return s.Client.GetTokenList(ctx, req)
+	resultList := []*replicator.Token{}
+
+	tokendb.View(func(tx walletdb.ReadTx) er.R {
+		rootBucket := tx.ReadBucket(tokensKey)
+
+		rootBucket.ForEach(func(k, _ []byte) er.R {
+			tokenBucket := rootBucket.NestedReadBucket(k)
+
+			var dbToken DB.Token
+			err := json.Unmarshal(tokenBucket.Get(infoKey), dbToken)
+			if err != nil {
+				return er.E(err)
+			}
+
+			token := replicator.Token{
+				Name:  string(k),
+				Token: &dbToken,
+				Root:  string(tokenBucket.Get(rootHashKey)),
+			}
+
+			resultList = append(resultList, &token)
+			return nil
+		})
+
+		return nil
+	})
+
+	return &replicator.GetTokenListResponse{
+		Tokens: resultList,
+		Total:  int32(len(resultList)),
+	}, nil
 }
 
 func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {

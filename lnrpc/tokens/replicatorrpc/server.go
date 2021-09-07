@@ -432,11 +432,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	var tokenList []*DB.Token
-	var err error
-
-	tokenList, err = s.allTokensFromIssuer(req.IssuerId)
-
+	tokenList, err := s.allTokensFromIssuer(req.IssuerId)
 	if err != nil {
 		return nil, err
 	}
@@ -449,12 +445,32 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 }
 
 // TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses
-func (s *Server) allTokensFromIssuer(issuer string) ([]*DB.Token, error) {
-	resultList := []*DB.Token{}
+func (s *Server) allTokensFromIssuer(issuer string) ([]*replicator.Token, error) {
+	resultList := []*replicator.Token{}
 
-	tokens.Range(func(key, value interface{}) bool {
-		// TODO: Fill the resultList with token information
-		return true
+	tokendb.View(func(tx walletdb.ReadTx) er.R {
+		rootBucket := tx.ReadBucket(tokensKey)
+
+		rootBucket.ForEach(func(k, _ []byte) er.R {
+			tokenBucket := rootBucket.NestedReadBucket(k)
+
+			var dbToken DB.Token
+			err := json.Unmarshal(tokenBucket.Get(infoKey), dbToken)
+			if err != nil {
+				return er.E(err)
+			}
+
+			token := replicator.Token{
+				Name:  string(k),
+				Token: &dbToken,
+				Root:  string(tokenBucket.Get(rootHashKey)),
+			}
+
+			resultList = append(resultList, &token)
+			return nil
+		})
+
+		return nil
 	})
 
 	return resultList, nil

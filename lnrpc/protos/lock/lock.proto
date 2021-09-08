@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package lock;
+
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/lock";
+
+// Lock contain information about tokens and contract for transferring
+message Lock {
+    // count — number of sending tokens
+    int64 count = 1;
+    // recipient — wallet addres of new owner of tokens
+    string recipient = 2;
+    // sender — owner of the wallet address to which tokens will be returned
+    string sender = 3;
+    // htlc — hash of contract
+    string htlc = 4;
+    // proof_count — lock expiration time in PKT blocks
+    int32 proof_count = 5;
+    // creation_height — creation height in token blockchain
+    uint64 creation_height = 6;
+    // signature generated with old owner private key
+    string signature = 7;
+}

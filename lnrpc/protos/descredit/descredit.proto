@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package descredit;
+
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/descredit";
+
+import "protos/DB/tokendb.proto";
+import "protos/lock/lock.proto";
+
+// DuplicateBlock 2 identical blocks were generated (Updated the structure)
+message DuplicateBlock {
+    // first_block_header — copied block
+    /// Caleb: Should be `message Block` rather than string
+    tokendb.Block first_block_header = 1;
+    // second_block_header — block copy
+    /// Caleb: Should be `message Block` rather than string
+    tokendb.Block second_block_header = 2;
+}
+
+// DenialService the issuer accepts a lock_tokens request from a sender but 
+// then ignores the transfer_tokens request from the recipient
+message DenialService {
+    // lock — information about ignored lock
+    lock.Lock lock = 1;
+    // htlc_secret_hash — htlc genereted issuer
+    string htlc_secret_hash = 2;
+    // proof_mercle_branch — proof from PKT blockchain
+    string proof_mercle_branch = 3; 
+}

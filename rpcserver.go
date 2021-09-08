@@ -312,6 +312,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "onchain",
 			Action: "read",
 		}},
+		"/lnrpc.Lightning/GetAddressBalances": {{
+			Entity: "onchain",
+			Action: "read",
+		}},
 		"/lnrpc.Lightning/EstimateFee": {{
 			Entity: "onchain",
 			Action: "read",

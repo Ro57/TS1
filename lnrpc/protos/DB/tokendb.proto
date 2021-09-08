@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package tokendb;
+
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB";
+
+import "protos/justifications/justifications.proto";
+import "protos/lock/lock.proto";
+
+// Block is struct of block in blockchain
+message Block {
+    // prev_block — hash of previous block 
+    string prev_block = 1;
+    // justification — one of justification structure with payload information.
+    oneof justification{
+        // lock — payload with lock
+        justifications.LockToken lock = 2;
+        // transfer — payload with transaction info
+        justifications.TranferToken transfer = 3;
+        // lock_over — payload with lock time over
+        justifications.LockTimeOver lock_over = 4;
+    }
+    // creation — date of block creation in unix time format
+    int64 creation = 5;
+    // state — hash of state structure containing locks, owners and meta token 
+    // info
+    string state = 6;
+    // pkt_block_hash —  the hash of the most recent PKT block
+    string pkt_block_hash = 7;
+    // pkt_block_height — the height of the most recent PKT block
+    int32 pkt_block_height = 8;
+    // height — the current height of this TokenStrike chain
+    uint64 height = 9;
+    // signature — issuer ID, needed for validate. If signature incorrect block
+    // is not valid
+    string signature = 10;
+}
+
+// Owner contains information about the holders' wallets and their balances
+message Owner {
+    // holder_wallet — hash of wallet address of holder 
+    string holder_wallet = 1;
+    // count — number of tokens held on wallet
+    int64 count = 2;
+}
+
+// Token contain information about token
+message Token {
+    // count — number of issued tokens;
+    int64 count = 1;
+    // expiration — number of PKT block after which the token expires
+    int32 expiration = 2;
+    // creation — date of token creation in unix time format
+    int64 creation = 3;
+    // urls — set of urls for access to blockchain
+    string url = 4;
+    // issuer_pubkey — public key of issuer used for signing
+    string issuer_pubkey = 5;
+}
+
+// State is a current state of blockchain
+message State {
+    // token — metadata about token
+    Token token = 1;
+    // owners — a set of structures with addresses and their balances
+    repeated Owner owners = 2;
+    // locks — set of lock structures 
+    repeated lock.Lock locks = 3;
+}

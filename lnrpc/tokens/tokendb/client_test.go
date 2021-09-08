@@ -9,12 +9,11 @@ import (
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/pktwallet/walletdb"
-	"google.golang.org/protobuf/types/known/anypb"
 )
 
 const (
 	path = "/.lnd/data/chain/pkt"
-	name = "/tokens"
+	name = "/test"
 )
 
 func TestCreateDB(t *testing.T) {
@@ -120,33 +119,23 @@ func TestTockenBlock(t *testing.T) {
 	wantCreateTime := time.Now()
 	tokenName := "smt"
 	wantToken := DB.Token{
-		Count:      200,
-		Expiration: wantExpBlockNumber,
-		Creation:   wantCreateTime.UnixNano(),
-		Url:        "",
+		Count:        200,
+		Expiration:   wantExpBlockNumber,
+		Creation:     wantCreateTime.UnixNano(),
+		Url:          "https://some.token",
+		IssuerPubkey: "issuerPublicKey",
 	}
 
 	wantBlock := DB.Block{
-		// TODO: Change on real justification structure after declaration
-		Justification:  &anypb.Any{Value: []byte("LOCK_TOKEN")},
-		Signature:      "SomeSig",
-		State:          "SomeHash",
-		AvailableCount: 200,
-		Locks: []*DB.Lock{
-			{
-				Id:         "SomeHash",
-				Count:      1,
-				Owner:      "pkt1otherwallet",
-				Htlc:       "someHTLCHash",
-				ProofCount: 2000,
-			},
-		},
-		Owners: []*DB.Owner{
-			{
-				HolderWallet: "pkt1somewallet",
-				Count:        1,
-			},
-		},
+		Justification: &DB.Block_Lock{},
+
+		Signature:      "someSig",
+		PrevBlock:      "hashPrevBlock",
+		Creation:       time.Now().Unix(),
+		State:          "hashOfState",
+		PktBlockHash:   "hashFromPkt",
+		PktBlockHeight: 1000,
+		Height:         10,
 	}
 
 	var lastBlock [sha256.Size]byte
@@ -157,7 +146,7 @@ func TestTockenBlock(t *testing.T) {
 	defer func() {
 		err := Clear()
 		if err != nil {
-			t.Fatal("Clear failed", err.Native())
+			t.Fatal("clear failed", err.Native())
 		}
 	}()
 

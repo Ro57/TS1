@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -56,6 +57,7 @@ var (
 	DefaultIssuanceMacFilename = "issuance.macaroon"
 
 	infoKey     = []byte("info")
+	stateKey    = []byte("state")
 	chainKey    = []byte("chain")
 	tokensKey   = []byte("tokens")
 	rootHashKey = []byte("rootHash")
@@ -245,6 +247,13 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 		return nil, err
 	}
 
+	_, err = generateGenesisBlock(req.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	//TODO: implement sending the block to the replicator
+
 	return &emptypb.Empty{}, nil
 }
 
@@ -326,6 +335,79 @@ func issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 			}
 		}
 
+		// if token state did not exist then create
+		if tokenBucket.Get(stateKey) == nil {
+			state := DB.State{
+				Token:  req.Offer,
+				Owners: nil,
+				Locks:  nil,
+			}
+
+			stateBytes, err := json.Marshal(state)
+			if err != nil {
+				return er.E(err)
+			}
+
+			errPut := tokenBucket.Put(stateKey, stateBytes)
+			if errPut != nil {
+				return errPut
+			}
+		}
+
 		return nil
 	})
+}
+
+func generateGenesisBlock(name string) (*DB.Block, error) {
+	genesisBlock := &DB.Block{
+		PrevBlock:      "",
+		Justification:  nil, //TODO: setup the justification
+		Creation:       time.Now().Unix(),
+		State:          "",
+		PktBlockHash:   "", // TODO: implementation getting pkt block hash
+		PktBlockHeight: 0,  //TODO:  implementation getting pkt block height
+		Height:         0,
+		Signature:      "",
+	}
+
+	err := tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
+		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
+		if err != nil {
+			return err
+		}
+
+		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(name))
+
+		state := tokenBucket.Get(stateKey)
+		if state == nil {
+			return er.New("state is not exist")
+		}
+
+		hashState := encoder.CreateHash(state)
+		genesisBlock.State = string(hashState)
+
+		_, errMarshal := json.Marshal(genesisBlock)
+		if errMarshal != nil {
+			return err
+		}
+
+		// TODO: setup the signature
+
+		err = tokenBucket.Put(rootHashKey, []byte(genesisBlock.GetSignature()))
+		if err != nil {
+			return err
+		}
+
+		genBlockBytes, errMarshal := json.Marshal(genesisBlock)
+		if errMarshal != nil {
+			return er.E(errMarshal)
+		}
+
+		return tokenBucket.Put(chainKey, genBlockBytes)
+	})
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	return genesisBlock, nil
 }

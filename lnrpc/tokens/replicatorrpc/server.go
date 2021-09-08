@@ -66,6 +66,7 @@ var (
 	DefaultReplicatorMacFilename = "replicator.macaroon"
 
 	infoKey     = []byte("info")
+	stateKey    = []byte("state")
 	chainKey    = []byte("chain")
 	tokensKey   = []byte("tokens")
 	rootHashKey = []byte("rootHash")
@@ -421,6 +422,25 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 			}
 
 			errPut := tokenBucket.Put(infoKey, tokenBytes)
+			if errPut != nil {
+				return errPut
+			}
+		}
+
+		// if token state did not exist then create
+		if tokenBucket.Get(stateKey) == nil {
+			state := DB.State{
+				Token:  req.Offer,
+				Owners: nil,
+				Locks:  nil,
+			}
+
+			stateBytes, err := json.Marshal(state)
+			if err != nil {
+				return er.E(err)
+			}
+
+			errPut := tokenBucket.Put(stateKey, stateBytes)
 			if errPut != nil {
 				return errPut
 			}

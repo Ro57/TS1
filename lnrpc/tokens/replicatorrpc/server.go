@@ -446,7 +446,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 			}
 		}
 
-		return nil
+		return tokenBucket.Put(rootHashKey, []byte(""))
 	})
 	return &emptypb.Empty{}, nil
 }
@@ -462,6 +462,36 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 		Total:  int32(len(tokenList)),
 	}, nil
 
+}
+
+func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest) (*empty.Empty, error) {
+	err := tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
+		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
+		if err != nil {
+			return err
+		}
+
+		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Name))
+
+		if string(tokenBucket.Get(rootHashKey)) != req.Block.PrevBlock {
+			return er.New("invalid hash of the previous block")
+		}
+
+		tokenBucket.Put(rootHashKey, []byte(req.Block.GetSignature()))
+		blockBytes, errMarshal := json.Marshal(req.Block)
+		if errMarshal != nil {
+			return er.E(errMarshal)
+		}
+
+		return tokenBucket.Put(chainKey, blockBytes)
+	})
+
+	return nil, err.Native()
+}
+
+func (s *Server) GetToken(context.Context, *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
+	// TODO: implement me
+	return &replicator.GetTokenResponse{}, nil
 }
 
 // TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses

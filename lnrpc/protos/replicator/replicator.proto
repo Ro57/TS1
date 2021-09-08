@@ -4,7 +4,7 @@ package replicator;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator";
 
-import "protos/DB/db.proto";
+import "protos/DB/tokendb.proto";
 import "google/protobuf/empty.proto";
 
 // Is mainly used to generate compatible querier (client)
@@ -28,6 +28,10 @@ service Replicator {
     // IssueToken — Issue new token with given data. Request data equal to
     // token purchase data, because it is token offer.
     rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
+
+    rpc SaveBlock(SaveBlockRequest) returns (google.protobuf.Empty);
+
+    rpc GetToken(GetTokenRequest) returns (GetTokenResponse);
 
     // GetTokenList — return list of issued token with infomation about
     // expiration time and fix price.
@@ -152,27 +156,16 @@ message IssueTokenRequest {
     tokendb.Token offer = 2;
 }
 
-// TokenInfoRequest — contain name of requested token
-message TokenInfoRequest {
-    // name of the token
+message SaveBlockRequest {
     string name = 1;
+
+    tokendb.Block block = 2;
 }
 
-// TokenInfoResponse — Token information with his name, price, expiration time 
-// and issuer login
-message TokenInfoResponse {
-    // name of the token
-    string name = 1;
+message GetTokenRequest {
+    string token_id = 1;
+}
 
-    // price of token in pkt
-    // TODO: discuss
-    //  ? Should we assume decimal prices
-    //  ? Add units field
-    uint64 price = 2;
-
-    // valid_time is expiration date
-    int64 valid_time = 3;
-
-    // issuer_login — user issued token
-    string issuer_login = 4;
+message GetTokenResponse {
+    Token tokens = 1;
 }

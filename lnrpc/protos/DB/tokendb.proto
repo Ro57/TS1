@@ -8,12 +8,9 @@ import "protos/justifications/justifications.proto";
 import "protos/lock/lock.proto";
 
 // Block is struct of block in blockchain
-// Caleb: We should have a "block header" which is small and can be 
-// copied into an Accusation
 message Block {
-    // header — data to identify this block
-    // Caleb: Block header should contain the height of the block
-    BlockHeader header = 1;
+    // prev_block — hash of previous block 
+    string prev_block = 1;
     // justification — one of justification structure with payload information.
     oneof justification{
         // lock — payload with lock
@@ -23,6 +20,20 @@ message Block {
         // lock_over — payload with lock time over
         justifications.LockTimeOver lock_over = 4;
     }
+    // creation — date of block creation in unix time format
+    int64 creation = 5;
+    // state — hash of state structure containing locks, owners and meta token 
+    // info
+    string state = 6;
+    // pkt_block_hash —  the hash of the most recent PKT block
+    string pkt_block_hash = 7;
+    // pkt_block_height — the height of the most recent PKT block
+    int32 pkt_block_height = 8;
+    // height — the current height of this TokenStrike chain
+    uint64 height = 9;
+    // signature — issuer ID, needed for validate. If signature incorrect block
+    // is not valid
+    string signature = 10;
 }
 
 // Owner contains information about the holders' wallets and their balances
@@ -43,31 +54,14 @@ message Token {
     int64 creation = 3;
     // urls — set of urls for access to blockchain
     string url = 4;
-    // available_count — number available tokens for buying
-    int64 available_count = 5;
     // issuer_pubkey — public key of issuer used for signing
-    string issuer_pubkey = 6;
+    string issuer_pubkey = 5;
 }
 
 // BlockHeader contain reference on previus block and creation time.
 // Hash of this structure will be used as a key in key-value storage
 message BlockHeader {
-    // prev_block — hash of previous block 
-    string prev_block = 1;
-    // creation — date of block creation in unix time format
-    int64 creation = 2;
-    // state — hash of state structure containing locks, owners and meta token 
-    // info
-    string state = 3;
-    // pkt_block_hash —  the hash of the most recent PKT block
-    string pkt_block_hash = 4;
-    // pkt_block_height — the height of the most recent PKT block
-    int32 pkt_block_height = 5;
-    // height — the current height of this TokenStrike chain
-    uint64 height = 6;
-    // signature — issuer ID, needed for validate. If signature incorrect block
-    // is not valid
-    string signature = 7;
+
 }
 
 // State is a current state of blockchain

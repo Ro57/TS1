@@ -119,26 +119,23 @@ func TestTockenBlock(t *testing.T) {
 	wantCreateTime := time.Now()
 	tokenName := "smt"
 	wantToken := DB.Token{
-		Count:          200,
-		Expiration:     wantExpBlockNumber,
-		Creation:       wantCreateTime.UnixNano(),
-		Url:            "https://some.token",
-		AvailableCount: 200,
-		IssuerPubkey:   "issuerPublicKey",
+		Count:        200,
+		Expiration:   wantExpBlockNumber,
+		Creation:     wantCreateTime.UnixNano(),
+		Url:          "https://some.token",
+		IssuerPubkey: "issuerPublicKey",
 	}
 
 	wantBlock := DB.Block{
 		Justification: &DB.Block_Lock{},
 
-		Header: &DB.BlockHeader{
-			Signature:      "someSig",
-			PrevBlock:      "hashPrevBlock",
-			Creation:       time.Now().Unix(),
-			State:          "hashOfState",
-			PktBlockHash:   "hashFromPkt",
-			PktBlockHeight: 1000,
-			Height:         10,
-		},
+		Signature:      "someSig",
+		PrevBlock:      "hashPrevBlock",
+		Creation:       time.Now().Unix(),
+		State:          "hashOfState",
+		PktBlockHash:   "hashFromPkt",
+		PktBlockHeight: 1000,
+		Height:         10,
 	}
 
 	var lastBlock [sha256.Size]byte

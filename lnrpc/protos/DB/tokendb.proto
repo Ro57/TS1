@@ -58,12 +58,6 @@ message Token {
     string issuer_pubkey = 5;
 }
 
-// BlockHeader contain reference on previus block and creation time.
-// Hash of this structure will be used as a key in key-value storage
-message BlockHeader {
-
-}
-
 // State is a current state of blockchain
 message State {
     // token — metadata about token

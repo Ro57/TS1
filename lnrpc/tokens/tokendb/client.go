@@ -9,9 +9,11 @@ import (
 	"github.com/pkt-cash/pktd/pktwallet/walletdb"
 )
 
-var (
+type TokenStrikeDB struct {
 	client channeldb.DB
-)
+}
+
+var ()
 
 const (
 	dbName = "channel.db"
@@ -22,47 +24,45 @@ func before() {
 	fmt.Println("Transaction")
 }
 
-func GetClient() channeldb.DB {
-	return client
-}
-
-func Connect(path string) error {
+func Connect(path string) (*TokenStrikeDB, error) {
 	home, _ := os.UserHomeDir()
 	db, err := channeldb.Open(home + path)
 	if err != nil {
-		return err.Native()
+		return nil, err.Native()
 	}
 
-	client = *db
+	tsDB := &TokenStrikeDB{
+		client: *db,
+	}
 
-	return nil
+	return tsDB, nil
 }
 
-func Close() {
-	client.Close()
+func (t *TokenStrikeDB) Close() {
+	t.client.Close()
 }
 
-func Ping() er.R {
-	return client.View(func(tx walletdb.ReadTx) er.R {
+func (t *TokenStrikeDB) Ping() er.R {
+	return t.client.View(func(tx walletdb.ReadTx) er.R {
 		return nil
 	}, before)
 }
 
 // Clear all database structure with buckets and their content
-func Clear() er.R {
-	dbFullPath := fmt.Sprintf("%v/%v", client.Path(), dbName)
+func (t *TokenStrikeDB) Clear() er.R {
+	dbFullPath := fmt.Sprintf("%v/%v", t.client.Path(), dbName)
 
 	if err := os.Truncate(dbFullPath, 0); err != nil {
 		return er.Errorf("Failed to truncate: %v", err)
 	}
-
+	t = nil
 	return nil
 }
 
-func Update(f func(tx walletdb.ReadWriteTx) er.R) er.R {
-	return client.Update(f, before)
+func (t *TokenStrikeDB) Update(f func(tx walletdb.ReadWriteTx) er.R) er.R {
+	return t.client.Update(f, before)
 }
 
-func View(f func(tx walletdb.ReadTx) er.R) er.R {
-	return client.View(f, before)
+func (t *TokenStrikeDB) View(f func(tx walletdb.ReadTx) er.R) er.R {
+	return t.client.View(f, before)
 }

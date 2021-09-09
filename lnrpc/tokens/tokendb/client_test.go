@@ -18,19 +18,27 @@ const (
 )
 
 func TestCreateDB(t *testing.T) {
-	Connect(path + name)
-	defer Close()
-	err := Ping()
+	ts, nativeErr := Connect(path + name)
+	if nativeErr != nil {
+		t.Fatalf("Connection refused %v", nativeErr)
+	}
 
+	defer ts.Close()
+
+	err := ts.Ping()
 	if err != nil {
 		t.Fatal("db not connected: ", err)
 	}
 }
 
 func TestPing(t *testing.T) {
-	Connect(path + name)
-	Close()
-	err := Ping()
+	ts, nativeErr := Connect(path + name)
+	if nativeErr != nil {
+		t.Fatalf("Connection refused %v", nativeErr)
+	}
+
+	ts.Close()
+	err := ts.Ping()
 
 	if err == nil {
 		t.Fatal("ping after close connection")
@@ -38,17 +46,21 @@ func TestPing(t *testing.T) {
 }
 
 func TestEmployeeUpdateView(t *testing.T) {
-	Connect(path + name)
-	defer Close()
+	ts, nativeErr := Connect(path + name)
+	if nativeErr != nil {
+		t.Fatalf("Connection refused %v", nativeErr)
+	}
+
+	defer ts.Close()
 
 	defer func() {
-		err := Clear()
+		err := ts.Clear()
 		if err != nil {
 			t.Fatal("Clear failed", err.Native())
 		}
 	}()
 
-	err := Update(func(tx walletdb.ReadWriteTx) er.R {
+	err := ts.Update(func(tx walletdb.ReadWriteTx) er.R {
 		_, err := tx.CreateTopLevelBucket([]byte("Business"))
 
 		if err != nil {
@@ -61,7 +73,7 @@ func TestEmployeeUpdateView(t *testing.T) {
 		t.Fatal("Create top level busket structures failed: ", err)
 	}
 
-	err = Update(func(tx walletdb.ReadWriteTx) er.R {
+	err = ts.Update(func(tx walletdb.ReadWriteTx) er.R {
 		b := tx.ReadWriteBucket([]byte("Business"))
 
 		_, err = b.CreateBucket([]byte("Employee"))
@@ -76,7 +88,7 @@ func TestEmployeeUpdateView(t *testing.T) {
 		t.Fatal("Create busket structures failed: ", err)
 	}
 
-	err = Update(func(tx walletdb.ReadWriteTx) er.R {
+	err = ts.Update(func(tx walletdb.ReadWriteTx) er.R {
 		b := tx.ReadWriteBucket([]byte("Business"))
 		emp := b.NestedReadWriteBucket([]byte("Employee"))
 
@@ -94,7 +106,7 @@ func TestEmployeeUpdateView(t *testing.T) {
 		t.Fatal("Put information into bucket: ", err)
 	}
 
-	err = View(func(tx walletdb.ReadTx) er.R {
+	err = ts.View(func(tx walletdb.ReadTx) er.R {
 		b := tx.ReadBucket([]byte("Business"))
 		emp := b.NestedReadBucket([]byte("Employee"))
 
@@ -146,17 +158,21 @@ func TestTockenBlock(t *testing.T) {
 
 	var lastBlock [sha256.Size]byte
 
-	Connect(path + name)
-	defer Close()
+	ts, nativeErr := Connect(path + name)
+	if nativeErr != nil {
+		t.Fatalf("Connection refused %v", nativeErr)
+	}
+
+	defer ts.Close()
 
 	defer func() {
-		err := Clear()
+		err := ts.Clear()
 		if err != nil {
 			t.Fatal("clear failed", err.Native())
 		}
 	}()
 
-	err := Update(func(tx walletdb.ReadWriteTx) er.R {
+	err := ts.Update(func(tx walletdb.ReadWriteTx) er.R {
 		b, err := tx.CreateTopLevelBucket([]byte(tokenName))
 		if err != nil {
 			t.Fatalf("create top level bucket: %s", err)
@@ -194,7 +210,7 @@ func TestTockenBlock(t *testing.T) {
 		t.Fatal("generate DB structure: ", err)
 	}
 
-	err = View(func(tx walletdb.ReadTx) er.R {
+	err = ts.View(func(tx walletdb.ReadTx) er.R {
 		b := tx.ReadBucket([]byte(tokenName))
 		if b == nil {
 			t.Fatalf("bucket %s not found", tokenName)

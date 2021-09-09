@@ -5,59 +5,59 @@ import (
 	"strings"
 )
 
-type address string
-type transaction string
-type block string
-type lock string
+type Address string
+type Transaction string
+type Block string
+type Lock string
 
-func NewAddress(hash string) (*address, error) {
-	a := address(hash)
-	if !a.validate() {
+func NewAddress(hash string) (*Address, error) {
+	a := Address(hash)
+	if !a.Validate() {
 		return nil, fmt.Errorf("hash %v not a address", hash)
 	}
 
 	return &a, nil
 }
 
-func NewBlock(hash string) (*block, error) {
-	b := block(hash)
-	if !b.validate() {
+func NewBlock(hash string) (*Block, error) {
+	b := Block(hash)
+	if !b.Validate() {
 		return nil, fmt.Errorf("hash %v not a block", hash)
 	}
 
 	return &b, nil
 }
 
-func NewTransaction(hash string) (*transaction, error) {
-	t := transaction(hash)
-	if !t.validate() {
+func NewTransaction(hash string) (*Transaction, error) {
+	t := Transaction(hash)
+	if !t.Validate() {
 		return nil, fmt.Errorf("hash %v not a transaction", hash)
 	}
 
 	return &t, nil
 }
 
-func NewLock(hash string) (*lock, error) {
-	l := lock(hash)
-	if !l.validate() {
+func NewLock(hash string) (*Lock, error) {
+	l := Lock(hash)
+	if !l.Validate() {
 		return nil, fmt.Errorf("hash %v not a lock", hash)
 	}
 
 	return &l, nil
 }
 
-func (a *address) validate() bool {
+func (a *Address) Validate() bool {
 	return strings.HasPrefix(string(*a), "pkt1")
 }
 
-func (t *transaction) validate() bool {
+func (t *Transaction) Validate() bool {
 	return strings.HasPrefix(string(*t), "tx")
 }
 
-func (b *block) validate() bool {
+func (b *Block) Validate() bool {
 	return strings.HasPrefix(string(*b), "block")
 }
 
-func (l *lock) validate() bool {
+func (l *Lock) Validate() bool {
 	return strings.HasPrefix(string(*l), "lock")
 }

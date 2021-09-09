@@ -163,6 +163,7 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 
 }
 func RunServerServing(host string, events ReplicatorEvents) {
+
 	var (
 		child = &Server{
 			events: events,

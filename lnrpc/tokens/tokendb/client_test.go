@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/justifications"
 	"github.com/pkt-cash/pktd/pktwallet/walletdb"
 )
 
@@ -127,7 +128,12 @@ func TestTockenBlock(t *testing.T) {
 	}
 
 	wantBlock := DB.Block{
-		Justification: &DB.Block_Lock{},
+		Justification: &DB.Block_Transfer{
+			Transfer: &justifications.TranferToken{
+				HtlcSecretHash: "some",
+				Lock:           "some",
+			},
+		},
 
 		Signature:      "someSig",
 		PrevBlock:      "hashPrevBlock",
@@ -160,7 +166,6 @@ func TestTockenBlock(t *testing.T) {
 		if err != nil {
 			t.Fatalf("create chain bucket: %s", err)
 		}
-
 		tokenByte, nativeErr := json.Marshal(wantToken)
 		if nativeErr != nil {
 			t.Fatalf("(update) marshal token structure: %s", nativeErr)

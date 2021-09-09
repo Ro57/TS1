@@ -8,7 +8,7 @@ func TestAddress(t *testing.T) {
 		t.Fatalf("on create address %v", err)
 	}
 
-	isAddress := a.validate()
+	isAddress := a.Validate()
 	if !isAddress {
 		t.Fatalf("hash %v created as a address", a)
 	}
@@ -21,7 +21,7 @@ func TestBlock(t *testing.T) {
 		t.Fatalf("on create block %v", err)
 	}
 
-	isBlock := b.validate()
+	isBlock := b.Validate()
 	if !isBlock {
 		t.Fatalf("hash %v created as a block", b)
 	}
@@ -33,7 +33,7 @@ func TestTransaction(t *testing.T) {
 		t.Fatalf("on create transaction %v", err)
 	}
 
-	isTransaction := tx.validate()
+	isTransaction := tx.Validate()
 	if !isTransaction {
 		t.Fatalf("hash %v created as a transaction", tx)
 	}
@@ -45,7 +45,7 @@ func TestLock(t *testing.T) {
 		t.Fatalf("on create lock %v", err)
 	}
 
-	isLock := l.validate()
+	isLock := l.Validate()
 	if !isLock {
 		t.Fatalf("hash %v created as a lock", l)
 	}

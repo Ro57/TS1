@@ -740,10 +740,10 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	// On close pld node send stop signal to issuence server
 	defer func() { issuerEvent.StopSig <- struct{}{} }()
 
-	// TODO: implement error chanel and hadnle that on node close or exception
+	// TODO: implement error channel and handle that on node close or exception
 	if cfg.Pkt.Active {
 		replicator_mock.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent)
-		issuer_mock.RunServerServing(cfg.IssuenceServerAddress, cfg.ReplicationServerAddress, issuerEvent)
+		issuer_mock.RunServerServing(cfg.IssuenceServerAddress, cfg.ReplicationServerAddress, issuerEvent, activeChainControl.ChainIO)
 	}
 
 	// Initialize, and register our implementation of the gRPC interface

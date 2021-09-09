@@ -3,7 +3,6 @@ package issueancerpc
 import (
 	"context"
 	"fmt"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"io/ioutil"
 	"net"
 	"os"
@@ -16,10 +15,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/encoder"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/tokendb"
+	"github.com/pkt-cash/pktd/lnd/lnwallet"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
 	"github.com/pkt-cash/pktd/pktwallet/walletdb"
@@ -72,6 +73,7 @@ type Server struct {
 	events IssunceEvents
 	Client replicator.ReplicatorClient
 	cfg    *Config
+	chain  lnwallet.BlockChainIO
 }
 
 // New returns a new instance of the issueancerpc Issuer sub-server. We also return
@@ -126,7 +128,7 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return issuanceServer, macPermissions, nil
 }
 
-func RunServerServing(host string, replicationHost string, events IssunceEvents) {
+func RunServerServing(host string, replicationHost string, events IssunceEvents, chain lnwallet.BlockChainIO) {
 	client, closeConn, err := connectReplicatorClient(context.TODO(), replicationHost)
 	if err != nil {
 		panic(err)
@@ -136,6 +138,7 @@ func RunServerServing(host string, replicationHost string, events IssunceEvents)
 		child = &Server{
 			Client: client,
 			events: events,
+			chain:  chain,
 		}
 		root = grpc.NewServer()
 	)
@@ -237,22 +240,32 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
-	err := issueTokenDB(req).Native()
+	// issuing token
+	err := s.issueTokenDB(req).Native()
 	if err != nil {
 		return nil, err
 	}
 
+	// duplicate in the replicator
 	_, err = s.Client.IssueToken(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = generateGenesisBlock(req.Name)
+	// generate genesis block
+	genesisBlock, err := s.generateGenesisBlock(req.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO: implement sending the block to the replicator
+	// send block to the replicator
+	_, err = s.Client.SaveBlock(ctx, &replicator.SaveBlockRequest{
+		Name:  req.Name,
+		Block: genesisBlock,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &emptypb.Empty{}, nil
 }
@@ -310,7 +323,7 @@ func connectReplicatorClient(ctx context.Context, replicationHost string) (_ rep
 	return replicator.NewReplicatorClient(conn), conn.Close, nil
 }
 
-func issueTokenDB(req *replicator.IssueTokenRequest) er.R {
+func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 	return tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
 		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
 		if err != nil {
@@ -358,19 +371,27 @@ func issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 	})
 }
 
-func generateGenesisBlock(name string) (*DB.Block, error) {
+func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 	genesisBlock := &DB.Block{
 		PrevBlock:      "",
 		Justification:  nil, //TODO: setup the justification
 		Creation:       time.Now().Unix(),
 		State:          "",
-		PktBlockHash:   "", // TODO: implementation getting pkt block hash
-		PktBlockHeight: 0,  //TODO:  implementation getting pkt block height
+		PktBlockHash:   "",
+		PktBlockHeight: 0,
 		Height:         0,
 		Signature:      "",
 	}
 
-	err := tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
+	currentBlockHash, currentBlockHeight, err := s.chain.GetBestBlock()
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	genesisBlock.PktBlockHash = currentBlockHash.String()
+	genesisBlock.PktBlockHeight = currentBlockHeight
+
+	err = tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
 		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
 		if err != nil {
 			return err

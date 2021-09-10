@@ -818,14 +818,14 @@ func newRPCServer(
 	}
 
 	// Initialize rpc replicator client
-	replicatorClient, _, connerr := connectReplicatorClient(cfg.ReplicationServerAddress)
-	if connerr != nil {
-		return nil, er.E(errors.WithMessage(connerr, "connecting client to replication server"))
+	replicatorClient, _, connError := connectReplicatorClient(cfg.ReplicationServerAddress)
+	if connError != nil {
+		return nil, er.E(errors.WithMessage(connError, "connecting client to replication server"))
 	}
 
-	issuerClient, _, connerr := connectIssuerClient(cfg.IssuenceServerAddress)
-	if connerr != nil {
-		return nil, er.E(errors.WithMessage(connerr, "connecting client to replication server"))
+	issuerClient, _, connError := connectIssuerClient(cfg.IssuanceServerAddress)
+	if connError != nil {
+		return nil, er.E(errors.WithMessage(connError, "connecting client to replication server"))
 	}
 
 	// Finally, with all the pre-set up complete,  we can create the main

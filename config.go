@@ -335,7 +335,7 @@ type Config struct {
 
 	ReplicationServerAddress string `long:"replication-server-addr" description:"Offchain token exchange arbitr server"`
 
-	IssuenceServerAddress string `long:"issuence-server-addr" description:"Offchain token handler arbitr server"`
+	IssuanceServerAddress string `long:"issuance-server-addr" description:"Offchain token handler arbitr server"`
 }
 
 // DefaultConfig returns all default values for the Config struct.
@@ -393,6 +393,9 @@ func DefaultConfig() Config {
 			EstimateMode: defaultBitcoindEstimateMode,
 		},
 		Pkt: &lncfg.Chain{
+			ReplicationServerDbPath: DefaultLndDir + "/replication/",
+			IssuanceServerDbPath:    DefaultLndDir + "/issuance/",
+
 			MinHTLCIn:     chainreg.DefaultPktMinHTLCInMSat,
 			MinHTLCOut:    chainreg.DefaultPktMinHTLCOutMSat,
 			BaseFee:       chainreg.DefaultPktBaseFeeMSat,

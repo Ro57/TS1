@@ -25,8 +25,7 @@ func before() {
 }
 
 func Connect(path string) (*TokenStrikeDB, error) {
-	home, _ := os.UserHomeDir()
-	db, err := channeldb.Open(home + path)
+	db, err := channeldb.Open(path)
 	if err != nil {
 		return nil, err.Native()
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"time"
 
 	"github.com/pkt-cash/pktd/btcutil/er"
@@ -65,7 +66,10 @@ func issueToken(ctx *cli.Context) er.R {
 
 func extractTokenIssue(ctx *cli.Context) (*replicator.IssueTokenRequest, er.R) {
 	// Extract general token offer data
-	offer := &replicator.IssueTokenRequest{}
+	offer := &replicator.IssueTokenRequest{
+		Name:  "",
+		Offer: &DB.Token{},
+	}
 
 	offer.Name = ctx.String(flagTokenName)
 	if offer.Name == "" {

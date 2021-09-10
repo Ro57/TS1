@@ -10,6 +10,9 @@ type Chain struct {
 	Active   bool   `long:"active" description:"If the chain should be active or not."`
 	ChainDir string `long:"chaindir" description:"The directory to store the chain's data within."`
 
+	ReplicationServerDbPath string `long:"replication-db-path" description:"Path to database for replication server"`
+	IssuanceServerDbPath    string `long:"issuance-db-path" description:"Path to database for issuance server"`
+
 	Node string `long:"node" description:"The blockchain interface to use." choice:"btcd" choice:"bitcoind" choice:"neutrino" choice:"ltcd" choice:"litecoind"`
 
 	MainNet  bool `long:"mainnet" description:"Use the main network"`

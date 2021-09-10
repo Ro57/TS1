@@ -45,8 +45,9 @@ import (
 	"github.com/pkt-cash/pktd/lnd/keychain"
 	"github.com/pkt-cash/pktd/lnd/lncfg"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
-	issuer_mock "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuerrpc"
-	replicator_mock "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicatorrpc"
+	issuerrpc "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/issuerrpc"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/replicatorrpc"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/tokendb"
 	"github.com/pkt-cash/pktd/lnd/lnwallet"
 	"github.com/pkt-cash/pktd/lnd/lnwallet/btcwallet"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
@@ -726,15 +727,15 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 		return getListeners()
 	}
 
-	issuerEvent := issuer_mock.IssunceEvents{
+	issuerEvent := issuerrpc.IssunceEvents{
 		StopSig: make(chan struct{}),
 	}
 
-	replicatorEvent := replicator_mock.ReplicatorEvents{
+	replicatorEvent := replicatorrpc.ReplicatorEvents{
 		StopSig:          make(chan struct{}),
-		OpenChannelEvent: make(chan replicator_mock.OpenChannel),
+		OpenChannelEvent: make(chan replicatorrpc.OpenChannel),
 		OpenChannelError: make(chan error),
-		RevokeEvent:      make(chan replicator_mock.RevokeSig),
+		RevokeEvent:      make(chan replicatorrpc.RevokeSig),
 	}
 
 	// On close pld node send stop signal to issuence server
@@ -742,8 +743,24 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 
 	// TODO: implement error channel and handle that on node close or exception
 	if cfg.Pkt.Active {
-		replicator_mock.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent)
-		issuer_mock.RunServerServing(cfg.IssuenceServerAddress, cfg.ReplicationServerAddress, issuerEvent, activeChainControl.ChainIO)
+		replicationDB, err := tokendb.Connect(cfg.Pkt.ReplicationServerDbPath)
+		defer replicationDB.Close()
+		if err != nil {
+			err := er.Errorf("cannot open database for replication server: %v", err)
+			log.Error(err)
+			return err
+		}
+
+		issuanceDB, err := tokendb.Connect(cfg.Pkt.IssuanceServerDbPath)
+		defer issuanceDB.Close()
+		if err != nil {
+			err := er.Errorf("cannot open database for issuance server: %v", err)
+			log.Error(err)
+			return err
+		}
+
+		replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO)
+		issuerrpc.RunServerServing(cfg.IssuanceServerAddress, cfg.ReplicationServerAddress, issuerEvent, issuanceDB, activeChainControl.ChainIO)
 	}
 
 	// Initialize, and register our implementation of the gRPC interface
@@ -882,7 +899,7 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	return nil
 }
 
-func OpenChannelHanlder(open replicator_mock.OpenChannel, server *rpcServer) error {
+func OpenChannelHanlder(open replicatorrpc.OpenChannel, server *rpcServer) error {
 	connect := &lnrpc.ConnectPeerRequest{
 		Addr:    &open.Address,
 		Perm:    false,

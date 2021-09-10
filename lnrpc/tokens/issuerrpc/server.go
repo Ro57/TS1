@@ -2,6 +2,7 @@ package issueancerpc
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -74,6 +75,7 @@ type Server struct {
 	Client replicator.ReplicatorClient
 	cfg    *Config
 	chain  lnwallet.BlockChainIO
+	db     *tokendb.TokenStrikeDB
 }
 
 // New returns a new instance of the issueancerpc Issuer sub-server. We also return
@@ -128,7 +130,7 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return issuanceServer, macPermissions, nil
 }
 
-func RunServerServing(host string, replicationHost string, events IssunceEvents, chain lnwallet.BlockChainIO) {
+func RunServerServing(host string, replicationHost string, events IssunceEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) {
 	client, closeConn, err := connectReplicatorClient(context.TODO(), replicationHost)
 	if err != nil {
 		panic(err)
@@ -139,6 +141,7 @@ func RunServerServing(host string, replicationHost string, events IssunceEvents,
 			Client: client,
 			events: events,
 			chain:  chain,
+			db:     db,
 		}
 		root = grpc.NewServer()
 	)
@@ -241,13 +244,13 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
 	// issuing token
-	err := s.issueTokenDB(req).Native()
-	if err != nil {
-		return nil, err
+	errIssueToken := s.issueTokenDB(req)
+	if errIssueToken != nil {
+		return nil, errIssueToken.Native()
 	}
 
 	// duplicate in the replicator
-	_, err = s.Client.IssueToken(ctx, req)
+	_, err := s.Client.IssueToken(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -273,14 +276,14 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	resultList := []*replicator.Token{}
 
-	tokendb.View(func(tx walletdb.ReadTx) er.R {
+	err := s.db.View(func(tx walletdb.ReadTx) er.R {
 		rootBucket := tx.ReadBucket(tokensKey)
 
-		rootBucket.ForEach(func(k, _ []byte) er.R {
+		return rootBucket.ForEach(func(k, _ []byte) er.R {
 			tokenBucket := rootBucket.NestedReadBucket(k)
 
 			var dbToken DB.Token
-			err := json.Unmarshal(tokenBucket.Get(infoKey), dbToken)
+			err := json.Unmarshal(tokenBucket.Get(infoKey), &dbToken)
 			if err != nil {
 				return er.E(err)
 			}
@@ -294,9 +297,10 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 			resultList = append(resultList, &token)
 			return nil
 		})
-
-		return nil
 	})
+	if err != nil {
+		return nil, err.Native()
+	}
 
 	return &replicator.GetTokenListResponse{
 		Tokens: resultList,
@@ -324,7 +328,7 @@ func connectReplicatorClient(ctx context.Context, replicationHost string) (_ rep
 }
 
 func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
-	return tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
+	return s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
 		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
 		if err != nil {
 			return err
@@ -391,7 +395,7 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 	genesisBlock.PktBlockHash = currentBlockHash.String()
 	genesisBlock.PktBlockHeight = currentBlockHeight
 
-	err = tokendb.Update(func(tx walletdb.ReadWriteTx) er.R {
+	err = s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
 		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
 		if err != nil {
 			return err
@@ -405,16 +409,17 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 		}
 
 		hashState := encoder.CreateHash(state)
-		genesisBlock.State = string(hashState)
+		genesisBlock.State = hex.EncodeToString(hashState)
 
 		_, errMarshal := json.Marshal(genesisBlock)
 		if errMarshal != nil {
 			return err
 		}
 
-		// TODO: setup the signature
+		genesisBlock.Signature = genesisBlock.State // TODO: setup the signature
 
-		err = tokenBucket.Put(rootHashKey, []byte(genesisBlock.GetSignature()))
+		blockSignatureBytes := []byte(genesisBlock.GetSignature())
+		err = tokenBucket.Put(rootHashKey, blockSignatureBytes)
 		if err != nil {
 			return err
 		}
@@ -424,7 +429,11 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 			return er.E(errMarshal)
 		}
 
-		return tokenBucket.Put(chainKey, genBlockBytes)
+		chainBucket, err := tokenBucket.CreateBucketIfNotExists(chainKey)
+		if err != nil {
+			return err
+		}
+		return chainBucket.Put(blockSignatureBytes, genBlockBytes)
 	})
 	if err != nil {
 		return nil, err.Native()

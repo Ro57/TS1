@@ -409,7 +409,7 @@ func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerR
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
-	s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+	err := s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
 		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
 		if err != nil {
 			return err
@@ -454,6 +454,10 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 
 		return tokenBucket.Put(rootHashKey, []byte(""))
 	})
+	if err != nil {
+		return nil, err.Native()
+	}
+
 	return &emptypb.Empty{}, nil
 }
 
@@ -507,9 +511,37 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) GetToken(context.Context, *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
-	// TODO: implement me
-	return &replicator.GetTokenResponse{}, nil
+func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
+	response := &replicator.GetTokenResponse{
+		Token: &replicator.Token{
+			Name:  req.TokenId,
+			Token: &DB.Token{},
+			Root:  "",
+		},
+	}
+
+	err := s.db.View(func(tx walletdb.ReadTx) er.R {
+		rootBucket := tx.ReadBucket(tokensKey)
+		tokenBucket := rootBucket.NestedReadBucket([]byte(req.TokenId))
+
+		infoBytes := tokenBucket.Get(infoKey)
+		if infoBytes == nil {
+			return er.New("info does not exist")
+		}
+
+		err := json.Unmarshal(infoBytes, &response.Token.Token)
+		if err != nil {
+			return er.E(err)
+		}
+
+		response.Token.Root = string(tokenBucket.Get(rootHashKey))
+		return nil
+	})
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	return response, nil
 }
 
 // TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses

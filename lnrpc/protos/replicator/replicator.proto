@@ -167,5 +167,5 @@ message GetTokenRequest {
 }
 
 message GetTokenResponse {
-    Token tokens = 1;
+    Token token = 1;
 }

@@ -5770,6 +5770,14 @@
         }
       }
     },
+    "replicatorGetTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "$ref": "#/definitions/replicatorToken"
+        }
+      }
+    },
     "replicatorIssuerInfo": {
       "type": "object",
       "properties": {

@@ -150,7 +150,7 @@
     "replicatorGetTokenResponse": {
       "type": "object",
       "properties": {
-        "tokens": {
+        "token": {
           "$ref": "#/definitions/replicatorToken"
         }
       }

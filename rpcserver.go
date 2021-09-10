@@ -503,6 +503,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "read",
 		}},
+		"/lnrpc.Lightning/GetToken": {{
+			Entity: "proxy",
+			Action: "read",
+		}},
 		"/lnrpc.Lightning/GetTokenBalances": {{
 			Entity: "proxy",
 			Action: "read",
@@ -6960,6 +6964,15 @@ func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBal
 
 func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	resp, err := r.issuanceClient.GetTokenList(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("querying token offers: %s", err)
+	}
+
+	return resp, nil
+}
+
+func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
+	resp, err := r.replicatorClient.GetToken(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("querying token offers: %s", err)
 	}

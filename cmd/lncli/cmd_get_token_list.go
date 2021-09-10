@@ -10,7 +10,7 @@ import (
 
 // TODO: This command now breaked, need research server logic and repair it.
 var getTokenListCommand = cli.Command{
-	Name:     "issuedtokens",
+	Name:     "get-token-list",
 	Category: "Tokens",
 	Usage:    "List information about available token set per issuer.",
 	Description: `List information about available token offers per issuer. 
@@ -68,6 +68,48 @@ func getTokenList(ctx *cli.Context) er.R {
 		},
 	}
 	resp, err := client.GetTokenList(context.TODO(), req)
+	if err != nil {
+		return er.E(err)
+	}
+
+	printRespJSON(resp)
+
+	return nil
+}
+
+var getTokenCommand = cli.Command{
+	Name:        "get-token",
+	Category:    "Tokens",
+	Usage:       "List information about available token set per token id.",
+	Description: `List information about available token offers per token id.`,
+
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "tokenID",
+			Usage: "Returned token info of would belong token id",
+		},
+	},
+	Action: getToken,
+}
+
+func getToken(ctx *cli.Context) er.R {
+	client, cleanUp := getClient(ctx)
+	defer cleanUp()
+
+	var ( // Default request parameters - no pagination
+		tokenID string
+	)
+
+	// Acquire passed values, that are not zero
+	if v := ctx.String("tokenID"); v != "" {
+		tokenID = v
+	}
+
+	// Request offers
+	req := &replicator.GetTokenRequest{
+		TokenId: tokenID,
+	}
+	resp, err := client.GetToken(context.TODO(), req)
 	if err != nil {
 		return er.E(err)
 	}

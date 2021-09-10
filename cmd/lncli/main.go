@@ -363,6 +363,7 @@ func main() {
 
 		getTokenOffersCommand,
 		getTokenListCommand,
+		getTokenCommand,
 		getTokenBalancesCommand,
 		signTokenSaleCommand,
 		issueTokenCommand,

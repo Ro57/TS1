@@ -537,11 +537,16 @@ service Lightning {
     rpc GetTokenOffers (replicator.GetTokenOffersRequest)
         returns (replicator.GetTokenOffersResponse);
 
-    // lncli: `gettokenlist`
+    // lncli: `get-token-list`
     // Proxies initial request to the replicator for available issuer token
     // offers
     rpc GetTokenList (replicator.GetTokenListRequest)
         returns (replicator.GetTokenListResponse);
+
+    // lncli: `get-token`
+    // Proxies initial request to the replicator for token info
+    rpc GetToken (replicator.GetTokenRequest)
+        returns (replicator.GetTokenResponse);
 
     // lncli: `signtokensell`
     // Proxies initial request to the issuer for a signature

@@ -21,7 +21,7 @@
         },
         "lock": {
           "type": "string",
-          "title": "lock_id — hash with information abiut lock justification"
+          "title": "lock_id — hash with information about lock justification"
         }
       },
       "title": "LockTimeOver timeout for token locking"

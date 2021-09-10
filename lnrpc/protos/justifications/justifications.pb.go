@@ -116,7 +116,7 @@ func (m *TranferToken) GetLock() string {
 type LockTimeOver struct {
 	// proof_elapsed — PKT block hash confirming expiration lock
 	ProofElapsed string `protobuf:"bytes,1,opt,name=proof_elapsed,json=proofElapsed,proto3" json:"proof_elapsed,omitempty"`
-	// lock_id — hash with information abiut lock justification
+	// lock_id — hash with information about lock justification
 	Lock                 string   `protobuf:"bytes,2,opt,name=lock,proto3" json:"lock,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

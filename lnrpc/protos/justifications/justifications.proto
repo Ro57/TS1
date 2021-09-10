@@ -24,6 +24,6 @@ message TranferToken {
 message LockTimeOver {
     // proof_elapsed — PKT block hash confirming expiration lock
     string proof_elapsed = 1;
-    // lock_id — hash with information abiut lock justification
+    // lock_id — hash with information about lock justification
     string lock = 2;
 }

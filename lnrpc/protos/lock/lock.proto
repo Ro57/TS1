@@ -12,8 +12,8 @@ message Lock {
     string recipient = 2;
     // sender — owner of the wallet address to which tokens will be returned
     string sender = 3;
-    // htlc — hash of contract
-    string htlc = 4;
+    // htlc_secret_hash — hash of contract
+    string htlc_secret_hash = 4;
     // proof_count — lock expiration time in PKT blocks
     int32 proof_count = 5;
     // creation_height — creation height in token blockchain

@@ -2,12 +2,14 @@
 package signer
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/pkt-cash/pktd/chaincfg/chainhash"
+	"github.com/pkt-cash/pktd/lnd/chainreg"
+	"github.com/pkt-cash/pktd/lnd/keychain"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	hh "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/hashHelper"
 )
@@ -17,12 +19,17 @@ type SignBlock struct {
 	block DB.Block
 	// block prefix used in start of hash string
 	prefix string
+	// signer used for sign block
+	signer *keychain.PubKeyDigestSigner
 }
 
-func NewSingBlock(block DB.Block) (*SignBlock, error) {
+func NewSingBlock(block DB.Block, cc *chainreg.ChainControl, nodeKeyDesc *keychain.KeyDescriptor) (*SignBlock, error) {
 	signBlock := &SignBlock{
 		block:  block,
 		prefix: "block",
+		signer: keychain.NewPubKeyDigestSigner(
+			*nodeKeyDesc, cc.KeyRing,
+		),
 	}
 
 	_, err := signBlock.Sign()
@@ -46,7 +53,14 @@ func (s *SignBlock) Sign() (hh.Hash, error) {
 		return nil, fmt.Errorf("on marshal: %v", err)
 	}
 
-	sig := sha256.Sum256(buf)
+	var digest [32]byte
+	copy(digest[:], chainhash.DoubleHashB(buf))
+
+	sig, errr := s.signer.SignDigestCompact(digest)
+
+	if errr != nil {
+		return nil, errr.Native()
+	}
 	s.block.Signature = s.prefix + hex.EncodeToString(sig[:])
 
 	blockSig, err := hh.NewBlock(s.block.Signature)
@@ -65,8 +79,10 @@ func (s *SignBlock) Validate() (bool, error) {
 		return false, err
 	}
 
-	hash := sha256.Sum256(buf)
-	blockHash := s.prefix + hex.EncodeToString(hash[:])
+	var digest [32]byte
+	copy(digest[:], chainhash.DoubleHashB(buf))
+
+	blockHash := s.prefix + hex.EncodeToString(digest[:])
 	s.block.Signature = sig
 
 	return blockHash == sig, nil

@@ -38,6 +38,10 @@ func Connect(path string) (*TokenStrikeDB, error) {
 	return tsDB, nil
 }
 
+func (t *TokenStrikeDB) GetClient() *channeldb.DB {
+	return &t.client
+}
+
 func (t *TokenStrikeDB) Close() {
 	t.client.Close()
 }

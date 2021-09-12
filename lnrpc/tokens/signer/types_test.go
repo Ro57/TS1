@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pkt-cash/pktd/lnd/chainreg"
+	"github.com/pkt-cash/pktd/lnd/keychain"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/justifications"
 	hashhelper "github.com/pkt-cash/pktd/lnd/lnrpc/tokens/hashHelper"
@@ -25,7 +27,19 @@ func TestBlock(t *testing.T) {
 		Height:         10,
 	}
 
-	signBlock, err := NewSingBlock(wantBlock)
+	activeChainControl := &chainreg.ChainControl{}
+
+	idKeyDesc, errr := activeChainControl.KeyRing.DeriveKey(
+		keychain.KeyLocator{
+			Family: keychain.KeyFamilyNodeKey,
+			Index:  0,
+		},
+	)
+	if errr != nil {
+		t.Fatalf("generate key descriptor: %v", errr.Native())
+	}
+
+	signBlock, err := NewSingBlock(wantBlock, activeChainControl, &idKeyDesc)
 	if err != nil {
 		t.Fatalf("Create singed block: %v", err)
 	}

@@ -22,8 +22,8 @@ message DuplicateBlock {
 message DenialService {
     // lock — hash of ignored lock
     string lock = 1;
-    // htlc_secret_hash — htlc genereted issuer
-    string htlc_secret_hash = 2;
+    // htlc_secret — htlc genereted issuer
+    string htlc_secret = 2;
     // proof_mercle_branch — proof from PKT blockchain
     string proof_mercle_branch = 3; 
 }

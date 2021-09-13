@@ -52,10 +52,10 @@ message Token {
     int32 expiration = 2;
     // creation — date of token creation in unix time format
     int64 creation = 3;
-    // urls — set of urls for access to blockchain
-    string url = 4;
     // issuer_pubkey — public key of issuer used for signing
-    string issuer_pubkey = 5;
+    string issuer_pubkey = 4;
+    // urls — set of urls for access to blockchain
+    repeated string  urls = 5;
 }
 
 // State is a current state of blockchain

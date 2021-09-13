@@ -14,8 +14,8 @@ message LockToken {
 
 // TranferToken receiving funds for tokens and unlcok them
 message TranferToken {
-    // htlc_secret_hash — htlc genereted issuer
-    string htlc_secret_hash = 1;
+    // htlc_secret — htlc genereted issuer
+    string htlc_secret = 1;
     // lock — hash information about lock
     string lock = 2;
 }

@@ -1,10 +1,13 @@
 package signer
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/pkt-cash/pktd/lnd/chainreg"
+	"github.com/pkt-cash/pktd/lnd/keychain"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/justifications"
 )
@@ -30,14 +33,26 @@ func TestSigner(t *testing.T) {
 		prefix: "block",
 	}
 
+	activeChainControl := &chainreg.ChainControl{}
+	fmt.Print("cc created")
+	idKeyDesc, errr := activeChainControl.KeyRing.DeriveKey(
+		keychain.KeyLocator{
+			Family: keychain.KeyFamilyNodeKey,
+			Index:  0,
+		},
+	)
+	if errr != nil {
+		t.Fatalf("generate key descriptor: %v", errr.Native())
+	}
+
 	var sign SignBlock
 
-	err := NewSigner(wantBlock, &sign)
+	err := NewSigner(wantBlock, &sign, activeChainControl, &idKeyDesc)
 	if err != nil {
 		t.Fatalf("on create signer %v", err)
 	}
 
-	wantSignBlock, err := NewSingBlock(wantBlock)
+	wantSignBlock, err := NewSingBlock(wantBlock, activeChainControl, &idKeyDesc)
 	if err != nil {
 		t.Fatalf("create sign block from want block: %v", err)
 	}
@@ -57,6 +72,6 @@ func TestSigner(t *testing.T) {
 	}
 
 	if sign.prefix != wantSigner.prefix {
-		t.Fatalf("want prefix %s but get %v", wantSigner.prefix, sign)
+		t.Fatalf("want prefix %s but get %s", wantSigner.prefix, sign.prefix)
 	}
 }

@@ -39,9 +39,9 @@
     "justificationsTranferToken": {
       "type": "object",
       "properties": {
-        "htlc_secret_hash": {
+        "htlc_secret": {
           "type": "string",
-          "title": "htlc_secret_hash — htlc genereted issuer"
+          "title": "htlc_secret — htlc genereted issuer"
         },
         "lock": {
           "type": "string",
@@ -66,9 +66,9 @@
           "type": "string",
           "title": "sender — owner of the wallet address to which tokens will be returned"
         },
-        "htlc": {
+        "htlc_secret_hash": {
           "type": "string",
-          "title": "htlc — hash of contract"
+          "title": "htlc_secret_hash — hash of contract"
         },
         "proof_count": {
           "type": "integer",
@@ -340,13 +340,16 @@
           "format": "int64",
           "title": "creation — date of token creation in unix time format"
         },
-        "url": {
-          "type": "string",
-          "title": "urls — set of urls for access to blockchain"
-        },
         "issuer_pubkey": {
           "type": "string",
           "title": "issuer_pubkey — public key of issuer used for signing"
+        },
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "urls — set of urls for access to blockchain"
         }
       },
       "title": "Token contain information about token"

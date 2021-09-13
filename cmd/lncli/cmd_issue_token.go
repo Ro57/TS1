@@ -39,7 +39,7 @@ var issueTokenFlags = []cli.Flag{
 		Name:  flagExpirationBlockNumber,
 		Usage: "number of PKT block after which the token expires",
 	},
-	cli.StringFlag{
+	cli.StringSliceFlag{
 		Name:  flagUrl,
 		Usage: "urls for access to blockchain",
 	},
@@ -86,8 +86,8 @@ func extractTokenIssue(ctx *cli.Context) (*replicator.IssueTokenRequest, er.R) {
 		return nil, er.Errorf("empty %q argument provided", flagExpirationBlockNumber)
 	}
 
-	offer.Offer.Url = ctx.String(flagUrl)
-	if offer.Offer.Url == "" {
+	offer.Offer.Urls = ctx.StringSlice(flagUrl)
+	if len(offer.Offer.Urls) == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagUrl)
 	}
 

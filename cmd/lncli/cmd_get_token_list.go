@@ -101,8 +101,9 @@ func getToken(ctx *cli.Context) er.R {
 	)
 
 	// Acquire passed values, that are not zero
-	if v := ctx.String("tokenID"); v != "" {
-		tokenID = v
+	tokenID = ctx.String("tokenID")
+	if tokenID == "" {
+		return er.New("token id cannot is empty")
 	}
 
 	// Request offers

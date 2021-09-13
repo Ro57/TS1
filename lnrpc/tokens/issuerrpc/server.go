@@ -278,6 +278,9 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 
 	err := s.db.View(func(tx walletdb.ReadTx) er.R {
 		rootBucket := tx.ReadBucket(tokensKey)
+		if rootBucket == nil {
+			return er.New("tokens do not exist")
+		}
 
 		return rootBucket.ForEach(func(k, _ []byte) er.R {
 			tokenBucket := rootBucket.NestedReadBucket(k)

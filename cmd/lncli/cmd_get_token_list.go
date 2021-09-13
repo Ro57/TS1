@@ -34,6 +34,10 @@ can be achieved by providing additional flags to the command.`,
 			Name:  "offset",
 			Usage: "(optional) If a value provided, returned offers would be at the specified offset \"height\"",
 		},
+		cli.BoolFlag{
+			Name:  "local",
+			Usage: "(optional) If a value provided, getting data from local database (default false)",
+		},
 	},
 	Action: getTokenList,
 }
@@ -66,6 +70,7 @@ func getTokenList(ctx *cli.Context) er.R {
 			Limit:  limit,
 			Offset: offset,
 		},
+		Local: ctx.Bool("local"),
 	}
 	resp, err := client.GetTokenList(context.TODO(), req)
 	if err != nil {

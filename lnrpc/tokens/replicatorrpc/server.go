@@ -21,6 +21,7 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/jwtstore"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/tokendb"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/utils"
 	"github.com/pkt-cash/pktd/lnd/lnwallet"
 	"github.com/pkt-cash/pktd/lnd/macaroons"
 	"github.com/pkt-cash/pktd/pktlog/log"
@@ -65,12 +66,6 @@ var (
 	// that we expect to find via a file handle within the main
 	// configuration file in this package.
 	DefaultReplicatorMacFilename = "replicator.macaroon"
-
-	infoKey     = []byte("info")
-	stateKey    = []byte("state")
-	chainKey    = []byte("chain")
-	tokensKey   = []byte("tokens")
-	rootHashKey = []byte("rootHash")
 )
 
 type userInfo struct {
@@ -410,7 +405,7 @@ func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerR
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
 	err := s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
-		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
+		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
 		if err != nil {
 			return err
 		}
@@ -421,20 +416,20 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 		}
 
 		// if information about token did not exist then create
-		if tokenBucket.Get(infoKey) == nil {
+		if tokenBucket.Get(utils.InfoKey) == nil {
 			tokenBytes, err := json.Marshal(req.Offer)
 			if err != nil {
 				return er.E(err)
 			}
 
-			errPut := tokenBucket.Put(infoKey, tokenBytes)
+			errPut := tokenBucket.Put(utils.InfoKey, tokenBytes)
 			if errPut != nil {
 				return errPut
 			}
 		}
 
 		// if token state did not exist then create
-		if tokenBucket.Get(stateKey) == nil {
+		if tokenBucket.Get(utils.StateKey) == nil {
 			state := DB.State{
 				Token:  req.Offer,
 				Owners: nil,
@@ -446,13 +441,13 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 				return er.E(err)
 			}
 
-			errPut := tokenBucket.Put(stateKey, stateBytes)
+			errPut := tokenBucket.Put(utils.StateKey, stateBytes)
 			if errPut != nil {
 				return errPut
 			}
 		}
 
-		return tokenBucket.Put(rootHashKey, []byte(""))
+		return tokenBucket.Put(utils.RootHashKey, []byte(""))
 	})
 	if err != nil {
 		return nil, err.Native()
@@ -462,7 +457,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	tokenList, err := s.allTokensFromIssuer(req.IssuerId)
+	tokenList, err := s.allTokensFromIssuer()
 	if err != nil {
 		return nil, err
 	}
@@ -476,19 +471,19 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 
 func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest) (*empty.Empty, error) {
 	err := s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
-		rootBucket, err := tx.CreateTopLevelBucket(tokensKey)
+		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
 		if err != nil {
 			return err
 		}
 
 		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Name))
 
-		if string(tokenBucket.Get(rootHashKey)) != req.Block.PrevBlock {
+		if string(tokenBucket.Get(utils.RootHashKey)) != req.Block.PrevBlock {
 			return er.New("invalid hash of the previous block")
 		}
 
 		blockSignatureBytes := []byte(req.Block.GetSignature())
-		err = tokenBucket.Put(rootHashKey, blockSignatureBytes)
+		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
 		if err != nil {
 			return err
 		}
@@ -498,7 +493,7 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 			return er.E(errMarshal)
 		}
 
-		chainBucket, err := tokenBucket.CreateBucketIfNotExists(chainKey)
+		chainBucket, err := tokenBucket.CreateBucketIfNotExists(utils.ChainKey)
 		if err != nil {
 			return err
 		}
@@ -521,10 +516,10 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 	}
 
 	err := s.db.View(func(tx walletdb.ReadTx) er.R {
-		rootBucket := tx.ReadBucket(tokensKey)
+		rootBucket := tx.ReadBucket(utils.TokensKey)
 		tokenBucket := rootBucket.NestedReadBucket([]byte(req.TokenId))
 
-		infoBytes := tokenBucket.Get(infoKey)
+		infoBytes := tokenBucket.Get(utils.InfoKey)
 		if infoBytes == nil {
 			return er.New("info does not exist")
 		}
@@ -534,7 +529,7 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 			return er.E(err)
 		}
 
-		response.Token.Root = string(tokenBucket.Get(rootHashKey))
+		response.Token.Root = string(tokenBucket.Get(utils.RootHashKey))
 		return nil
 	})
 	if err != nil {
@@ -545,33 +540,10 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 }
 
 // TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses
-func (s *Server) allTokensFromIssuer(issuer string) ([]*replicator.Token, error) {
-	resultList := []*replicator.Token{}
-
-	err := s.db.View(func(tx walletdb.ReadTx) er.R {
-		rootBucket := tx.ReadBucket(tokensKey)
-
-		return rootBucket.ForEach(func(k, _ []byte) er.R {
-			tokenBucket := rootBucket.NestedReadBucket(k)
-
-			var dbToken DB.Token
-			err := json.Unmarshal(tokenBucket.Get(infoKey), &dbToken)
-			if err != nil {
-				return er.E(err)
-			}
-
-			token := replicator.Token{
-				Name:  string(k),
-				Token: &dbToken,
-				Root:  string(tokenBucket.Get(rootHashKey)),
-			}
-
-			resultList = append(resultList, &token)
-			return nil
-		})
-	})
+func (s *Server) allTokensFromIssuer() ([]*replicator.Token, error) {
+	resultList, err := utils.GetTokenList(s.db)
 	if err != nil {
-		return nil, err.Native()
+		return nil, err
 	}
 
 	return resultList, nil

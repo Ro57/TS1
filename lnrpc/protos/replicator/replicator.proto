@@ -55,6 +55,8 @@ message GetTokenListRequest {
     string issuer_id = 1;
     // params of paginaton
     replicator.Pagination params = 2;
+    // local its provide getting data from local database
+    bool local = 3;
 }
 
 // GetTokenListResponse — list of tokens with additional info

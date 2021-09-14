@@ -135,15 +135,15 @@ func TestTockenBlock(t *testing.T) {
 		Count:        200,
 		Expiration:   wantExpBlockNumber,
 		Creation:     wantCreateTime.UnixNano(),
-		Url:          "https://some.token",
+		Urls:         []string{"https://some.token"},
 		IssuerPubkey: "issuerPublicKey",
 	}
 
 	wantBlock := DB.Block{
 		Justification: &DB.Block_Transfer{
 			Transfer: &justifications.TranferToken{
-				HtlcSecretHash: "some",
-				Lock:           "some",
+				HtlcSecret: "some",
+				Lock:       "some",
 			},
 		},
 

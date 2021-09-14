@@ -15,8 +15,8 @@ func TestBlock(t *testing.T) {
 	wantBlock := DB.Block{
 		Justification: &DB.Block_Transfer{
 			Transfer: &justifications.TranferToken{
-				HtlcSecretHash: "some",
-				Lock:           "some",
+				HtlcSecret: "some",
+				Lock:       "some",
 			},
 		},
 		PrevBlock:      "hashPrevBlock",

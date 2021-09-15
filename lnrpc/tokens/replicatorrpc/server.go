@@ -116,6 +116,8 @@ type token struct {
 	validTime int64
 }
 
+var _ replicator.ReplicatorServer = (*Server)(nil)
+
 // New returns a new instance of the replicatorrpc Repicator sub-server. We also return
 // the set of permissions for the macaroons that we may create within this
 // method. If the macaroons we need aren't found in the filepath, then we'll
@@ -454,6 +456,10 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) LockToken(ctx context.Context, req *replicator.LockTokenRequest) (*replicator.LockTokenResponse, error) {
+	return nil, nil
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {

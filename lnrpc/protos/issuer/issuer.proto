@@ -4,6 +4,7 @@ package issuer;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer";
 
+import "protos/DB/tokendb.proto";
 import "google/protobuf/empty.proto";
 import "protos/replicator/replicator.proto";
 
@@ -24,10 +25,21 @@ service IssuerService {
     rpc IssueToken(replicator.IssueTokenRequest) 
         returns (google.protobuf.Empty);
 
-    // GetTokenList — return list of issued token with information about
+    // GetTokenList — Return list of issued token with information about
     // expiration time and fix price.
     rpc GetTokenList(replicator.GetTokenListRequest) 
         returns(replicator.GetTokenListResponse);
+
+    // LockToken — Return hash of lock token for verify htlc and information
+    // about transaction
+    rpc LockToken(replicator.LockTokenRequest) 
+        returns(LockTokenResponse);
+}
+
+// LockTokenResponse — send new block to replication server for generate lockID
+message LockTokenResponse {
+    // block — lock block for generation hash
+    tokendb.Block block = 1;
 }
 
 // SignTokenSellRequest — info about sell token

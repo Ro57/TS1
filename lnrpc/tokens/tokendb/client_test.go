@@ -127,7 +127,7 @@ func TestEmployeeUpdateView(t *testing.T) {
 	}
 }
 
-func TestTockenBlock(t *testing.T) {
+func TestTokenBlock(t *testing.T) {
 	var wantExpBlockNumber int32 = 2000
 	wantCreateTime := time.Now()
 	tokenName := "smt"

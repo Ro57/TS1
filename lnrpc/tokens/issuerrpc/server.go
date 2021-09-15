@@ -18,6 +18,8 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/justifications"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/lock"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/encoder"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/tokendb"
@@ -268,6 +270,35 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	return &emptypb.Empty{}, nil
 }
 
+func (s *Server) LockToken(ctx context.Context, req *replicator.LockTokenRequest) (*issuer.LockTokenResponse, error) {
+	// lock token
+	errLockToken := s.lockTokenDB(req)
+	if errLockToken != nil {
+		return nil, errLockToken.Native()
+	}
+
+	// generate lock block
+	lockBlock, err := s.generateLockBlock(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// send block to the replicator
+	_, err = s.Client.SaveBlock(ctx, &replicator.SaveBlockRequest{
+		Name:  req.Token,
+		Block: lockBlock,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &issuer.LockTokenResponse{
+		Block: lockBlock,
+	}
+
+	return resp, nil
+}
+
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	if req.Local {
 		resultList, err := utils.GetTokenList(s.db)
@@ -351,6 +382,163 @@ func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 	})
 }
 
+func (s *Server) lockTokenDB(req *replicator.LockTokenRequest) er.R {
+	return s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		var block DB.Block
+		var oldState DB.State
+
+		rootBucket := tx.ReadWriteBucket(utils.TokensKey)
+
+		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Token))
+
+		// if information about token did not exist then create
+		if tokenBucket.Get(utils.InfoKey) == nil {
+			return er.Errorf("token %s without information", req.Token)
+		}
+
+		jsonBlock := tokenBucket.Get(utils.RootHashKey)
+		if jsonBlock == nil {
+			return er.Errorf("not found last block")
+		}
+
+		err := json.Unmarshal(jsonBlock, block)
+		if err != nil {
+			return er.Errorf("unmarshal block form json: %v", err)
+		}
+
+		jsonState := tokenBucket.Get(utils.StateKey)
+		if jsonState == nil {
+			return er.Errorf("not found state")
+		}
+
+		err = json.Unmarshal(jsonState, oldState)
+		if err != nil {
+			return er.Errorf("unmarshal state form json: %v", err)
+		}
+
+		state := DB.State{
+			Token:  oldState.Token,
+			Owners: oldState.Owners,
+			Locks: append(oldState.Locks, &lock.Lock{
+				Count:     req.GetCount(),
+				Recipient: req.GetRecipient(),
+				// TODO: change on real issuer wallet address
+				Sender:         "plk1sender",
+				HtlcSecretHash: req.GetHtlc(),
+				// TODO: get proof count from config
+				ProofCount:     1000,
+				CreationHeight: block.Height + 1,
+			}),
+		}
+
+		stateBytes, err := json.Marshal(state)
+		if err != nil {
+			return er.Errorf("marshal new state: %v", err)
+		}
+
+		errPut := tokenBucket.Put(utils.StateKey, stateBytes)
+		if errPut != nil {
+			return errPut
+		}
+
+		return nil
+	})
+}
+
+func (s *Server) generateLockID(blockLock DB.Block_Lock) (*string, error) {
+	lock := blockLock.Lock.Lock
+
+	jsonLock, err := json.Marshal(lock)
+	if err != nil {
+		return nil, err
+	}
+
+	hashLock := encoder.CreateHash(jsonLock)
+	lockID := hex.EncodeToString(hashLock)
+	return &lockID, nil
+}
+
+func (s *Server) generateLockBlock(req *replicator.LockTokenRequest) (*DB.Block, error) {
+	var state DB.State
+	var block DB.Block
+
+	lockBlock := &DB.Block{
+		Justification: &DB.Block_Lock{},
+		Creation:      time.Now().Unix(),
+	}
+
+	currentBlockHash, currentBlockHeight, err := s.chain.GetBestBlock()
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	lockBlock.PktBlockHash = currentBlockHash.String()
+	lockBlock.PktBlockHeight = currentBlockHeight
+
+	err = s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
+		if err != nil {
+			return err
+		}
+
+		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Token))
+
+		lastHash := tokenBucket.Get(utils.RootHashKey)
+		if lastHash == nil {
+			return er.Errorf("not found last block hash")
+		}
+
+		jsonBlock := tokenBucket.Get(lastHash)
+		if jsonBlock == nil {
+			return er.Errorf("not found last block hash")
+		}
+
+		nativeErr := json.Unmarshal(jsonBlock, block)
+		if nativeErr != nil {
+			return er.Errorf("unmarshal block form json: %v", nativeErr)
+		}
+
+		jsonState := tokenBucket.Get(utils.StateKey)
+		if jsonState == nil {
+			return er.New("state is not exist")
+		}
+
+		nativeErr = json.Unmarshal(jsonState, state)
+		if nativeErr != nil {
+			return er.Errorf("marshal new state: %v", nativeErr)
+		}
+
+		lock := state.Locks[len(state.Locks)-1]
+		lockBlock.Justification = &DB.Block_Lock{Lock: &justifications.LockToken{Lock: lock}}
+		lockBlock.Height = block.Height + 1
+		lockBlock.PrevBlock = string(lastHash)
+
+		hashState := encoder.CreateHash(jsonState)
+		lockBlock.State = hex.EncodeToString(hashState)
+
+		lockBlockBytes, nativeErr := json.Marshal(lockBlock)
+		if nativeErr != nil {
+			return err
+		}
+
+		hashByte := encoder.CreateHash(lockBlockBytes)
+		err = tokenBucket.Put(utils.RootHashKey, hashByte)
+		if err != nil {
+			return err
+		}
+
+		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
+
+		return chainBucket.Put(hashByte, lockBlockBytes)
+	})
+
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	return lockBlock, nil
+}
+
 func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 	genesisBlock := &DB.Block{
 		PrevBlock:      "",
@@ -409,6 +597,7 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 		if err != nil {
 			return err
 		}
+
 		return chainBucket.Put(blockSignatureBytes, genBlockBytes)
 	})
 	if err != nil {

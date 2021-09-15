@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	InfoKey     = []byte("info")
-	StateKey    = []byte("state")
-	ChainKey    = []byte("chain")
-	TokensKey   = []byte("tokens")
+	InfoKey   = []byte("info")
+	StateKey  = []byte("state")
+	ChainKey  = []byte("chain")
+	TokensKey = []byte("tokens")
+	// rootHash is a hash of last block in chain
 	RootHashKey = []byte("rootHash")
 )
 

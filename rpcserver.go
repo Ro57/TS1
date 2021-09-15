@@ -519,6 +519,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "write",
 		}},
+		"/lnrpc.Lightning/LockToken": {{
+			Entity: "proxy",
+			Action: "write",
+		}},
 	}
 }
 
@@ -6973,7 +6977,7 @@ func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBal
 func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	resp, err := r.issuanceClient.GetTokenList(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("querying token offers: %s", err)
+		return nil, fmt.Errorf("get token list: %s", err)
 	}
 
 	return resp, nil
@@ -6982,7 +6986,7 @@ func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenLi
 func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
 	resp, err := r.replicatorClient.GetToken(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("querying token offers: %s", err)
+		return nil, fmt.Errorf("get only one token: %s", err)
 	}
 
 	return resp, nil
@@ -6992,7 +6996,7 @@ func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRe
 
 	resp, err := r.issuanceClient.IssueToken(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("requesting token sell signature: %s", err)
+		return nil, fmt.Errorf("issue new token: %s", err)
 	}
 	return resp, nil
 }

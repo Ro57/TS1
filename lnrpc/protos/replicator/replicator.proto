@@ -38,9 +38,6 @@ service Replicator {
     rpc GetTokenList(GetTokenListRequest)
         returns(GetTokenListResponse);
 
-    // LockToken — Create new lock and generate new block with information
-    // about it. Return hash of lock structure
-    rpc LockToken(LockTokenRequest) returns(LockTokenResponse);
 }
 
 message GetTokenOffersRequest {
@@ -174,22 +171,4 @@ message GetTokenRequest {
 
 message GetTokenResponse {
     Token token = 1;
-}
-
-// LockTokenRequest send information about token
-message LockTokenRequest {
-    // token — token name
-    string token = 1;
-    // count — number of tokens to lock
-    int64 count = 2;
-    // htlc — hash of preimagine
-    string htlc = 3;
-    // recipient — wallet addres of new owner of tokens
-    string recipient = 4;
-    // proof_count — lock expiration time in PKT blocks
-    int32 proof_count = 5;
-}
-
-message LockTokenResponse {
-    string lock = 1;
 }

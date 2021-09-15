@@ -15,12 +15,12 @@
     "issuerLockTokenResponse": {
       "type": "object",
       "properties": {
-        "block": {
-          "$ref": "#/definitions/tokendbBlock",
-          "title": "block — lock block for generation hash"
+        "lock_id": {
+          "type": "string",
+          "title": "lock_id — hash of lock"
         }
       },
-      "title": "LockTokenResponse — send new block to replication server for generate lockID"
+      "title": "LockTokenResponse response with hash of lock"
     },
     "issuerSignTokenSellResponse": {
       "type": "object",
@@ -31,81 +31,6 @@
         }
       },
       "title": "SignTokenSellResponse — info about sign offer"
-    },
-    "justificationsLockTimeOver": {
-      "type": "object",
-      "properties": {
-        "proof_elapsed": {
-          "type": "string",
-          "title": "proof_elapsed — PKT block hash confirming expiration lock"
-        },
-        "lock": {
-          "type": "string",
-          "title": "lock_id — hash with information about lock justification"
-        }
-      },
-      "title": "LockTimeOver timeout for token locking"
-    },
-    "justificationsLockToken": {
-      "type": "object",
-      "properties": {
-        "lock": {
-          "$ref": "#/definitions/lockLock",
-          "title": "lock — information about lock"
-        }
-      },
-      "title": "LockToken the token locking"
-    },
-    "justificationsTranferToken": {
-      "type": "object",
-      "properties": {
-        "htlc_secret": {
-          "type": "string",
-          "title": "htlc_secret — htlc genereted issuer"
-        },
-        "lock": {
-          "type": "string",
-          "title": "lock — hash information about lock"
-        }
-      },
-      "title": "TranferToken receiving funds for tokens and unlcok them"
-    },
-    "lockLock": {
-      "type": "object",
-      "properties": {
-        "count": {
-          "type": "string",
-          "format": "int64",
-          "title": "count — number of sending tokens"
-        },
-        "recipient": {
-          "type": "string",
-          "title": "recipient — wallet addres of new owner of tokens"
-        },
-        "sender": {
-          "type": "string",
-          "title": "sender — owner of the wallet address to which tokens will be returned"
-        },
-        "htlc_secret_hash": {
-          "type": "string",
-          "title": "htlc_secret_hash — hash of contract"
-        },
-        "proof_count": {
-          "type": "integer",
-          "format": "int32",
-          "title": "proof_count — lock expiration time in PKT blocks"
-        },
-        "creation_height": {
-          "type": "string",
-          "format": "uint64",
-          "title": "creation_height — creation height in token blockchain"
-        },
-        "signature": {
-          "type": "string",
-          "title": "signature generated with old owner private key"
-        }
-      },
-      "title": "Lock contain information about tokens and contract for transferring"
     },
     "protobufAny": {
       "type": "object",
@@ -238,55 +163,6 @@
           }
         }
       }
-    },
-    "tokendbBlock": {
-      "type": "object",
-      "properties": {
-        "prev_block": {
-          "type": "string",
-          "title": "prev_block — hash of previous block"
-        },
-        "lock": {
-          "$ref": "#/definitions/justificationsLockToken",
-          "title": "lock — payload with lock"
-        },
-        "transfer": {
-          "$ref": "#/definitions/justificationsTranferToken",
-          "title": "transfer — payload with transaction info"
-        },
-        "lock_over": {
-          "$ref": "#/definitions/justificationsLockTimeOver",
-          "title": "lock_over — payload with lock time over"
-        },
-        "creation": {
-          "type": "string",
-          "format": "int64",
-          "title": "creation — date of block creation in unix time format"
-        },
-        "state": {
-          "type": "string",
-          "title": "state — hash of state structure containing locks, owners and meta token \ninfo"
-        },
-        "pkt_block_hash": {
-          "type": "string",
-          "title": "pkt_block_hash —  the hash of the most recent PKT block"
-        },
-        "pkt_block_height": {
-          "type": "integer",
-          "format": "int32",
-          "title": "pkt_block_height — the height of the most recent PKT block"
-        },
-        "height": {
-          "type": "string",
-          "format": "uint64",
-          "title": "height — the current height of this TokenStrike chain"
-        },
-        "signature": {
-          "type": "string",
-          "title": "signature — issuer ID, needed for validate. If signature incorrect block\nis not valid"
-        }
-      },
-      "title": "Block is struct of block in blockchain"
     },
     "tokendbToken": {
       "type": "object",

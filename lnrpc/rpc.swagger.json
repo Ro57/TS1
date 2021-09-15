@@ -2443,6 +2443,16 @@
         }
       }
     },
+    "issuerLockTokenResponse": {
+      "type": "object",
+      "properties": {
+        "lock_id": {
+          "type": "string",
+          "title": "lock_id — hash of lock"
+        }
+      },
+      "title": "LockTokenResponse response with hash of lock"
+    },
     "issuerSignTokenSellResponse": {
       "type": "object",
       "properties": {
@@ -5792,14 +5802,6 @@
         "host": {
           "type": "string",
           "title": "Is used to establish client connection to the issuer's node during some\nRPC calls"
-        }
-      }
-    },
-    "replicatorLockTokenResponse": {
-      "type": "object",
-      "properties": {
-        "lock": {
-          "type": "string"
         }
       }
     },

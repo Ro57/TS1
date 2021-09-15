@@ -560,8 +560,8 @@ service Lightning {
 
     // lncli: `issuetoken`
     // Proxies initial request to the generate new lock token
-    rpc LockToken(replicator.LockTokenRequest)
-        returns (replicator.LockTokenResponse);
+    rpc LockToken(issuer.LockTokenRequest)
+        returns (issuer.LockTokenResponse);
 }
 
 message Utxo {

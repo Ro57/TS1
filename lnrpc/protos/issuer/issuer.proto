@@ -4,7 +4,6 @@ package issuer;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer";
 
-import "protos/DB/tokendb.proto";
 import "google/protobuf/empty.proto";
 import "protos/replicator/replicator.proto";
 
@@ -32,14 +31,28 @@ service IssuerService {
 
     // LockToken — Return hash of lock token for verify htlc and information
     // about transaction
-    rpc LockToken(replicator.LockTokenRequest) 
+    rpc LockToken(LockTokenRequest) 
         returns(LockTokenResponse);
 }
 
-// LockTokenResponse — send new block to replication server for generate lockID
+// LockTokenRequest send information about token
+message LockTokenRequest {
+    // token — token name
+    string token = 1;
+    // count — number of tokens to lock
+    int64 count = 2;
+    // htlc — hash of preimagine
+    string htlc = 3;
+    // recipient — wallet addres of new owner of tokens
+    string recipient = 4;
+    // proof_count — lock expiration time in PKT blocks
+    int32 proof_count = 5;
+}
+
+// LockTokenResponse response with hash of lock 
 message LockTokenResponse {
-    // block — lock block for generation hash
-    tokendb.Block block = 1;
+    // lock_id — hash of lock
+    string lock_id = 1;
 }
 
 // SignTokenSellRequest — info about sell token

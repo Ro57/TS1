@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/pkt-cash/pktd/btcutil/er"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
+	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer"
 	"github.com/urfave/cli"
 )
 
@@ -60,17 +60,17 @@ func lockToken(ctx *cli.Context) er.R {
 		return _err
 	}
 
-	signTokenSellResponse, err := client.LockToken(context.TODO(), lockTokenRequest)
+	lockTokenResponse, err := client.LockToken(context.TODO(), lockTokenRequest)
 	if err != nil {
 		return er.Errorf("requesting token purchase signature: %s", err)
 	}
 
-	printRespJSON(signTokenSellResponse)
+	printRespJSON(lockTokenResponse)
 
 	return nil
 }
 
-func extractTokenLock(ctx *cli.Context) (*replicator.LockTokenRequest, er.R) {
+func extractTokenLock(ctx *cli.Context) (*issuer.LockTokenRequest, er.R) {
 	token, err := parseRequiredString(ctx, flagTokenName)
 	if err != nil {
 		return nil, er.E(err)
@@ -92,7 +92,7 @@ func extractTokenLock(ctx *cli.Context) (*replicator.LockTokenRequest, er.R) {
 	}
 
 	// Extract general token offer data
-	offer := &replicator.LockTokenRequest{
+	offer := &issuer.LockTokenRequest{
 		Token:      token,
 		Count:      count,
 		Htlc:       htlc,

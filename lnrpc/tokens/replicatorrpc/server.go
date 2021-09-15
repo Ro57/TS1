@@ -2,7 +2,6 @@ package replicatorrpc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go/v4"
+	"github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/pkg/errors"
@@ -419,7 +419,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 
 		// if information about token did not exist then create
 		if tokenBucket.Get(utils.InfoKey) == nil {
-			tokenBytes, err := json.Marshal(req.Offer)
+			tokenBytes, err := proto.Marshal(req.Offer)
 			if err != nil {
 				return er.E(err)
 			}
@@ -438,7 +438,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 				Locks:  nil,
 			}
 
-			stateBytes, err := json.Marshal(state)
+			stateBytes, err := proto.Marshal(&state)
 			if err != nil {
 				return er.E(err)
 			}
@@ -456,10 +456,6 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	}
 
 	return &emptypb.Empty{}, nil
-}
-
-func (s *Server) LockToken(ctx context.Context, req *replicator.LockTokenRequest) (*replicator.LockTokenResponse, error) {
-	return nil, nil
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
@@ -485,16 +481,19 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Name))
 
 		if string(tokenBucket.Get(utils.RootHashKey)) != req.Block.PrevBlock {
-			return er.New("invalid hash of the previous block")
+			return er.Errorf("invalid hash of the previous block want %s but get %s", tokenBucket.Get(utils.RootHashKey), req.Block.PrevBlock)
 		}
 
+		log.Infof("block root fo replication %s", req.Block.GetSignature())
+
 		blockSignatureBytes := []byte(req.Block.GetSignature())
+
 		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
 		if err != nil {
 			return err
 		}
 
-		blockBytes, errMarshal := json.Marshal(req.Block)
+		blockBytes, errMarshal := proto.Marshal(req.Block)
 		if errMarshal != nil {
 			return er.E(errMarshal)
 		}
@@ -530,7 +529,7 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 			return er.New("info does not exist")
 		}
 
-		err := json.Unmarshal(infoBytes, &response.Token.Token)
+		err := proto.Unmarshal(infoBytes, response.Token.Token)
 		if err != nil {
 			return er.E(err)
 		}

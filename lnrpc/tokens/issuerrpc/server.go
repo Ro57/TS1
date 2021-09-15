@@ -3,6 +3,7 @@ package issueancerpc
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -10,9 +11,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/lightninglabs/protobuf-hex-display/json"
 	"github.com/pkg/errors"
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
@@ -270,7 +271,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) LockToken(ctx context.Context, req *replicator.LockTokenRequest) (*issuer.LockTokenResponse, error) {
+func (s *Server) LockToken(ctx context.Context, req *issuer.LockTokenRequest) (*issuer.LockTokenResponse, error) {
 	// lock token
 	errLockToken := s.lockTokenDB(req)
 	if errLockToken != nil {
@@ -292,8 +293,13 @@ func (s *Server) LockToken(ctx context.Context, req *replicator.LockTokenRequest
 		return nil, err
 	}
 
+	lockID, err := s.generateLockID(lockBlock.Justification.(*DB.Block_Lock))
+	if err != nil {
+		return nil, err
+	}
+
 	resp := &issuer.LockTokenResponse{
-		Block: lockBlock,
+		LockId: *lockID,
 	}
 
 	return resp, nil
@@ -348,7 +354,7 @@ func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 
 		// if information about token did not exist then create
 		if tokenBucket.Get(utils.InfoKey) == nil {
-			tokenBytes, err := json.Marshal(req.Offer)
+			tokenBytes, err := proto.Marshal(req.Offer)
 			if err != nil {
 				return er.E(err)
 			}
@@ -361,13 +367,13 @@ func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 
 		// if token state did not exist then create
 		if tokenBucket.Get(utils.StateKey) == nil {
-			state := DB.State{
+			state := &DB.State{
 				Token:  req.Offer,
 				Owners: nil,
 				Locks:  nil,
 			}
 
-			stateBytes, err := json.Marshal(state)
+			stateBytes, err := proto.Marshal(state)
 			if err != nil {
 				return er.E(err)
 			}
@@ -382,12 +388,15 @@ func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 	})
 }
 
-func (s *Server) lockTokenDB(req *replicator.LockTokenRequest) er.R {
+func (s *Server) lockTokenDB(req *issuer.LockTokenRequest) er.R {
 	return s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
 		var block DB.Block
 		var oldState DB.State
 
 		rootBucket := tx.ReadWriteBucket(utils.TokensKey)
+		if rootBucket == nil {
+			return er.Errorf("%s bucket not created", string(utils.TokensKey))
+		}
 
 		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Token))
 
@@ -396,14 +405,24 @@ func (s *Server) lockTokenDB(req *replicator.LockTokenRequest) er.R {
 			return er.Errorf("token %s without information", req.Token)
 		}
 
-		jsonBlock := tokenBucket.Get(utils.RootHashKey)
-		if jsonBlock == nil {
+		blockHash := tokenBucket.Get(utils.RootHashKey)
+		if blockHash == nil {
 			return er.Errorf("not found last block")
 		}
 
-		err := json.Unmarshal(jsonBlock, block)
+		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
+		if chainBucket == nil {
+			return er.New("chain bucket not found")
+		}
+
+		jsonBlock := chainBucket.Get(blockHash)
+		if blockHash == nil {
+			return er.Errorf("not found last block")
+		}
+
+		err := proto.Unmarshal(jsonBlock, &block)
 		if err != nil {
-			return er.Errorf("unmarshal block form json: %v", err)
+			return er.Errorf("unmarshal block %s \n form json: %v", jsonBlock, err)
 		}
 
 		jsonState := tokenBucket.Get(utils.StateKey)
@@ -411,12 +430,12 @@ func (s *Server) lockTokenDB(req *replicator.LockTokenRequest) er.R {
 			return er.Errorf("not found state")
 		}
 
-		err = json.Unmarshal(jsonState, oldState)
+		err = proto.Unmarshal(jsonState, &oldState)
 		if err != nil {
 			return er.Errorf("unmarshal state form json: %v", err)
 		}
 
-		state := DB.State{
+		state := &DB.State{
 			Token:  oldState.Token,
 			Owners: oldState.Owners,
 			Locks: append(oldState.Locks, &lock.Lock{
@@ -431,7 +450,7 @@ func (s *Server) lockTokenDB(req *replicator.LockTokenRequest) er.R {
 			}),
 		}
 
-		stateBytes, err := json.Marshal(state)
+		stateBytes, err := proto.Marshal(state)
 		if err != nil {
 			return er.Errorf("marshal new state: %v", err)
 		}
@@ -445,10 +464,10 @@ func (s *Server) lockTokenDB(req *replicator.LockTokenRequest) er.R {
 	})
 }
 
-func (s *Server) generateLockID(blockLock DB.Block_Lock) (*string, error) {
+func (s *Server) generateLockID(blockLock *DB.Block_Lock) (*string, error) {
 	lock := blockLock.Lock.Lock
 
-	jsonLock, err := json.Marshal(lock)
+	jsonLock, err := proto.Marshal(lock)
 	if err != nil {
 		return nil, err
 	}
@@ -458,7 +477,7 @@ func (s *Server) generateLockID(blockLock DB.Block_Lock) (*string, error) {
 	return &lockID, nil
 }
 
-func (s *Server) generateLockBlock(req *replicator.LockTokenRequest) (*DB.Block, error) {
+func (s *Server) generateLockBlock(req *issuer.LockTokenRequest) (*DB.Block, error) {
 	var state DB.State
 	var block DB.Block
 
@@ -488,12 +507,17 @@ func (s *Server) generateLockBlock(req *replicator.LockTokenRequest) (*DB.Block,
 			return er.Errorf("not found last block hash")
 		}
 
-		jsonBlock := tokenBucket.Get(lastHash)
-		if jsonBlock == nil {
-			return er.Errorf("not found last block hash")
+		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
+		if chainBucket == nil {
+			return er.New("chain bucket not found")
 		}
 
-		nativeErr := json.Unmarshal(jsonBlock, block)
+		jsonBlock := chainBucket.Get(lastHash)
+		if jsonBlock == nil {
+			return er.Errorf("not found last block by hash")
+		}
+
+		nativeErr := proto.Unmarshal(jsonBlock, &block)
 		if nativeErr != nil {
 			return er.Errorf("unmarshal block form json: %v", nativeErr)
 		}
@@ -503,7 +527,7 @@ func (s *Server) generateLockBlock(req *replicator.LockTokenRequest) (*DB.Block,
 			return er.New("state is not exist")
 		}
 
-		nativeErr = json.Unmarshal(jsonState, state)
+		nativeErr = proto.Unmarshal(jsonState, &state)
 		if nativeErr != nil {
 			return er.Errorf("marshal new state: %v", nativeErr)
 		}
@@ -511,25 +535,25 @@ func (s *Server) generateLockBlock(req *replicator.LockTokenRequest) (*DB.Block,
 		lock := state.Locks[len(state.Locks)-1]
 		lockBlock.Justification = &DB.Block_Lock{Lock: &justifications.LockToken{Lock: lock}}
 		lockBlock.Height = block.Height + 1
-		lockBlock.PrevBlock = string(lastHash)
 
 		hashState := encoder.CreateHash(jsonState)
 		lockBlock.State = hex.EncodeToString(hashState)
+		// TODO: Change to signature generation
+		lockBlock.Signature = lockBlock.GetState()
+		lockBlock.PrevBlock = string(lastHash)
 
-		lockBlockBytes, nativeErr := json.Marshal(lockBlock)
+		lockBlockBytes, nativeErr := proto.Marshal(lockBlock)
 		if nativeErr != nil {
 			return err
 		}
 
-		hashByte := encoder.CreateHash(lockBlockBytes)
-		err = tokenBucket.Put(utils.RootHashKey, hashByte)
+		blockSignatureBytes := []byte(lockBlock.GetSignature())
+		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
 		if err != nil {
 			return err
 		}
 
-		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
-
-		return chainBucket.Put(hashByte, lockBlockBytes)
+		return chainBucket.Put(blockSignatureBytes, lockBlockBytes)
 	})
 
 	if err != nil {
@@ -575,12 +599,14 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 		hashState := encoder.CreateHash(state)
 		genesisBlock.State = hex.EncodeToString(hashState)
 
-		_, errMarshal := json.Marshal(genesisBlock)
+		_, errMarshal := proto.Marshal(genesisBlock)
 		if errMarshal != nil {
 			return err
 		}
 
 		genesisBlock.Signature = genesisBlock.State // TODO: setup the signature
+
+		log.Infof("block root fo issuer %s", genesisBlock.GetSignature())
 
 		blockSignatureBytes := []byte(genesisBlock.GetSignature())
 		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
@@ -588,7 +614,7 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 			return err
 		}
 
-		genBlockBytes, errMarshal := json.Marshal(genesisBlock)
+		genBlockBytes, errMarshal := proto.Marshal(genesisBlock)
 		if errMarshal != nil {
 			return er.E(errMarshal)
 		}

@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"encoding/json"
-
+	"github.com/golang/protobuf/proto"
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
@@ -32,7 +31,7 @@ func GetTokenList(db *tokendb.TokenStrikeDB) ([]*replicator.Token, error) {
 			tokenBucket := rootBucket.NestedReadBucket(k)
 
 			var dbToken DB.Token
-			err := json.Unmarshal(tokenBucket.Get(InfoKey), &dbToken)
+			err := proto.Unmarshal(tokenBucket.Get(InfoKey), &dbToken)
 			if err != nil {
 				return er.E(err)
 			}

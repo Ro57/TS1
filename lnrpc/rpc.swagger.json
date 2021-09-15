@@ -5732,6 +5732,20 @@
         }
       }
     },
+    "replicatorGetHeadersResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "$ref": "#/definitions/tokendbToken"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/replicatorMerkleBlock"
+          }
+        }
+      }
+    },
     "replicatorGetTokenBalancesResponse": {
       "type": "object",
       "properties": {
@@ -5802,6 +5816,17 @@
         "host": {
           "type": "string",
           "title": "Is used to establish client connection to the issuer's node during some\nRPC calls"
+        }
+      }
+    },
+    "replicatorMerkleBlock": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "prev_hash": {
+          "type": "string"
         }
       }
     },

@@ -544,6 +544,45 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 	return response, nil
 }
 
+func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersRequest) (*replicator.GetHeadersResponse, error) {
+	var response *replicator.GetHeadersResponse
+	err := s.db.View(func(tx walletdb.ReadTx) er.R {
+		tokensBucket := tx.ReadBucket(utils.TokensKey)
+		tokenBucket := tokensBucket.NestedReadBucket([]byte(req.TokenId))
+		if tokenBucket == nil {
+			return er.New("token does not exist exist")
+		}
+
+		infoBytes := tokenBucket.Get(utils.InfoKey)
+		if infoBytes == nil {
+			return er.New("info does not exist")
+		}
+
+		err := json.Unmarshal(infoBytes, &response.Token)
+		if err != nil {
+			return er.E(err)
+		}
+
+		rootHash := tokenBucket.Get(utils.RootHashKey)
+		if rootHash == nil {
+			return er.New("root hash does not exist exist")
+		}
+
+		if string(rootHash) != req.Hash {
+			response.Blocks, err = s.getMerkleRoot(tokenBucket, rootHash, req.Hash)
+			if err != nil {
+				return er.E(err)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	return response, nil
+}
+
 // TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses
 func (s *Server) allTokensFromIssuer() ([]*replicator.Token, error) {
 	resultList, err := utils.GetTokenList(s.db)
@@ -560,6 +599,35 @@ func (s *Server) payoutCalculate() map[string]int64 {
 		"alice": 1000,
 		"bob":   2000,
 	}
+}
+
+func (s *Server) getMerkleRoot(bucket walletdb.ReadBucket, root []byte, hash string) ([]*replicator.MerkleBlock, error) {
+	var (
+		currentHash []byte = root
+		response    []*replicator.MerkleBlock
+		chainBucket = bucket.NestedReadBucket(utils.ChainKey)
+	)
+
+	for {
+		blockBytes := chainBucket.Get(currentHash)
+		if blockBytes == nil {
+			return nil, errors.New("block does not exist exist")
+		}
+		var merkleBlock replicator.MerkleBlock
+		err := json.Unmarshal(blockBytes, &merkleBlock)
+		if err != nil {
+			return nil, err
+		}
+
+		if merkleBlock.Hash == hash {
+			break
+		}
+
+		response = append(response, &merkleBlock)
+		currentHash = []byte(merkleBlock.PrevHash)
+	}
+
+	return response, nil
 }
 
 type TokenHoldersStoreAPI interface {

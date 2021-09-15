@@ -27,3 +27,9 @@ message LockTimeOver {
     // lock_id — hash with information about lock justification
     string lock = 2;
 }
+
+// Genesis initial block justification
+message Genesis {
+    // token — token identification by name
+    string token = 1;
+}

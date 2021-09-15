@@ -5795,6 +5795,14 @@
         }
       }
     },
+    "replicatorLockTokenResponse": {
+      "type": "object",
+      "properties": {
+        "lock": {
+          "type": "string"
+        }
+      }
+    },
     "replicatorPagination": {
       "type": "object",
       "properties": {

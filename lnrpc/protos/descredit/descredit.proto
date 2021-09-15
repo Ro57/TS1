@@ -5,7 +5,6 @@ package descredit;
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/descredit";
 
 import "protos/DB/tokendb.proto";
-import "protos/lock/lock.proto";
 
 // DuplicateBlock 2 identical blocks were generated (Updated the structure)
 message DuplicateBlock {

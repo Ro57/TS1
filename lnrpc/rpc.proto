@@ -557,6 +557,11 @@ service Lightning {
     // Proxies initial request to the issuer for register new token
     rpc IssueToken(replicator.IssueTokenRequest)
         returns (google.protobuf.Empty);
+
+    // lncli: `issuetoken`
+    // Proxies initial request to the generate new lock token
+    rpc LockToken(replicator.LockTokenRequest)
+        returns (replicator.LockTokenResponse);
 }
 
 message Utxo {

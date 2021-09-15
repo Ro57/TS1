@@ -365,7 +365,7 @@ func main() {
 		getTokenListCommand,
 		getTokenCommand,
 		getTokenBalancesCommand,
-		signTokenSaleCommand,
+		lockTokenCommand,
 		issueTokenCommand,
 	}
 

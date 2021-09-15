@@ -6950,6 +6950,14 @@ func (r *rpcServer) SignTokenSell(ctx context.Context, req *issuer.SignTokenSell
 	return resp, nil
 }
 
+func (r *rpcServer) LockToken(ctx context.Context, req *replicator.LockTokenRequest) (*replicator.LockTokenResponse, error) {
+	resp, err := r.replicatorClient.LockToken(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("requesting token sell signature: %s", err)
+	}
+	return resp, nil
+}
+
 func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBalancesRequest) (*replicator.GetTokenBalancesResponse, error) {
 	GetTokenBalancesRequest := &replicator.GetTokenBalancesRequest{
 		Params: req.Params,

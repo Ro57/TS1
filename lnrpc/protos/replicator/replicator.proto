@@ -31,6 +31,8 @@ service Replicator {
 
     rpc SaveBlock(SaveBlockRequest) returns (google.protobuf.Empty);
 
+    rpc GetHeaders(GetHeadersRequest) returns (GetHeadersResponse);
+
     rpc GetToken(GetTokenRequest) returns (GetTokenResponse);
 
     // GetTokenList — return list of issued token with infomation about
@@ -170,4 +172,19 @@ message GetTokenRequest {
 
 message GetTokenResponse {
     Token token = 1;
+}
+
+message GetHeadersRequest {
+    string token_id = 1;
+    string hash = 2;
+}
+
+message GetHeadersResponse {
+    tokendb.Token token = 1;
+    repeated MerkleBlock blocks = 2;
+}
+
+message MerkleBlock {
+    string hash = 1;
+    string prev_hash = 2;
 }

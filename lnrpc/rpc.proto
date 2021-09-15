@@ -548,6 +548,11 @@ service Lightning {
     rpc GetToken (replicator.GetTokenRequest)
         returns (replicator.GetTokenResponse);
 
+    // lncli: `get-headers`
+    // Proxies initial request to the replicator for token info
+    rpc GetHeaders (replicator.GetHeadersRequest)
+        returns (replicator.GetHeadersResponse);
+
     // lncli: `signtokensell`
     // Proxies initial request to the issuer for a signature
     rpc SignTokenSell (issuer.SignTokenSellRequest)

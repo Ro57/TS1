@@ -503,6 +503,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "read",
 		}},
+		"/lnrpc.Lightning/GetHeaders": {{
+			Entity: "proxy",
+			Action: "read",
+		}},
 		"/lnrpc.Lightning/GetToken": {{
 			Entity: "proxy",
 			Action: "read",

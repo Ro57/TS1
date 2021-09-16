@@ -522,8 +522,14 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 
 	err := s.db.View(func(tx walletdb.ReadTx) er.R {
 		rootBucket := tx.ReadBucket(utils.TokensKey)
-		tokenBucket := rootBucket.NestedReadBucket([]byte(req.TokenId))
+		if rootBucket == nil {
+			return er.New("tokens DB not created")
+		}
 
+		tokenBucket := rootBucket.NestedReadBucket([]byte(req.TokenId))
+		if tokenBucket == nil {
+			return er.Errorf("token by name %v not found", req.TokenId)
+		}
 		infoBytes := tokenBucket.Get(utils.InfoKey)
 		if infoBytes == nil {
 			return er.New("info does not exist")
@@ -545,12 +551,15 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 }
 
 func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersRequest) (*replicator.GetHeadersResponse, error) {
-	var response *replicator.GetHeadersResponse
+	response := &replicator.GetHeadersResponse{
+		Token:  &DB.Token{},
+		Blocks: []*replicator.MerkleBlock{},
+	}
 	err := s.db.View(func(tx walletdb.ReadTx) er.R {
 		tokensBucket := tx.ReadBucket(utils.TokensKey)
 		tokenBucket := tokensBucket.NestedReadBucket([]byte(req.TokenId))
 		if tokenBucket == nil {
-			return er.New("token does not exist exist")
+			return er.New("token does not exist")
 		}
 
 		infoBytes := tokenBucket.Get(utils.InfoKey)
@@ -558,14 +567,14 @@ func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersReque
 			return er.New("info does not exist")
 		}
 
-		err := json.Unmarshal(infoBytes, &response.Token)
+		err := proto.Unmarshal(infoBytes, response.Token)
 		if err != nil {
 			return er.E(err)
 		}
 
 		rootHash := tokenBucket.Get(utils.RootHashKey)
 		if rootHash == nil {
-			return er.New("root hash does not exist exist")
+			return er.New("root hash does not exist")
 		}
 
 		if string(rootHash) != req.Hash {
@@ -613,14 +622,22 @@ func (s *Server) getMerkleRoot(bucket walletdb.ReadBucket, root []byte, hash str
 		if blockBytes == nil {
 			return nil, errors.New("block does not exist exist")
 		}
-		var merkleBlock replicator.MerkleBlock
-		err := json.Unmarshal(blockBytes, &merkleBlock)
+
+		log.Infof("block in generate mercle root: %s", blockBytes)
+
+		var block DB.Block
+		err := proto.Unmarshal(blockBytes, &block)
 		if err != nil {
 			return nil, err
 		}
 
-		if merkleBlock.Hash == hash {
+		if string(currentHash) == hash {
 			break
+		}
+
+		merkleBlock := replicator.MerkleBlock{
+			Hash:     string(currentHash),
+			PrevHash: block.PrevBlock,
 		}
 
 		response = append(response, &merkleBlock)

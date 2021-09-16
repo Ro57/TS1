@@ -574,7 +574,7 @@ func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersReque
 
 		rootHash := tokenBucket.Get(utils.RootHashKey)
 		if rootHash == nil {
-			return er.New("root hash does not exist")
+			return er.New("root hash does not exist exist")
 		}
 
 		if string(rootHash) != req.Hash {
@@ -622,8 +622,6 @@ func (s *Server) getMerkleRoot(bucket walletdb.ReadBucket, root []byte, hash str
 		if blockBytes == nil {
 			return nil, errors.New("block does not exist exist")
 		}
-
-		log.Infof("block in generate mercle root: %s", blockBytes)
 
 		var block DB.Block
 		err := proto.Unmarshal(blockBytes, &block)

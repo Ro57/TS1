@@ -6996,6 +6996,15 @@ func (r *rpcServer) GetHeaders(ctx context.Context, req *replicator.GetHeadersRe
 	return resp, nil
 }
 
+func (r *rpcServer) GetHeaders(ctx context.Context, req *replicator.GetHeadersRequest) (*replicator.GetHeadersResponse, error) {
+	resp, err := r.replicatorClient.GetHeaders(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("querying token offers: %s", err)
+	}
+
+	return resp, nil
+}
+
 func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
 	resp, err := r.replicatorClient.GetToken(ctx, req)
 	if err != nil {

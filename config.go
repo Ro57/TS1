@@ -59,6 +59,9 @@ const (
 	defaultPeerPort           = 9735
 	defaultRPCHost            = "localhost"
 
+	defaultIssuanceServerAddress    = ":5050"
+	defaultReplicationServerAddress = ":8081"
+
 	defaultNoSeedBackup                  = false
 	defaultPaymentsExpirationGracePeriod = time.Duration(0)
 	defaultTrickleDelay                  = 90 * 1000
@@ -482,11 +485,13 @@ func DefaultConfig() Config {
 				},
 			},
 		},
-		MaxOutgoingCltvExpiry:   htlcswitch.DefaultMaxOutgoingCltvExpiry,
-		MaxChannelFeeAllocation: htlcswitch.DefaultMaxLinkFeeAllocation,
-		DB:                      lncfg.DefaultDB(),
-		registeredChains:        chainreg.NewChainRegistry(),
-		ActiveNetParams:         chainreg.BitcoinTestNetParams,
+		MaxOutgoingCltvExpiry:    htlcswitch.DefaultMaxOutgoingCltvExpiry,
+		MaxChannelFeeAllocation:  htlcswitch.DefaultMaxLinkFeeAllocation,
+		DB:                       lncfg.DefaultDB(),
+		registeredChains:         chainreg.NewChainRegistry(),
+		ActiveNetParams:          chainreg.BitcoinTestNetParams,
+		IssuanceServerAddress:    defaultIssuanceServerAddress,
+		ReplicationServerAddress: defaultReplicationServerAddress,
 	}
 }
 

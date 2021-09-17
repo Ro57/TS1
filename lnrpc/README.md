@@ -221,5 +221,5 @@ The following commands are available with `make`:
 ## Start pld node
 
 For starting full node with replication and issuance servers we need run
-`./pld --replication-server-addr=":8081" --issuence-server-addr=":5050"` in `./bin` directiry.
+`./pld --replication-server true --issuence-server true` in `./bin` directiry.
 If you don't have `./bin` directiry then run script `do` in root catalog repository

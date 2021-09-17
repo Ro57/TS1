@@ -528,11 +528,11 @@ func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) 
 
 		tokenBucket := rootBucket.NestedReadBucket([]byte(req.TokenId))
 		if tokenBucket == nil {
-			return er.Errorf("token by name %v not found", req.TokenId)
+			return utils.TokenNotFoundErr
 		}
 		infoBytes := tokenBucket.Get(utils.InfoKey)
 		if infoBytes == nil {
-			return er.New("info does not exist")
+			return utils.InfoNotFoundErr
 		}
 
 		err := proto.Unmarshal(infoBytes, response.Token.Token)
@@ -559,12 +559,12 @@ func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersReque
 		tokensBucket := tx.ReadBucket(utils.TokensKey)
 		tokenBucket := tokensBucket.NestedReadBucket([]byte(req.TokenId))
 		if tokenBucket == nil {
-			return er.New("token does not exist")
+			return utils.TokenNotFoundErr
 		}
 
 		infoBytes := tokenBucket.Get(utils.InfoKey)
 		if infoBytes == nil {
-			return er.New("info does not exist")
+			return utils.InfoNotFoundErr
 		}
 
 		err := proto.Unmarshal(infoBytes, response.Token)
@@ -574,7 +574,7 @@ func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersReque
 
 		rootHash := tokenBucket.Get(utils.RootHashKey)
 		if rootHash == nil {
-			return er.New("root hash does not exist exist")
+			return utils.RootHashNotFoundErr
 		}
 
 		if string(rootHash) != req.Hash {
@@ -620,7 +620,7 @@ func (s *Server) getMerkleRoot(bucket walletdb.ReadBucket, root []byte, hash str
 	for {
 		blockBytes := chainBucket.Get(currentHash)
 		if blockBytes == nil {
-			return nil, errors.New("block does not exist exist")
+			return nil, utils.BlockNotFoundErr.Native()
 		}
 
 		var block DB.Block

@@ -323,7 +323,7 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 
 func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {
 	if replicationHost == "" {
-		return nil, nil, errors.New("empty address")
+		return nil, nil, utils.EmptyAddressErr.Native()
 	}
 
 	// TODO: research connection option to be secure for protected methods
@@ -407,17 +407,17 @@ func (s *Server) lockTokenDB(req *issuer.LockTokenRequest) er.R {
 
 		blockHash := tokenBucket.Get(utils.RootHashKey)
 		if blockHash == nil {
-			return er.Errorf("not found last block")
+			return utils.LastBlockNotFoundErr
 		}
 
 		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
 		if chainBucket == nil {
-			return er.New("chain bucket not found")
+			return utils.ChainBucketNotFoundErr
 		}
 
 		jsonBlock := chainBucket.Get(blockHash)
 		if blockHash == nil {
-			return er.Errorf("not found last block")
+			return utils.LastBlockNotFoundErr
 		}
 
 		err := proto.Unmarshal(jsonBlock, &block)
@@ -427,7 +427,7 @@ func (s *Server) lockTokenDB(req *issuer.LockTokenRequest) er.R {
 
 		jsonState := tokenBucket.Get(utils.StateKey)
 		if jsonState == nil {
-			return er.Errorf("not found state")
+			return utils.StateNotFoundErr
 		}
 
 		err = proto.Unmarshal(jsonState, &oldState)
@@ -504,17 +504,17 @@ func (s *Server) generateLockBlock(req *issuer.LockTokenRequest) (*DB.Block, err
 
 		lastHash := tokenBucket.Get(utils.RootHashKey)
 		if lastHash == nil {
-			return er.Errorf("not found last block hash")
+			return utils.LastBlockNotFoundErr
 		}
 
 		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
 		if chainBucket == nil {
-			return er.New("chain bucket not found")
+			return utils.ChainBucketNotFoundErr
 		}
 
 		jsonBlock := chainBucket.Get(lastHash)
 		if jsonBlock == nil {
-			return er.Errorf("not found last block by hash")
+			return utils.LastBlockNotFoundErr
 		}
 
 		nativeErr := proto.Unmarshal(jsonBlock, &block)
@@ -524,7 +524,7 @@ func (s *Server) generateLockBlock(req *issuer.LockTokenRequest) (*DB.Block, err
 
 		jsonState := tokenBucket.Get(utils.StateKey)
 		if jsonState == nil {
-			return er.New("state is not exist")
+			return utils.StateNotFoundErr
 		}
 
 		nativeErr = proto.Unmarshal(jsonState, &state)
@@ -593,7 +593,7 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 
 		state := tokenBucket.Get(utils.StateKey)
 		if state == nil {
-			return er.New("state is not exist")
+			return utils.StateNotFoundErr
 		}
 
 		hashState := encoder.CreateHash(state)

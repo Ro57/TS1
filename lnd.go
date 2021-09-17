@@ -741,27 +741,37 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	// On close pld node send stop signal to issuence server
 	defer func() { issuerEvent.StopSig <- struct{}{} }()
 
-	// TODO: implement error channel and handle that on node close or exception
 	if cfg.Pkt.Active {
-		replicationDB, err := tokendb.Connect(cfg.Pkt.ReplicationServerDbPath)
-		defer replicationDB.Close()
-		if err != nil {
-			err := er.Errorf("cannot open database for replication server: %v", err)
-			log.Error(err)
-			return err
+
+		// Initialize rpc replicator server
+		if cfg.ReplicationServer {
+			replicationDB, err := tokendb.Connect(cfg.Pkt.ReplicationServerDbPath)
+			defer replicationDB.Close()
+			if err != nil {
+				err := er.Errorf("cannot open database for replication server: %v", err)
+				log.Error(err)
+				return err
+			}
+
+			log.Infof("Replication server started, address=%v", cfg.ReplicationServerAddress)
+			replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO)
 		}
 
-		issuanceDB, err := tokendb.Connect(cfg.Pkt.IssuanceServerDbPath)
-		defer issuanceDB.Close()
-		if err != nil {
-			err := er.Errorf("cannot open database for issuance server: %v", err)
-			log.Error(err)
-			return err
-		}
+		// Initialize rpc issuance client
+		if cfg.IssuanceServer {
+			issuanceDB, err := tokendb.Connect(cfg.Pkt.IssuanceServerDbPath)
+			defer issuanceDB.Close()
+			if err != nil {
+				err := er.Errorf("cannot open database for issuance server: %v", err)
+				log.Error(err)
+				return err
+			}
 
-		replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO)
-		issuerrpc.RunServerServing(cfg.IssuanceServerAddress, cfg.ReplicationServerAddress, issuerEvent, issuanceDB, activeChainControl.ChainIO)
+			log.Infof("Issuance server started, address=%v", cfg.IssuanceServerAddress)
+			issuerrpc.RunServerServing(cfg.IssuanceServerAddress, cfg.ReplicationServerAddress, issuerEvent, issuanceDB, activeChainControl.ChainIO)
+		}
 	}
+	// TODO: implement error channel and handle that on node close or exception
 
 	// Initialize, and register our implementation of the gRPC interface
 	// exported by the rpcServer.

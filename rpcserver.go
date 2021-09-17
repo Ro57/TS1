@@ -830,16 +830,24 @@ func newRPCServer(
 	}
 
 	// Initialize rpc replicator client
-	replicatorClient, _, connError := connectReplicatorClient(cfg.ReplicationServerAddress)
-	if connError != nil {
-		return nil, er.E(errors.WithMessage(connError, "connecting client to replication server"))
+	var replicatorClient replicator.ReplicatorClient
+	if cfg.ReplicationServer {
+		var err error
+		replicatorClient, _, err = connectReplicatorClient(cfg.ReplicationServerAddress)
+		if err != nil {
+			return nil, er.E(errors.WithMessage(err, "connecting client to replication server"))
+		}
 	}
 
-	issuerClient, _, connError := connectIssuerClient(cfg.IssuanceServerAddress)
-	if connError != nil {
-		return nil, er.E(errors.WithMessage(connError, "connecting client to replication server"))
+	// Initialize rpc issuance client
+	var issuerClient issuer.IssuerServiceClient
+	if cfg.IssuanceServer {
+		var err error
+		issuerClient, _, err = connectIssuerClient(cfg.IssuanceServerAddress)
+		if err != nil {
+			return nil, er.E(errors.WithMessage(err, "connecting client to replication server"))
+		}
 	}
-
 	// Finally, with all the pre-set up complete,  we can create the main
 	// gRPC server, and register the main lnrpc server along side.
 	grpcServer := grpc.NewServer(serverOpts...)

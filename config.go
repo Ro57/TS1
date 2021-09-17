@@ -333,9 +333,11 @@ type Config struct {
 	// ActiveNetParams contains parameters of the target chain.
 	ActiveNetParams chainreg.BitcoinNetParams
 
-	ReplicationServerAddress string `long:"replication-server-addr" description:"Offchain token exchange arbitr server"`
+	ReplicationServer        bool   `long:"replication-server" description:"Start rpc replicator server"`
+	ReplicationServerAddress string `long:"replication-server-addr" description:"Address where the replicator server started"`
 
-	IssuanceServerAddress string `long:"issuance-server-addr" description:"Offchain token handler arbitr server"`
+	IssuanceServer        bool   `long:"issuance-server" description:"Start rpc issuance server"`
+	IssuanceServerAddress string `long:"issuance-server-addr" description:"Address where the issuance server started"`
 }
 
 // DefaultConfig returns all default values for the Config struct.

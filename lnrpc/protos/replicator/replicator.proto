@@ -189,3 +189,13 @@ message MerkleBlock {
     string hash = 1;
     string prev_hash = 2;
 }
+
+message GetUrlTokenRequest {
+    string url = 1;
+}
+
+message GetUrlTokenResponse {
+    tokendb.State state = 1;
+    repeated tokendb.Block blocks = 2;
+    string root = 3;
+}

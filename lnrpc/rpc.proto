@@ -548,6 +548,11 @@ service Lightning {
     rpc GetToken (replicator.GetTokenRequest)
         returns (replicator.GetTokenResponse);
 
+    // lncli: `get-url-token`
+    // Proxies initial request to the replicator for token info
+    rpc GetUrlToken (replicator.GetUrlTokenRequest)
+        returns (replicator.GetUrlTokenResponse);
+
     // lncli: `get-headers`
     // Proxies initial request to the replicator for token info
     rpc GetHeaders (replicator.GetHeadersRequest)

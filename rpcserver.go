@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"net"
 	"net/http"
@@ -504,6 +506,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Action: "read",
 		}},
 		"/lnrpc.Lightning/GetHeaders": {{
+			Entity: "proxy",
+			Action: "read",
+		}},
+		"/lnrpc.Lightning/GetUrlToken": {{
 			Entity: "proxy",
 			Action: "read",
 		}},
@@ -7011,6 +7017,26 @@ func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenReques
 	}
 
 	return resp, nil
+}
+
+func (r *rpcServer) GetUrlToken(ctx context.Context, req *replicator.GetUrlTokenRequest) (*replicator.GetUrlTokenResponse, error) {
+	res, err := http.Get(req.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var token replicator.GetUrlTokenResponse
+	err = json.Unmarshal(body, &token)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: validate and save in the database
+	return &token, nil
 }
 
 func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {

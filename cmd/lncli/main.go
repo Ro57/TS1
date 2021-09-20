@@ -364,6 +364,7 @@ func main() {
 		getTokenOffersCommand,
 		getTokenListCommand,
 		getTokenCommand,
+		getUrlTokenCommand,
 		getHeadersCommand,
 		getTokenBalancesCommand,
 		lockTokenCommand,

@@ -19,6 +19,8 @@ message Block {
         justifications.TranferToken transfer = 3;
         // lock_over — payload with lock time over
         justifications.LockTimeOver lock_over = 4;
+        // genesis — justification to initialize block chian
+        justifications.Genesis genesis = 11;
     }
     // creation — date of block creation in unix time format
     int64 creation = 5;

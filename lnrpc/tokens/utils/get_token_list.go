@@ -16,6 +16,9 @@ var (
 	TokensKey = []byte("tokens")
 	// rootHash is a hash of last block in chain
 	RootHashKey = []byte("rootHash")
+	Replication = []byte("replication")
+	Descredits  = []byte("descredits")
+	Conncetions = []byte("connections")
 )
 
 func GetTokenList(db *tokendb.TokenStrikeDB) ([]*replicator.Token, error) {

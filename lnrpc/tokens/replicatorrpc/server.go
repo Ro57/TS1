@@ -201,6 +201,28 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 	}()
 
 	jwtStore = jwtstore.New([]jwtstore.JWT{})
+
+	er := db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		meta, err := tx.CreateTopLevelBucket(utils.Replication)
+		if err != nil {
+			return err
+		}
+
+		_, err = meta.CreateBucketIfNotExists(utils.Descredits)
+		if err != nil {
+			return err
+		}
+
+		_, err = meta.CreateBucketIfNotExists(utils.Replication)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if er != nil {
+		panic(er.Native())
+	}
+
 }
 
 // Start launches any helper goroutines required for the rpcServer to function.

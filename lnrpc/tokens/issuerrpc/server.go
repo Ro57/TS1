@@ -566,7 +566,7 @@ func (s *Server) generateLockBlock(req *issuer.LockTokenRequest) (*DB.Block, err
 func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 	genesisBlock := &DB.Block{
 		PrevBlock:      "",
-		Justification:  nil, //TODO: setup the justification
+		Justification:  &DB.Block_Genesis{Genesis: &justifications.Genesis{Token: name}}, //TODO: setup the justification
 		Creation:       time.Now().Unix(),
 		State:          "",
 		PktBlockHash:   "",

@@ -12,6 +12,16 @@
   ],
   "paths": {},
   "definitions": {
+    "justificationsGenesis": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "title": "token — token identification by name"
+        }
+      },
+      "title": "Genesis initial block justification"
+    },
     "justificationsLockTimeOver": {
       "type": "object",
       "properties": {
@@ -316,6 +326,10 @@
         "lock_over": {
           "$ref": "#/definitions/justificationsLockTimeOver",
           "title": "lock_over — payload with lock time over"
+        },
+        "genesis": {
+          "$ref": "#/definitions/justificationsGenesis",
+          "title": "genesis — justification to initialize block chian"
         },
         "creation": {
           "type": "string",

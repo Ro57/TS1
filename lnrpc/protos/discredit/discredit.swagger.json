@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "protos/descredit/descredit.proto",
+    "title": "protos/discredit/discredit.proto",
     "version": "version not set"
   },
   "consumes": [

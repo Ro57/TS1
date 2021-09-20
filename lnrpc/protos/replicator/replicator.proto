@@ -4,8 +4,9 @@ package replicator;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator";
 
-import "protos/DB/tokendb.proto";
 import "google/protobuf/empty.proto";
+import "protos/DB/tokendb.proto";
+import "protos/discredit/discredit.proto";
 
 // Is mainly used to generate compatible querier (client)
 //
@@ -188,4 +189,23 @@ message GetHeadersResponse {
 message MerkleBlock {
     string hash = 1;
     string prev_hash = 2;
+}
+
+// IssuerConnection contain local information for connect to issuer 
+message IssuerConnection {
+    // host — connection address
+    string host = 1;
+    // DiscreditWrapper used for resolve problem with repeated oneof
+    // https://github.com/protocolbuffers/protobuf/issues/2592#issuecomment-284540212
+    message DiscreditWrapper {
+        oneof discedit {
+            // duplicate_block — problem with dubled block
+            discredit.DuplicateBlock duplicate_block = 2;
+            // denial_service — ignore transactions after lock
+            discredit.DenialService denial_service = 3;
+        }
+    }
+    // descredits — collections of descredits
+    repeated DiscreditWrapper descredits = 4;
+
 }

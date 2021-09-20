@@ -321,25 +321,6 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 	return s.Client.GetTokenList(ctx, req)
 }
 
-func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {
-	if replicationHost == "" {
-		return nil, nil, errors.New("empty address")
-	}
-
-	// TODO: research connection option to be secure for protected methods
-	// 	? Use "r.restDialOpts"
-	conn, err := grpc.DialContext(
-		ctx,
-		replicationHost,
-		grpc.WithInsecure(),
-	)
-
-	if err != nil {
-		return nil, nil, errors.WithMessage(err, "dialing")
-	}
-	return replicator.NewReplicatorClient(conn), conn.Close, nil
-}
-
 func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 	return s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
 		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
@@ -631,4 +612,23 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 	}
 
 	return genesisBlock, nil
+}
+
+func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {
+	if replicationHost == "" {
+		return nil, nil, errors.New("empty address")
+	}
+
+	// TODO: research connection option to be secure for protected methods
+	// 	? Use "r.restDialOpts"
+	conn, err := grpc.DialContext(
+		ctx,
+		replicationHost,
+		grpc.WithInsecure(),
+	)
+
+	if err != nil {
+		return nil, nil, errors.WithMessage(err, "dialing")
+	}
+	return replicator.NewReplicatorClient(conn), conn.Close, nil
 }

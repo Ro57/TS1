@@ -31,6 +31,9 @@ service Replicator {
 
     rpc SaveBlock(SaveBlockRequest) returns (google.protobuf.Empty);
 
+    // GetBlockSequence get all sequence from a selected by token name bucket and return it
+    rpc GetBlockSequence(GetBlockSequenceRequest) returns(GetUrlTokenResponse);
+
     rpc GetHeaders(GetHeadersRequest) returns (GetHeadersResponse);
 
     rpc GetToken(GetTokenRequest) returns (GetTokenResponse);
@@ -165,6 +168,11 @@ message SaveBlockRequest {
     string name = 1;
 
     tokendb.Block block = 2;
+}
+
+// GetBlockSequenceRequest get block sequence by token name
+message GetBlockSequenceRequest{
+    string name = 1;
 }
 
 message GetTokenRequest {

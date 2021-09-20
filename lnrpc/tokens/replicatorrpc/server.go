@@ -2,6 +2,7 @@ package replicatorrpc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -509,6 +510,43 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) GetBlockSequence(ctx context.Context, req *replicator.GetBlockSequenceRequest) (*replicator.GetUrlTokenResponse, error) {
+	var resp replicator.GetUrlTokenResponse
+	err := s.db.View(func(tx walletdb.ReadTx) er.R {
+		var err error
+		rootBucket := tx.ReadBucket(utils.TokensKey)
+		tokenBucket := rootBucket.NestedReadBucket([]byte(req.Name))
+
+		dbStateByte := tokenBucket.Get(utils.StateKey)
+
+		var dbstate DB.State
+		err = json.Unmarshal(dbStateByte, &dbstate)
+		if err != nil {
+			return er.E(err)
+		}
+
+		sequenceByte := tokenBucket.Get(utils.ChainKey)
+
+		var blocks []*DB.Block
+		err = json.Unmarshal(sequenceByte, &blocks)
+		if err != nil {
+			return er.E(err)
+		}
+
+		root := string(tokenBucket.Get(utils.RootHashKey))
+
+		resp.State = &dbstate
+		resp.Root = root
+		resp.Blocks = blocks
+
+		return nil
+	})
+	if err != nil {
+		return nil, err.Native()
+	}
+	return &resp, nil
 }
 
 func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {

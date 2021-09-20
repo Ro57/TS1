@@ -6987,7 +6987,17 @@ func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBal
 }
 
 func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	resp, err := r.issuanceClient.GetTokenList(ctx, req)
+	var (
+		resp *replicator.GetTokenListResponse
+		err  error
+	)
+
+	if req.Local {
+		resp, err = r.issuanceClient.GetTokenList(ctx, req)
+	} else {
+		resp, err = r.replicatorClient.GetTokenList(ctx, req)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("get token list: %s", err)
 	}

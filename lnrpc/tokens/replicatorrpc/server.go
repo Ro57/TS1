@@ -459,16 +459,15 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	tokenList, err := s.allTokensFromIssuer()
+	resultList, err := utils.GetTokenList(s.db)
 	if err != nil {
 		return nil, err
 	}
 
 	return &replicator.GetTokenListResponse{
-		Tokens: tokenList,
-		Total:  int32(len(tokenList)),
+		Tokens: resultList,
+		Total:  int32(len(resultList)),
 	}, nil
-
 }
 
 func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest) (*empty.Empty, error) {

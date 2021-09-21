@@ -10,6 +10,8 @@ import (
 )
 
 var (
+	IssuerTokens = []byte("issuer_tokens")
+
 	InfoKey   = []byte("info")
 	StateKey  = []byte("state")
 	ChainKey  = []byte("chain")

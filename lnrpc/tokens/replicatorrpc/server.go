@@ -2,6 +2,7 @@ package replicatorrpc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -455,6 +456,33 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 		return nil, err.Native()
 	}
 
+	s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
+		if err != nil {
+			return err
+		}
+
+		tokens := rootBucket.Get(utils.IssuerTokens)
+		if tokens == nil {
+			tokens, _ = json.Marshal(IssuerTokens{})
+		}
+
+		var issuerTokens IssuerTokens
+		errUnmarshal := json.Unmarshal(tokens, &issuerTokens)
+		if errUnmarshal != nil {
+			return er.E(errUnmarshal)
+		}
+
+		issuerTokens.AddToken(req.Offer.IssuerPubkey, req.Name)
+
+		issuerTokensBytes, errMarshal := json.Marshal(issuerTokens)
+		if errMarshal != nil {
+			return er.E(errMarshal)
+		}
+
+		return rootBucket.Put(utils.IssuerTokens, issuerTokensBytes)
+	})
+
 	return &emptypb.Empty{}, nil
 }
 
@@ -689,4 +717,18 @@ type TokenName = string
 type TokenHolder struct {
 	Login    TokenHolderLogin
 	Password string
+}
+
+type IssuerTokens map[string][]string
+
+func (i IssuerTokens) GetTokens(issuer string) []string {
+	val, found := i[issuer]
+	if !found {
+		return []string{}
+	}
+	return val
+}
+
+func (i IssuerTokens) AddToken(issuer, token string) {
+	i[issuer] = append(i[issuer], token)
 }

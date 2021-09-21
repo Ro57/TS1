@@ -993,6 +993,7 @@ func (r *rpcServer) Start() er.R {
 			return er.Errorf("unable to register REST sub-server "+
 				"%v with root: %v", subServer.Name(), err)
 		}
+		log.Infof("subserver %s was registered", subServer.Name())
 	}
 
 	// Before listening on any of the interfaces, we also want to give the
@@ -1008,6 +1009,8 @@ func (r *rpcServer) Start() er.R {
 				log.Errorf("error registering "+
 					"external REST subserver: %v", err)
 			}
+			lis.Addr()
+			log.Infof("subserver was registered at address", lis.Addr())
 		}
 	}
 

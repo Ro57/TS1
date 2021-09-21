@@ -61,6 +61,10 @@ var (
 			Entity: "replicator",
 			Action: "read",
 		}},
+		"/replicator.Replicator/GetBlockSequence": {{
+			Entity: "replicator",
+			Action: "read",
+		}},
 	}
 
 	// DefaultReplicatorMacFilename is the default name of the replicator macaroon
@@ -249,11 +253,23 @@ func (s *Server) RegisterWithRootServer(grpcServer *grpc.Server) er.R {
 //
 // NOTE: This is part of the lnrpc.SubServer interface.
 func (s *Server) RegisterWithRestServer(ctx context.Context,
+	//RegisterReplicatorHandlerFromEndpoint
 	mux *runtime.ServeMux, dest string, opts []grpc.DialOption) er.R {
 	// TODO: Clarify whether it is necessary REST API, and if it necessary
 	// describe rest notation in yaml file and generate .gw file from proto
 	// notation. Implementation of RegisterWithRestServer can be found in
 	// other services, such as the signature service.
+	// We make sure that we register it with the main REST server to ensure
+	// all our methods are routed properly.
+	err := replicator.RegisterReplicatorHandlerFromEndpoint(ctx, mux, dest, opts)
+	if err != nil {
+		log.Errorf("Could not register replicator REST server "+
+			"with root REST server: %v", err)
+		return er.E(err)
+	}
+
+	log.Debugf("Replicator REST server successfully registered with " +
+		"root REST server")
 	return nil
 }
 

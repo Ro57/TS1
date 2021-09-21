@@ -538,6 +538,32 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 	return &emptypb.Empty{}, nil
 }
 
+func (s *Server) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerTokensRequest) (*replicator.GetIssuerTokensResponse, error) {
+	var (
+		response = &replicator.GetIssuerTokensResponse{}
+	)
+
+	tokens, err := s.getIssuerTokens()
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	issuerTokens := tokens.GetTokens(req.Issuer)
+	if len(issuerTokens) == 0 {
+		return &replicator.GetIssuerTokensResponse{}, nil
+	}
+
+	for _, issuerToken := range issuerTokens {
+		token, err := s.getToken(issuerToken)
+		if err != nil {
+			return nil, err.Native()
+		}
+		response.Token = append(response.Token, token)
+	}
+
+	return response, nil
+}
+
 func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
 	token, err := s.getToken(req.TokenId)
 	if err != nil {

@@ -511,6 +511,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "read",
 		}},
+		"/lnrpc.Lightning/GetIssuerTokens": {{
+			Entity: "proxy",
+			Action: "read",
+		}},
 		"/lnrpc.Lightning/GetTokenBalances": {{
 			Entity: "proxy",
 			Action: "read",
@@ -7016,6 +7020,15 @@ func (r *rpcServer) GetHeaders(ctx context.Context, req *replicator.GetHeadersRe
 
 func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
 	resp, err := r.replicatorClient.GetToken(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("get only one token: %s", err)
+	}
+
+	return resp, nil
+}
+
+func (r *rpcServer) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerTokensRequest) (*replicator.GetIssuerTokensResponse, error) {
+	resp, err := r.replicatorClient.GetIssuerTokens(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("get only one token: %s", err)
 	}

@@ -113,6 +113,17 @@
         }
       }
     },
+    "replicatorGetIssuerTokensResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/replicatorToken"
+          }
+        }
+      }
+    },
     "replicatorGetTokenBalancesResponse": {
       "type": "object",
       "properties": {

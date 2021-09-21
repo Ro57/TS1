@@ -539,42 +539,14 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 }
 
 func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
-	response := &replicator.GetTokenResponse{
-		Token: &replicator.Token{
-			Name:  req.TokenId,
-			Token: &DB.Token{},
-			Root:  "",
-		},
-	}
-
-	err := s.db.View(func(tx walletdb.ReadTx) er.R {
-		rootBucket := tx.ReadBucket(utils.TokensKey)
-		if rootBucket == nil {
-			return er.New("tokens DB not created")
-		}
-
-		tokenBucket := rootBucket.NestedReadBucket([]byte(req.TokenId))
-		if tokenBucket == nil {
-			return utils.TokenNotFoundErr
-		}
-		infoBytes := tokenBucket.Get(utils.InfoKey)
-		if infoBytes == nil {
-			return utils.InfoNotFoundErr
-		}
-
-		err := proto.Unmarshal(infoBytes, response.Token.Token)
-		if err != nil {
-			return er.E(err)
-		}
-
-		response.Token.Root = string(tokenBucket.Get(utils.RootHashKey))
-		return nil
-	})
+	token, err := s.getToken(req.TokenId)
 	if err != nil {
 		return nil, err.Native()
 	}
 
-	return response, nil
+	return &replicator.GetTokenResponse{
+		Token: token,
+	}, nil
 }
 
 func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersRequest) (*replicator.GetHeadersResponse, error) {

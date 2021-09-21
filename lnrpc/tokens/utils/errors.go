@@ -5,6 +5,7 @@ import "github.com/pkt-cash/pktd/btcutil/er"
 var (
 	EmptyAddressErr = er.New("empty address")
 
+	TokensDBNotFound       = er.New("tokens DB not created")
 	InfoNotFoundErr        = er.New("token info not found")
 	StateNotFoundErr       = er.New("state not found")
 	TokenNotFoundErr       = er.New("token does not found")

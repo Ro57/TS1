@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package discredit;
 
-option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/descredit";
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/discredit";
 
 import "protos/DB/tokendb.proto";
 

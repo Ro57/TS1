@@ -9,7 +9,7 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	DB "github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
-	descredit "github.com/pkt-cash/pktd/lnd/lnrpc/protos/discredit"
+	discredit "github.com/pkt-cash/pktd/lnd/lnrpc/protos/discredit"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -27,8 +27,13 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+// GetTokenOffersRequest godoc
+//
+// Deprecated: Do not use.
 type GetTokenOffersRequest struct {
-	IssuerId             string      `protobuf:"bytes,1,opt,name=issuer_id,json=issuerId,proto3" json:"issuer_id,omitempty"`
+	// issuer_id godoc
+	IssuerId string `protobuf:"bytes,1,opt,name=issuer_id,json=issuerId,proto3" json:"issuer_id,omitempty"`
+	// params godoc
 	Params               *Pagination `protobuf:"bytes,2,opt,name=params,proto3" json:"params,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
@@ -74,12 +79,17 @@ func (m *GetTokenOffersRequest) GetParams() *Pagination {
 	return nil
 }
 
+// GetTokenOffersResponse godoc
+//
+// Deprecated: Do not use.
 type GetTokenOffersResponse struct {
-	Offers               []*TokenOffer `protobuf:"bytes,1,rep,name=offers,proto3" json:"offers,omitempty"`
-	Total                uint64        `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
+	// offers godoc
+	Offers []*TokenOffer `protobuf:"bytes,1,rep,name=offers,proto3" json:"offers,omitempty"`
+	// total godoc
+	Total                uint64   `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *GetTokenOffersResponse) Reset()         { *m = GetTokenOffersResponse{} }
@@ -231,14 +241,17 @@ func (m *GetTokenListResponse) GetTotal() int32 {
 	return 0
 }
 
+// Token contain information about token to send it and store in DB
 type Token struct {
+	// name — identifier of token
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// offer on token issue
-	Token                *DB.Token `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	Root                 string    `protobuf:"bytes,3,opt,name=root,proto3" json:"root,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
-	XXX_unrecognized     []byte    `json:"-"`
-	XXX_sizecache        int32     `json:"-"`
+	// token — meta info about token
+	Token *DB.Token `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	// root — hash of last block in blockchain
+	Root                 string   `protobuf:"bytes,3,opt,name=root,proto3" json:"root,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *Token) Reset()         { *m = Token{} }
@@ -287,31 +300,24 @@ func (m *Token) GetRoot() string {
 	return ""
 }
 
+// TokenOffer is used to send an offer to buy a token
+// TODO: rework or remove
 type TokenOffer struct {
+	// token — name of token
 	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	// TODO: discuss
-	//  ? Should we assume decimal prices
-	//  ? Add units field
-	Price      uint64      `protobuf:"varint,2,opt,name=price,proto3" json:"price,omitempty"`
+	// price in PKT tokens
+	Price uint64 `protobuf:"varint,2,opt,name=price,proto3" json:"price,omitempty"`
+	// issuer_info — contain info about token about the issuer server that
+	// issued the token
 	IssuerInfo *IssuerInfo `protobuf:"bytes,3,opt,name=issuer_info,json=issuerInfo,proto3" json:"issuer_info,omitempty"`
-	// It is assumed that the each registered token holder login is unique
-	//
-	// Value of this field may be empty orRegisterTokenHolder filled depending
-	// on context (e.g. gettokenoffers, verifytokenpurchasesignature)
-	TokenHolderLogin string `protobuf:"bytes,4,opt,name=token_holder_login,json=tokenHolderLogin,proto3" json:"token_holder_login,omitempty"`
-	// It is assumed that the each registered token holder login is unique
-	//
-	// Value of this field may be empty or filled depending on context
-	// (e.g. gettokenoffers, verifytokenpurchasesignature)
-	TokenBuyerLogin string `protobuf:"bytes,5,opt,name=token_buyer_login,json=tokenBuyerLogin,proto3" json:"token_buyer_login,omitempty"`
-	// This field protects issuers from such a case, when potential buyer
-	// successfully acquires dozens of signatures just in case if that issuer
-	// would raise up the price later. If a Token Wallet holder would like to
-	// open channel with an outdated offer, Replicator would reject to register
-	// this purchase and buyer stays unprotected
-	ValidUntilSeconds int64 `protobuf:"varint,6,opt,name=valid_until_seconds,json=validUntilSeconds,proto3" json:"valid_until_seconds,omitempty"`
+	// valid_until_seconds — protects issuers from such a case, when potential
+	// buyer successfully acquires dozens of signatures just in case if that
+	// issuer would raise up the price later. If a Token Wallet holder would
+	// like to open channel with an outdated offer, Replicator would reject to
+	// register this purchase and buyer stays unprotected
+	ValidUntilSeconds int64 `protobuf:"varint,4,opt,name=valid_until_seconds,json=validUntilSeconds,proto3" json:"valid_until_seconds,omitempty"`
 	// count — the number of tokens to be issued
-	Count                uint64   `protobuf:"varint,7,opt,name=count,proto3" json:"count,omitempty"`
+	Count                uint64   `protobuf:"varint,5,opt,name=count,proto3" json:"count,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -363,20 +369,6 @@ func (m *TokenOffer) GetIssuerInfo() *IssuerInfo {
 	return nil
 }
 
-func (m *TokenOffer) GetTokenHolderLogin() string {
-	if m != nil {
-		return m.TokenHolderLogin
-	}
-	return ""
-}
-
-func (m *TokenOffer) GetTokenBuyerLogin() string {
-	if m != nil {
-		return m.TokenBuyerLogin
-	}
-	return ""
-}
-
 func (m *TokenOffer) GetValidUntilSeconds() int64 {
 	if m != nil {
 		return m.ValidUntilSeconds
@@ -391,16 +383,17 @@ func (m *TokenOffer) GetCount() uint64 {
 	return 0
 }
 
+// IssuerInfo info about issuer server
 type IssuerInfo struct {
-	// This value is explicetely used by Replicator to uniquely identify related
+	// id — value is explicetely used by Replicator to uniquely identify related
 	// issuer later in order to ban him (discredite case), since
 	// "identity_pubkey", "host" may be changed
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// The following field values are used to open payment channel, invoices
-	// commands execution etc.
+	// identity_pubkey — the following field values are used to open payment
+	// channel, invoices commands execution etc.
 	IdentityPubkey string `protobuf:"bytes,2,opt,name=identity_pubkey,json=identityPubkey,proto3" json:"identity_pubkey,omitempty"`
-	// Is used to establish client connection to the issuer's node during some
-	// RPC calls
+	// host is used to establish client connection to the issuer's node during
+	// some RPC calls
 	Host                 string   `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -453,10 +446,12 @@ func (m *IssuerInfo) GetHost() string {
 	return ""
 }
 
+// GetTokenBalancesRequest godoc
 // NOTE: we don't provide any token holder identification since the reqeuest is
 // authorized with JWT applied to the request metadata. It means, that
 // replicator is capable to extract all data needed to process the request
 type GetTokenBalancesRequest struct {
+	// params godoc
 	Params               *Pagination `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
@@ -495,12 +490,15 @@ func (m *GetTokenBalancesRequest) GetParams() *Pagination {
 	return nil
 }
 
+// GetTokenBalancesResponse godoc
 type GetTokenBalancesResponse struct {
-	Balances             []*TokenBalance `protobuf:"bytes,1,rep,name=balances,proto3" json:"balances,omitempty"`
-	Total                uint64          `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	// balances godoc
+	Balances []*TokenBalance `protobuf:"bytes,1,rep,name=balances,proto3" json:"balances,omitempty"`
+	// total godoc
+	Total                uint64   `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *GetTokenBalancesResponse) Reset()         { *m = GetTokenBalancesResponse{} }
@@ -542,9 +540,13 @@ func (m *GetTokenBalancesResponse) GetTotal() uint64 {
 	return 0
 }
 
+// TokenBalance godoc
 type TokenBalance struct {
-	Token                string   `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	Available            uint64   `protobuf:"varint,2,opt,name=available,proto3" json:"available,omitempty"`
+	// token — name of token
+	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	// available godoc
+	Available uint64 `protobuf:"varint,2,opt,name=available,proto3" json:"available,omitempty"`
+	// frozen godoc
 	Frozen               uint64   `protobuf:"varint,3,opt,name=frozen,proto3" json:"frozen,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -597,8 +599,11 @@ func (m *TokenBalance) GetFrozen() uint64 {
 	return 0
 }
 
+// Pagination used for separation on page
 type Pagination struct {
-	Limit                uint64   `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// limit – maximum on the one page
+	Limit uint64 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// offset from the beginning of the list
 	Offset               uint64   `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -644,47 +649,9 @@ func (m *Pagination) GetOffset() uint64 {
 	return 0
 }
 
-type VerifyIssuerRequest struct {
-	Login                string   `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *VerifyIssuerRequest) Reset()         { *m = VerifyIssuerRequest{} }
-func (m *VerifyIssuerRequest) String() string { return proto.CompactTextString(m) }
-func (*VerifyIssuerRequest) ProtoMessage()    {}
-func (*VerifyIssuerRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{11}
-}
-
-func (m *VerifyIssuerRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_VerifyIssuerRequest.Unmarshal(m, b)
-}
-func (m *VerifyIssuerRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_VerifyIssuerRequest.Marshal(b, m, deterministic)
-}
-func (m *VerifyIssuerRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VerifyIssuerRequest.Merge(m, src)
-}
-func (m *VerifyIssuerRequest) XXX_Size() int {
-	return xxx_messageInfo_VerifyIssuerRequest.Size(m)
-}
-func (m *VerifyIssuerRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_VerifyIssuerRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_VerifyIssuerRequest proto.InternalMessageInfo
-
-func (m *VerifyIssuerRequest) GetLogin() string {
-	if m != nil {
-		return m.Login
-	}
-	return ""
-}
-
 // IssueTokenRequest — info about token will be issued
 type IssueTokenRequest struct {
+	// name — identifier of new token
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// offer on token issue
 	Offer                *DB.Token `protobuf:"bytes,2,opt,name=offer,proto3" json:"offer,omitempty"`
@@ -697,7 +664,7 @@ func (m *IssueTokenRequest) Reset()         { *m = IssueTokenRequest{} }
 func (m *IssueTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*IssueTokenRequest) ProtoMessage()    {}
 func (*IssueTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{12}
+	return fileDescriptor_f2f15fabe54a973d, []int{11}
 }
 
 func (m *IssueTokenRequest) XXX_Unmarshal(b []byte) error {
@@ -732,8 +699,13 @@ func (m *IssueTokenRequest) GetOffer() *DB.Token {
 	return nil
 }
 
+// SaveBlockRequest godoc
+//
+// Deprecated: Do not use.
 type SaveBlockRequest struct {
-	Name                 string    `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// name of saved token
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// block from blockchain
 	Block                *DB.Block `protobuf:"bytes,2,opt,name=block,proto3" json:"block,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
@@ -744,7 +716,7 @@ func (m *SaveBlockRequest) Reset()         { *m = SaveBlockRequest{} }
 func (m *SaveBlockRequest) String() string { return proto.CompactTextString(m) }
 func (*SaveBlockRequest) ProtoMessage()    {}
 func (*SaveBlockRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{13}
+	return fileDescriptor_f2f15fabe54a973d, []int{12}
 }
 
 func (m *SaveBlockRequest) XXX_Unmarshal(b []byte) error {
@@ -779,7 +751,9 @@ func (m *SaveBlockRequest) GetBlock() *DB.Block {
 	return nil
 }
 
+// GetTokenRequest used for identification token for getting
 type GetTokenRequest struct {
+	// token_id — name or hash of genesis block of the token
 	TokenId              string   `protobuf:"bytes,1,opt,name=token_id,json=tokenId,proto3" json:"token_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -790,7 +764,7 @@ func (m *GetTokenRequest) Reset()         { *m = GetTokenRequest{} }
 func (m *GetTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*GetTokenRequest) ProtoMessage()    {}
 func (*GetTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{14}
+	return fileDescriptor_f2f15fabe54a973d, []int{13}
 }
 
 func (m *GetTokenRequest) XXX_Unmarshal(b []byte) error {
@@ -818,7 +792,9 @@ func (m *GetTokenRequest) GetTokenId() string {
 	return ""
 }
 
+// GetTokenRequest contains the found token
 type GetTokenResponse struct {
+	// token — information about selected token
 	Token                *Token   `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -829,7 +805,7 @@ func (m *GetTokenResponse) Reset()         { *m = GetTokenResponse{} }
 func (m *GetTokenResponse) String() string { return proto.CompactTextString(m) }
 func (*GetTokenResponse) ProtoMessage()    {}
 func (*GetTokenResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{15}
+	return fileDescriptor_f2f15fabe54a973d, []int{14}
 }
 
 func (m *GetTokenResponse) XXX_Unmarshal(b []byte) error {
@@ -857,8 +833,12 @@ func (m *GetTokenResponse) GetToken() *Token {
 	return nil
 }
 
+// GetHeadersRequest contains a hash from which need to give all the hashes to
+// the last
 type GetHeadersRequest struct {
-	TokenId              string   `protobuf:"bytes,1,opt,name=token_id,json=tokenId,proto3" json:"token_id,omitempty"`
+	// token_id — name or hash of genesis block of the token
+	TokenId string `protobuf:"bytes,1,opt,name=token_id,json=tokenId,proto3" json:"token_id,omitempty"`
+	// hash from which tokens will be selected
 	Hash                 string   `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -869,7 +849,7 @@ func (m *GetHeadersRequest) Reset()         { *m = GetHeadersRequest{} }
 func (m *GetHeadersRequest) String() string { return proto.CompactTextString(m) }
 func (*GetHeadersRequest) ProtoMessage()    {}
 func (*GetHeadersRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{16}
+	return fileDescriptor_f2f15fabe54a973d, []int{15}
 }
 
 func (m *GetHeadersRequest) XXX_Unmarshal(b []byte) error {
@@ -904,8 +884,11 @@ func (m *GetHeadersRequest) GetHash() string {
 	return ""
 }
 
+// GetHeadersResponse contain block hashes with token information
 type GetHeadersResponse struct {
-	Token                *DB.Token      `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	// token — information about token
+	Token *DB.Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	// blocks — collcetion of block hash from given to last
 	Blocks               []*MerkleBlock `protobuf:"bytes,2,rep,name=blocks,proto3" json:"blocks,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
@@ -916,7 +899,7 @@ func (m *GetHeadersResponse) Reset()         { *m = GetHeadersResponse{} }
 func (m *GetHeadersResponse) String() string { return proto.CompactTextString(m) }
 func (*GetHeadersResponse) ProtoMessage()    {}
 func (*GetHeadersResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{17}
+	return fileDescriptor_f2f15fabe54a973d, []int{16}
 }
 
 func (m *GetHeadersResponse) XXX_Unmarshal(b []byte) error {
@@ -951,8 +934,11 @@ func (m *GetHeadersResponse) GetBlocks() []*MerkleBlock {
 	return nil
 }
 
+// MerkleBlock — inforamtion about block
 type MerkleBlock struct {
-	Hash                 string   `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
+	// hash of block
+	Hash string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
+	// prev_hash — reference of previous block
 	PrevHash             string   `protobuf:"bytes,2,opt,name=prev_hash,json=prevHash,proto3" json:"prev_hash,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -963,7 +949,7 @@ func (m *MerkleBlock) Reset()         { *m = MerkleBlock{} }
 func (m *MerkleBlock) String() string { return proto.CompactTextString(m) }
 func (*MerkleBlock) ProtoMessage()    {}
 func (*MerkleBlock) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{18}
+	return fileDescriptor_f2f15fabe54a973d, []int{17}
 }
 
 func (m *MerkleBlock) XXX_Unmarshal(b []byte) error {
@@ -1013,7 +999,7 @@ func (m *IssuerConnection) Reset()         { *m = IssuerConnection{} }
 func (m *IssuerConnection) String() string { return proto.CompactTextString(m) }
 func (*IssuerConnection) ProtoMessage()    {}
 func (*IssuerConnection) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{19}
+	return fileDescriptor_f2f15fabe54a973d, []int{18}
 }
 
 func (m *IssuerConnection) XXX_Unmarshal(b []byte) error {
@@ -1064,7 +1050,7 @@ func (m *IssuerConnection_DiscreditWrapper) Reset()         { *m = IssuerConnect
 func (m *IssuerConnection_DiscreditWrapper) String() string { return proto.CompactTextString(m) }
 func (*IssuerConnection_DiscreditWrapper) ProtoMessage()    {}
 func (*IssuerConnection_DiscreditWrapper) Descriptor() ([]byte, []int) {
-	return fileDescriptor_f2f15fabe54a973d, []int{19, 0}
+	return fileDescriptor_f2f15fabe54a973d, []int{18, 0}
 }
 
 func (m *IssuerConnection_DiscreditWrapper) XXX_Unmarshal(b []byte) error {
@@ -1090,11 +1076,11 @@ type isIssuerConnection_DiscreditWrapper_Discedit interface {
 }
 
 type IssuerConnection_DiscreditWrapper_DuplicateBlock struct {
-	DuplicateBlock *descredit.DuplicateBlock `protobuf:"bytes,2,opt,name=duplicate_block,json=duplicateBlock,proto3,oneof"`
+	DuplicateBlock *discredit.DuplicateBlock `protobuf:"bytes,2,opt,name=duplicate_block,json=duplicateBlock,proto3,oneof"`
 }
 
 type IssuerConnection_DiscreditWrapper_DenialService struct {
-	DenialService *descredit.DenialService `protobuf:"bytes,3,opt,name=denial_service,json=denialService,proto3,oneof"`
+	DenialService *discredit.DenialService `protobuf:"bytes,3,opt,name=denial_service,json=denialService,proto3,oneof"`
 }
 
 func (*IssuerConnection_DiscreditWrapper_DuplicateBlock) isIssuerConnection_DiscreditWrapper_Discedit() {
@@ -1110,14 +1096,14 @@ func (m *IssuerConnection_DiscreditWrapper) GetDiscedit() isIssuerConnection_Dis
 	return nil
 }
 
-func (m *IssuerConnection_DiscreditWrapper) GetDuplicateBlock() *descredit.DuplicateBlock {
+func (m *IssuerConnection_DiscreditWrapper) GetDuplicateBlock() *discredit.DuplicateBlock {
 	if x, ok := m.GetDiscedit().(*IssuerConnection_DiscreditWrapper_DuplicateBlock); ok {
 		return x.DuplicateBlock
 	}
 	return nil
 }
 
-func (m *IssuerConnection_DiscreditWrapper) GetDenialService() *descredit.DenialService {
+func (m *IssuerConnection_DiscreditWrapper) GetDenialService() *discredit.DenialService {
 	if x, ok := m.GetDiscedit().(*IssuerConnection_DiscreditWrapper_DenialService); ok {
 		return x.DenialService
 	}
@@ -1144,7 +1130,6 @@ func init() {
 	proto.RegisterType((*GetTokenBalancesResponse)(nil), "replicator.GetTokenBalancesResponse")
 	proto.RegisterType((*TokenBalance)(nil), "replicator.TokenBalance")
 	proto.RegisterType((*Pagination)(nil), "replicator.Pagination")
-	proto.RegisterType((*VerifyIssuerRequest)(nil), "replicator.VerifyIssuerRequest")
 	proto.RegisterType((*IssueTokenRequest)(nil), "replicator.IssueTokenRequest")
 	proto.RegisterType((*SaveBlockRequest)(nil), "replicator.SaveBlockRequest")
 	proto.RegisterType((*GetTokenRequest)(nil), "replicator.GetTokenRequest")
@@ -1161,75 +1146,71 @@ func init() {
 }
 
 var fileDescriptor_f2f15fabe54a973d = []byte{
-	// 1076 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0x6d, 0x6f, 0xe3, 0xc4,
-	0x13, 0x3f, 0xb7, 0x49, 0x2e, 0x99, 0xf6, 0x9f, 0x26, 0xdb, 0xfe, 0x5b, 0x5f, 0x5a, 0x20, 0x98,
-	0x4a, 0x57, 0xe0, 0xce, 0x91, 0x8e, 0x13, 0x48, 0x20, 0x21, 0x5d, 0xae, 0xa7, 0xa6, 0xa2, 0x15,
-	0x87, 0xcb, 0x51, 0x71, 0x12, 0x44, 0x1b, 0x7b, 0x9d, 0xac, 0xe2, 0x78, 0x8d, 0xbd, 0x89, 0x08,
-	0xdf, 0x82, 0x4f, 0xc0, 0x4b, 0xbe, 0x24, 0x2f, 0xd0, 0x3e, 0xf8, 0x21, 0x0f, 0x3e, 0x78, 0xc3,
-	0x0b, 0x4b, 0xbb, 0x33, 0xbf, 0xf9, 0xed, 0xcc, 0xec, 0xcc, 0x78, 0xc1, 0x8a, 0x62, 0xc6, 0x59,
-	0xd2, 0x8b, 0x49, 0x14, 0x50, 0x17, 0x73, 0x16, 0x17, 0x96, 0xb6, 0x54, 0x22, 0xc8, 0x25, 0x9d,
-	0xd3, 0x31, 0x63, 0xe3, 0x80, 0xf4, 0xa4, 0x66, 0x34, 0xf7, 0x7b, 0x64, 0x16, 0xf1, 0xa5, 0x02,
-	0x76, 0x4e, 0x34, 0xd9, 0x65, 0xbf, 0xc7, 0xd9, 0x94, 0x84, 0xde, 0x48, 0x2b, 0xba, 0x5a, 0xe1,
-	0xd1, 0xc4, 0x8d, 0x89, 0x47, 0x79, 0xbe, 0x52, 0x08, 0xcb, 0x83, 0xff, 0x5f, 0x11, 0xfe, 0xbd,
-	0xb0, 0xfa, 0xd6, 0xf7, 0x49, 0x9c, 0x38, 0xe4, 0x97, 0x39, 0x49, 0x38, 0x3a, 0x85, 0x06, 0x4d,
-	0x92, 0x39, 0x89, 0x87, 0xd4, 0x33, 0x8d, 0xae, 0x71, 0xd1, 0x70, 0xea, 0x4a, 0x70, 0xed, 0x21,
-	0x1b, 0x6a, 0x11, 0x8e, 0xf1, 0x2c, 0x31, 0x77, 0xba, 0xc6, 0xc5, 0xde, 0xb3, 0x63, 0xbb, 0xe0,
-	0xfc, 0x6b, 0x3c, 0xa6, 0x21, 0xe6, 0x94, 0x85, 0x8e, 0x46, 0x59, 0x3f, 0xc3, 0xf1, 0xfa, 0x29,
-	0x49, 0xc4, 0xc2, 0x84, 0x08, 0x26, 0x26, 0x25, 0xa6, 0xd1, 0xdd, 0x5d, 0x67, 0xca, 0x0d, 0x1c,
-	0x8d, 0x42, 0x47, 0x50, 0xe5, 0x8c, 0xe3, 0x40, 0x1e, 0x5c, 0x71, 0xd4, 0xc6, 0xfa, 0x15, 0x0e,
-	0x53, 0xfe, 0x1b, 0x9a, 0xf0, 0xff, 0x22, 0x06, 0x71, 0x72, 0xc0, 0x5c, 0x1c, 0x98, 0xbb, 0x5d,
-	0xe3, 0xa2, 0xee, 0xa8, 0x8d, 0x75, 0x0f, 0x47, 0xab, 0x27, 0xeb, 0xb8, 0x3e, 0x86, 0x9a, 0xbc,
-	0x8a, 0x34, 0xae, 0xf6, 0x46, 0x5c, 0x8e, 0x06, 0xac, 0x86, 0x54, 0x4d, 0x43, 0x7a, 0x03, 0x55,
-	0x09, 0x43, 0x08, 0x2a, 0x21, 0x9e, 0x11, 0xed, 0xbf, 0x5c, 0xa3, 0x73, 0x61, 0x32, 0x25, 0xa1,
-	0x76, 0xbd, 0x69, 0xa7, 0xd7, 0xae, 0x98, 0x95, 0x52, 0x58, 0xc6, 0x8c, 0x71, 0xe9, 0x70, 0xc3,
-	0x91, 0x6b, 0xeb, 0xf7, 0x1d, 0x80, 0x3c, 0xad, 0xea, 0x6c, 0x41, 0xa4, 0xd8, 0xb5, 0xe1, 0x11,
-	0x54, 0xa3, 0x98, 0xba, 0x24, 0x4d, 0xb2, 0xdc, 0xa0, 0x2f, 0x60, 0x2f, 0xcd, 0x66, 0xe8, 0x33,
-	0xc9, 0xba, 0x96, 0xb5, 0x6b, 0x95, 0xdb, 0xd0, 0x67, 0x0e, 0xd0, 0x6c, 0x8d, 0x9e, 0x00, 0x92,
-	0xbc, 0xc3, 0x09, 0x0b, 0x3c, 0x12, 0x0f, 0x03, 0x36, 0xa6, 0xa1, 0x59, 0x91, 0x27, 0xb6, 0xa4,
-	0x66, 0x20, 0x15, 0x37, 0x42, 0x8e, 0x3e, 0x81, 0xb6, 0x42, 0x8f, 0xe6, 0xcb, 0x0c, 0x5c, 0x95,
-	0xe0, 0x03, 0xa9, 0xe8, 0x0b, 0xb9, 0xc2, 0xda, 0x70, 0xb8, 0xc0, 0x01, 0xf5, 0x86, 0xf3, 0x90,
-	0xd3, 0x60, 0x98, 0x10, 0x97, 0x85, 0x5e, 0x62, 0xd6, 0xba, 0xc6, 0xc5, 0xae, 0xd3, 0x96, 0xaa,
-	0x37, 0x42, 0x73, 0xa7, 0x14, 0x22, 0x30, 0x97, 0xcd, 0x43, 0x6e, 0x3e, 0x54, 0x81, 0xc9, 0x8d,
-	0xf5, 0x23, 0x40, 0xee, 0x39, 0x6a, 0xc2, 0x4e, 0x56, 0x2d, 0x3b, 0xd4, 0x43, 0x8f, 0xe1, 0x80,
-	0x7a, 0x24, 0xe4, 0x94, 0x2f, 0x87, 0xd1, 0x7c, 0x34, 0x25, 0x4b, 0x99, 0x96, 0x86, 0xd3, 0x4c,
-	0xc5, 0xaf, 0xa5, 0x54, 0xa4, 0x7b, 0xc2, 0x92, 0x2c, 0xdd, 0x62, 0x6d, 0x5d, 0xc3, 0x49, 0x5a,
-	0x1e, 0x7d, 0x1c, 0xe0, 0xd0, 0x25, 0x59, 0x83, 0xe5, 0xf5, 0x67, 0xfc, 0xab, 0x1e, 0xf2, 0xc1,
-	0xdc, 0xa4, 0xd2, 0xd5, 0xf6, 0x1c, 0xea, 0x23, 0x2d, 0xd3, 0xf5, 0x66, 0x6e, 0xd4, 0x9b, 0x36,
-	0x72, 0x32, 0x64, 0x49, 0x2f, 0xbd, 0x85, 0xfd, 0x22, 0xbe, 0xa4, 0x44, 0xce, 0xa0, 0x81, 0x17,
-	0x98, 0x06, 0x78, 0x14, 0xa4, 0x65, 0x92, 0x0b, 0xd0, 0x31, 0xd4, 0xfc, 0x98, 0xfd, 0x46, 0x42,
-	0x99, 0x8c, 0x8a, 0xa3, 0x77, 0xd6, 0x97, 0x00, 0x79, 0x64, 0xb2, 0xa3, 0xe8, 0x8c, 0x72, 0xc9,
-	0x5c, 0x71, 0xd4, 0x46, 0xd8, 0x32, 0xdf, 0x4f, 0x08, 0xd7, 0xb4, 0x7a, 0x67, 0x7d, 0x0a, 0x87,
-	0x3f, 0x90, 0x98, 0xfa, 0x4b, 0x75, 0x57, 0x69, 0x1a, 0x65, 0x5b, 0x8a, 0x12, 0xd1, 0xee, 0xc9,
-	0x8d, 0x75, 0x0b, 0x6d, 0x09, 0x53, 0xfd, 0xa0, 0xa1, 0x25, 0x9d, 0x24, 0x27, 0x4b, 0x59, 0x27,
-	0x49, 0xa5, 0x75, 0x03, 0xad, 0x3b, 0xbc, 0x20, 0xfd, 0x80, 0xb9, 0xd3, 0x7f, 0x60, 0x1b, 0x09,
-	0xcc, 0x06, 0x9b, 0xb2, 0x54, 0x4a, 0xeb, 0x09, 0x1c, 0xa4, 0x37, 0x99, 0x92, 0x3d, 0x82, 0xba,
-	0x2a, 0xfa, 0xac, 0xf4, 0x1e, 0xca, 0xfd, 0xb5, 0x67, 0x7d, 0x05, 0xad, 0x1c, 0xad, 0xef, 0xfb,
-	0x71, 0xf1, 0x4e, 0xb6, 0x0e, 0x17, 0xa5, 0xb7, 0xfa, 0xd0, 0xbe, 0x22, 0x7c, 0x40, 0xb0, 0x57,
-	0x18, 0xed, 0xe5, 0x87, 0xc9, 0x1a, 0xc6, 0xc9, 0x44, 0x57, 0xb8, 0x5c, 0x5b, 0x53, 0x40, 0x45,
-	0x0e, 0xed, 0xc2, 0xf9, 0xaa, 0x0b, 0x25, 0x23, 0xa8, 0x07, 0x35, 0x19, 0xb3, 0x18, 0xb2, 0xa2,
-	0x2c, 0x4f, 0x8a, 0x9e, 0xde, 0x92, 0x78, 0x1a, 0xe8, 0xa4, 0x6a, 0x98, 0xf5, 0x35, 0xec, 0x15,
-	0xc4, 0x99, 0x3f, 0x46, 0xee, 0x8f, 0x98, 0xea, 0x51, 0x4c, 0x16, 0xc3, 0x82, 0xa3, 0x75, 0x21,
-	0x18, 0x08, 0x67, 0xff, 0xd8, 0x81, 0x96, 0x2a, 0x90, 0x97, 0x2c, 0x0c, 0x89, 0x2b, 0x0b, 0x2d,
-	0xed, 0x4c, 0x23, 0xef, 0x4c, 0x74, 0x0b, 0xe0, 0x11, 0xfd, 0x2f, 0x4c, 0xcc, 0x8a, 0xf4, 0xee,
-	0xe9, 0xe6, 0x30, 0xcb, 0x59, 0xec, 0xcb, 0xf4, 0xd7, 0x79, 0x1f, 0xe3, 0x28, 0x22, 0xb1, 0x53,
-	0x20, 0xe8, 0xfc, 0x69, 0x40, 0x6b, 0x1d, 0x80, 0x2e, 0xe1, 0xc0, 0x9b, 0x2b, 0x42, 0x32, 0x2c,
-	0x16, 0xc6, 0x23, 0x3b, 0xff, 0x0f, 0x5f, 0xa6, 0x08, 0x19, 0xf1, 0xe0, 0x81, 0xd3, 0xf4, 0x56,
-	0x24, 0xe8, 0x05, 0x34, 0x3d, 0x12, 0x52, 0x2c, 0xe6, 0x5b, 0xbc, 0x10, 0x63, 0x59, 0x8d, 0x5e,
-	0xb3, 0x48, 0x22, 0x01, 0x77, 0x4a, 0x3f, 0x78, 0xe0, 0xfc, 0xcf, 0x2b, 0x0a, 0xfa, 0x00, 0x75,
-	0x81, 0x15, 0xd0, 0x67, 0x7f, 0x55, 0x00, 0x9c, 0x2c, 0x4c, 0x74, 0x0f, 0xcd, 0xd5, 0x5f, 0x33,
-	0xfa, 0xb0, 0x98, 0x85, 0xad, 0x8f, 0x83, 0x8e, 0xf5, 0x2e, 0x88, 0x2e, 0x90, 0x9f, 0xf2, 0xba,
-	0x4d, 0xe7, 0x15, 0xfa, 0x68, 0x9b, 0xdd, 0xda, 0x60, 0xec, 0x9c, 0xbf, 0x1b, 0xa4, 0xe9, 0xaf,
-	0x60, 0xbf, 0x38, 0x0e, 0xd0, 0x07, 0x45, 0xab, 0x2d, 0x83, 0xa2, 0x73, 0x6c, 0xab, 0x27, 0x94,
-	0x9d, 0x3e, 0xa1, 0xec, 0x57, 0xe2, 0x09, 0x85, 0x5e, 0xea, 0xe9, 0xaf, 0xfe, 0xb6, 0xef, 0x6d,
-	0x94, 0x40, 0xb1, 0x4f, 0x4b, 0x49, 0x5e, 0x40, 0x23, 0x1b, 0x10, 0xe8, 0xac, 0xc8, 0xb1, 0x3e,
-	0x37, 0x4a, 0x29, 0xbe, 0x01, 0xc8, 0xdb, 0x6c, 0xd5, 0x8f, 0x8d, 0x16, 0xee, 0xbc, 0x5f, 0xa6,
-	0xd6, 0xd9, 0x79, 0x05, 0xf5, 0x34, 0x73, 0xe8, 0x74, 0x5b, 0x3e, 0x53, 0xa2, 0xb3, 0xed, 0x4a,
-	0x4d, 0xf3, 0x1d, 0xec, 0x17, 0x5f, 0x37, 0xab, 0x49, 0xde, 0xf2, 0xe2, 0xea, 0x74, 0xcb, 0x01,
-	0x8a, 0xb2, 0xff, 0xf9, 0xdb, 0xe7, 0x63, 0xca, 0x27, 0xf3, 0x91, 0xed, 0xb2, 0x59, 0x2f, 0x9a,
-	0xf2, 0xa7, 0x2e, 0x4e, 0x26, 0x62, 0xe1, 0xf5, 0x82, 0x50, 0x7c, 0x71, 0xe4, 0xf6, 0x36, 0x5e,
-	0xc7, 0xa3, 0x9a, 0x14, 0x7d, 0xf6, 0x77, 0x00, 0x00, 0x00, 0xff, 0xff, 0x9d, 0x1c, 0x91, 0x19,
-	0x39, 0x0b, 0x00, 0x00,
+	// 1014 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xdd, 0x6e, 0x1b, 0x45,
+	0x14, 0xee, 0x3a, 0x8e, 0xb1, 0x4f, 0x8a, 0x93, 0x4c, 0x43, 0xb2, 0x75, 0x02, 0x98, 0x21, 0x52,
+	0x83, 0x44, 0xd7, 0x52, 0xa9, 0x40, 0x2a, 0x12, 0x12, 0x6e, 0x4a, 0x13, 0x41, 0x44, 0xd8, 0x50,
+	0x55, 0x54, 0x48, 0xd6, 0xec, 0xee, 0x38, 0x1e, 0x79, 0x3d, 0xb3, 0xec, 0x8e, 0x2d, 0xc2, 0x13,
+	0xf0, 0x16, 0x5c, 0xf2, 0x08, 0xdc, 0xf3, 0x64, 0x68, 0x7e, 0xd6, 0x3b, 0xfe, 0x2b, 0xdc, 0x70,
+	0xb1, 0xd2, 0xcc, 0x39, 0xdf, 0x7c, 0xe7, 0x67, 0xce, 0x39, 0x3b, 0x80, 0xb3, 0x5c, 0x48, 0x51,
+	0xf4, 0x72, 0x9a, 0xa5, 0x2c, 0x26, 0x52, 0xe4, 0xce, 0x32, 0xd0, 0x4a, 0x04, 0x95, 0xa4, 0x73,
+	0x7c, 0x2b, 0xc4, 0x6d, 0x4a, 0x7b, 0x5a, 0x13, 0x4d, 0x87, 0x3d, 0x3a, 0xc9, 0xe4, 0x9d, 0x01,
+	0x76, 0x8e, 0x2c, 0xd9, 0x79, 0xbf, 0x27, 0xc5, 0x98, 0xf2, 0x24, 0xb2, 0x8a, 0xae, 0x55, 0x24,
+	0xac, 0x88, 0x73, 0x9a, 0x30, 0x59, 0xad, 0x0c, 0x02, 0x8f, 0xe0, 0xbd, 0x97, 0x54, 0xfe, 0xa8,
+	0x4e, 0x7d, 0x3f, 0x1c, 0xd2, 0xbc, 0x08, 0xe9, 0x2f, 0x53, 0x5a, 0x48, 0x74, 0x0c, 0x2d, 0x56,
+	0x14, 0x53, 0x9a, 0x0f, 0x58, 0xe2, 0x7b, 0x5d, 0xef, 0xac, 0x15, 0x36, 0x8d, 0xe0, 0x32, 0x41,
+	0x01, 0x34, 0x32, 0x92, 0x93, 0x49, 0xe1, 0xd7, 0xba, 0xde, 0xd9, 0xce, 0x93, 0xc3, 0xc0, 0x71,
+	0xfe, 0x9a, 0xdc, 0x32, 0x4e, 0x24, 0x13, 0x3c, 0xb4, 0xa8, 0x67, 0x35, 0xdf, 0xc3, 0x11, 0x1c,
+	0x2e, 0x5b, 0x2a, 0x32, 0xc1, 0x0b, 0xaa, 0xd8, 0x84, 0x96, 0xf8, 0x5e, 0x77, 0x6b, 0x99, 0xad,
+	0x3a, 0x10, 0x5a, 0x14, 0x3a, 0x80, 0x6d, 0x29, 0x24, 0x49, 0xb5, 0xf1, 0x7a, 0x68, 0x36, 0xda,
+	0xc6, 0xaf, 0xf0, 0xa0, 0xb4, 0xf1, 0x1d, 0x2b, 0xe4, 0xff, 0x11, 0x8b, 0xb2, 0x9e, 0x8a, 0x98,
+	0xa4, 0xfe, 0x56, 0xd7, 0x3b, 0x6b, 0x86, 0x66, 0x83, 0x5f, 0xc3, 0xc1, 0xa2, 0x65, 0x1b, 0xdb,
+	0x27, 0xd0, 0xd0, 0x57, 0x52, 0xc6, 0xb6, 0xbf, 0x12, 0x5b, 0x68, 0x01, 0x8b, 0x61, 0x6d, 0xdb,
+	0xb0, 0xf0, 0x2b, 0xd8, 0xd6, 0x30, 0x84, 0xa0, 0xce, 0xc9, 0x84, 0x5a, 0xff, 0xf5, 0x1a, 0x9d,
+	0xaa, 0x23, 0x63, 0xca, 0xad, 0xeb, 0xed, 0xa0, 0xbc, 0x7e, 0xc3, 0x6c, 0x94, 0xea, 0x64, 0x2e,
+	0x84, 0xd4, 0x0e, 0xb7, 0x42, 0xbd, 0xc6, 0x7f, 0x79, 0x00, 0x55, 0x6a, 0x8d, 0x6d, 0x45, 0x64,
+	0xd8, 0xed, 0xc1, 0x03, 0xd8, 0xce, 0x72, 0x16, 0xd3, 0x32, 0xd1, 0x7a, 0x83, 0xbe, 0x80, 0x9d,
+	0x32, 0x9b, 0x7c, 0x28, 0x34, 0xeb, 0x52, 0xd6, 0x2e, 0x4d, 0x6e, 0xf9, 0x50, 0x84, 0xc0, 0xe6,
+	0x6b, 0x14, 0xc0, 0x83, 0x19, 0x49, 0x59, 0x32, 0x98, 0x72, 0xc9, 0xd2, 0x41, 0x41, 0x63, 0xc1,
+	0x93, 0xc2, 0xaf, 0x77, 0xbd, 0xb3, 0xad, 0x70, 0x5f, 0xab, 0x5e, 0x29, 0xcd, 0x8d, 0x51, 0x28,
+	0xf3, 0xb1, 0x98, 0x72, 0xe9, 0x6f, 0x1b, 0xf3, 0x7a, 0x83, 0x7f, 0x02, 0xa8, 0xf8, 0x51, 0x1b,
+	0x6a, 0xf3, 0x3b, 0xad, 0xb1, 0x04, 0x3d, 0x82, 0x5d, 0x96, 0x50, 0x2e, 0x99, 0xbc, 0x1b, 0x64,
+	0xd3, 0x68, 0x4c, 0xef, 0xb4, 0xf3, 0xad, 0xb0, 0x5d, 0x8a, 0xaf, 0xb5, 0x54, 0x25, 0x65, 0x24,
+	0x8a, 0x79, 0x52, 0xd4, 0x1a, 0x5f, 0xc2, 0x51, 0x79, 0x89, 0x7d, 0x92, 0x12, 0x1e, 0xd3, 0x79,
+	0x3b, 0x54, 0x55, 0xe2, 0xfd, 0x97, 0x2a, 0xc1, 0x43, 0xf0, 0x57, 0xa9, 0x6c, 0x4d, 0x3c, 0x85,
+	0x66, 0x64, 0x65, 0xb6, 0x2a, 0xfc, 0x95, 0xaa, 0xb0, 0x87, 0xc2, 0x39, 0x72, 0x7d, 0xd5, 0xe3,
+	0x37, 0x70, 0xdf, 0xc5, 0x6f, 0xb8, 0xc8, 0x13, 0x68, 0x91, 0x19, 0x61, 0x29, 0x89, 0xd2, 0xf2,
+	0x32, 0x2b, 0x01, 0x3a, 0x84, 0xc6, 0x30, 0x17, 0xbf, 0x51, 0xae, 0x93, 0x51, 0x0f, 0xed, 0x0e,
+	0x3f, 0x03, 0xa8, 0x22, 0xd3, 0x75, 0xcf, 0x26, 0x4c, 0x6a, 0xe6, 0x7a, 0x68, 0x36, 0xea, 0xac,
+	0x18, 0x0e, 0x0b, 0x2a, 0x2d, 0xad, 0xdd, 0xe1, 0x2b, 0xd8, 0xd7, 0xb7, 0x64, 0x0a, 0xd1, 0x26,
+	0x71, 0x43, 0x09, 0xeb, 0xb6, 0xde, 0x54, 0xc2, 0x5a, 0x89, 0xaf, 0x61, 0xef, 0x86, 0xcc, 0x68,
+	0x3f, 0x15, 0xf1, 0xf8, 0x5f, 0xd8, 0x22, 0x85, 0x59, 0x61, 0x33, 0x27, 0x8d, 0x52, 0x8f, 0x8a,
+	0x4f, 0x61, 0xb7, 0xbc, 0xa0, 0x92, 0xf0, 0x21, 0x34, 0x35, 0xbc, 0x9a, 0x12, 0xef, 0xe8, 0xfd,
+	0x65, 0x82, 0xbf, 0x84, 0xbd, 0x0a, 0x6d, 0xaf, 0xf1, 0x91, 0x9b, 0xea, 0xb5, 0x9d, 0x6d, 0xf4,
+	0xb8, 0x0f, 0xfb, 0x2f, 0xa9, 0xbc, 0xa0, 0x24, 0x71, 0xe6, 0xeb, 0x66, 0x63, 0xba, 0x34, 0x49,
+	0x31, 0xb2, 0x85, 0xab, 0xd7, 0x78, 0x0c, 0xc8, 0xe5, 0xb0, 0x2e, 0x9c, 0x2e, 0xba, 0xb0, 0xa1,
+	0xff, 0x7b, 0xd0, 0xd0, 0x71, 0xab, 0x09, 0xa7, 0xaa, 0xed, 0xc8, 0xf5, 0xf4, 0x8a, 0xe6, 0xe3,
+	0xd4, 0x26, 0xd6, 0xc2, 0xf0, 0x57, 0xb0, 0xe3, 0x88, 0xe7, 0xfe, 0x78, 0x95, 0x3f, 0x6a, 0xa4,
+	0x66, 0x39, 0x9d, 0x0d, 0x1c, 0x47, 0x9b, 0x4a, 0x70, 0xa1, 0x9c, 0xfd, 0xa3, 0x06, 0x7b, 0xa6,
+	0x47, 0x9f, 0x0b, 0xce, 0x69, 0xac, 0xeb, 0xa7, 0x6c, 0x38, 0xaf, 0x6a, 0x38, 0x74, 0x05, 0x90,
+	0x50, 0xfb, 0x43, 0x52, 0x83, 0x40, 0x79, 0xf7, 0x78, 0x75, 0x92, 0x54, 0x2c, 0xc1, 0x79, 0xf9,
+	0xff, 0x7a, 0x9d, 0x93, 0x2c, 0xa3, 0x79, 0xe8, 0x10, 0x74, 0xfe, 0xf4, 0x60, 0x6f, 0x19, 0x80,
+	0xce, 0x61, 0x37, 0x99, 0x1a, 0x42, 0x3a, 0x70, 0x8b, 0xe3, 0x61, 0x50, 0xfd, 0x0c, 0xcf, 0x4b,
+	0x84, 0x8e, 0xf8, 0xe2, 0x5e, 0xd8, 0x4e, 0x16, 0x24, 0xe8, 0x6b, 0x68, 0x27, 0x94, 0x33, 0xa2,
+	0xc6, 0x56, 0x3e, 0x53, 0x33, 0xd1, 0xcc, 0x3d, 0xdf, 0x25, 0xd1, 0x80, 0x1b, 0xa3, 0xbf, 0xb8,
+	0x17, 0xbe, 0x9b, 0xb8, 0x82, 0x3e, 0x40, 0x53, 0x61, 0x15, 0xf4, 0xc9, 0xdf, 0x75, 0x80, 0x70,
+	0x1e, 0x26, 0xfa, 0x19, 0xda, 0x8b, 0xff, 0x46, 0xf4, 0x91, 0x9b, 0x85, 0xb5, 0x7f, 0xe8, 0x0e,
+	0x7e, 0x1b, 0xc4, 0x14, 0x08, 0xde, 0xfa, 0xbd, 0xe6, 0xa1, 0xa8, 0x2a, 0xde, 0x72, 0x16, 0xa1,
+	0x8f, 0xd7, 0x1d, 0x5e, 0x1a, 0x7a, 0x9d, 0xd3, 0xb7, 0x83, 0x5c, 0x1b, 0xcf, 0xed, 0x54, 0x36,
+	0xff, 0xaa, 0xf7, 0x57, 0xee, 0xd0, 0x6d, 0xb4, 0xce, 0x61, 0x60, 0x5e, 0x33, 0x41, 0xf9, 0x9a,
+	0x09, 0x5e, 0xa8, 0xd7, 0x0c, 0xfa, 0x06, 0x5a, 0xf3, 0x2e, 0x47, 0x27, 0x2e, 0xc7, 0x72, 0xf3,
+	0x6f, 0xa2, 0x30, 0xce, 0x7c, 0x0b, 0x50, 0x35, 0xcb, 0xa2, 0x33, 0x2b, 0x8d, 0xd8, 0xf9, 0x60,
+	0x93, 0xda, 0xf6, 0xd8, 0x0b, 0x68, 0x96, 0xa1, 0xa3, 0xe3, 0x75, 0x09, 0x29, 0x89, 0x4e, 0xd6,
+	0x2b, 0x2d, 0xcd, 0x0f, 0x70, 0xdf, 0x7d, 0x20, 0xa0, 0x0f, 0xd7, 0xa1, 0x9d, 0x47, 0x4b, 0xa7,
+	0xbb, 0x19, 0x60, 0x28, 0xfb, 0x9f, 0xbf, 0x79, 0x7a, 0xcb, 0xe4, 0x68, 0x1a, 0x05, 0xb1, 0x98,
+	0xf4, 0xb2, 0xb1, 0x7c, 0x1c, 0x93, 0x62, 0xa4, 0x16, 0x49, 0x2f, 0xe5, 0xea, 0xcb, 0xb3, 0xb8,
+	0xb7, 0xf2, 0xd0, 0x8c, 0x1a, 0x5a, 0xf4, 0xd9, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x16, 0xca,
+	0x9f, 0x8a, 0x84, 0x0a, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1244,18 +1225,20 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ReplicatorClient interface {
-	// Returns available token offers
+	// GetTokenOffers returns available token offers
+	// Now deprecated, use GetTokenList instead
 	GetTokenOffers(ctx context.Context, in *GetTokenOffersRequest, opts ...grpc.CallOption) (*GetTokenOffersResponse, error)
-	// Returns current token balances
+	// GetTokenBalances returns current token balances
+	// TODO: rework or delete
 	GetTokenBalances(ctx context.Context, in *GetTokenBalancesRequest, opts ...grpc.CallOption) (*GetTokenBalancesResponse, error)
-	// Verifies a user permitions to issue a token. Returns exceptions if
-	// passed user is not contained in issuer's db
-	VerifyIssuer(ctx context.Context, in *VerifyIssuerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// IssueToken — Issue new token with given data. Request data equal to
 	// token purchase data, because it is token offer.
 	IssueToken(ctx context.Context, in *IssueTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// SaveBlock get new block for local blockchain
 	SaveBlock(ctx context.Context, in *SaveBlockRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// GetHeaders returns headers of all block from given hash to last block
 	GetHeaders(ctx context.Context, in *GetHeadersRequest, opts ...grpc.CallOption) (*GetHeadersResponse, error)
+	// GetToken returns only one specified token
 	GetToken(ctx context.Context, in *GetTokenRequest, opts ...grpc.CallOption) (*GetTokenResponse, error)
 	// GetTokenList — return list of issued token with infomation about
 	// expiration time and fix price.
@@ -1270,6 +1253,7 @@ func NewReplicatorClient(cc *grpc.ClientConn) ReplicatorClient {
 	return &replicatorClient{cc}
 }
 
+// Deprecated: Do not use.
 func (c *replicatorClient) GetTokenOffers(ctx context.Context, in *GetTokenOffersRequest, opts ...grpc.CallOption) (*GetTokenOffersResponse, error) {
 	out := new(GetTokenOffersResponse)
 	err := c.cc.Invoke(ctx, "/replicator.Replicator/GetTokenOffers", in, out, opts...)
@@ -1279,18 +1263,10 @@ func (c *replicatorClient) GetTokenOffers(ctx context.Context, in *GetTokenOffer
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *replicatorClient) GetTokenBalances(ctx context.Context, in *GetTokenBalancesRequest, opts ...grpc.CallOption) (*GetTokenBalancesResponse, error) {
 	out := new(GetTokenBalancesResponse)
 	err := c.cc.Invoke(ctx, "/replicator.Replicator/GetTokenBalances", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *replicatorClient) VerifyIssuer(ctx context.Context, in *VerifyIssuerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/replicator.Replicator/VerifyIssuer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1306,6 +1282,7 @@ func (c *replicatorClient) IssueToken(ctx context.Context, in *IssueTokenRequest
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *replicatorClient) SaveBlock(ctx context.Context, in *SaveBlockRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/replicator.Replicator/SaveBlock", in, out, opts...)
@@ -1344,18 +1321,20 @@ func (c *replicatorClient) GetTokenList(ctx context.Context, in *GetTokenListReq
 
 // ReplicatorServer is the server API for Replicator service.
 type ReplicatorServer interface {
-	// Returns available token offers
+	// GetTokenOffers returns available token offers
+	// Now deprecated, use GetTokenList instead
 	GetTokenOffers(context.Context, *GetTokenOffersRequest) (*GetTokenOffersResponse, error)
-	// Returns current token balances
+	// GetTokenBalances returns current token balances
+	// TODO: rework or delete
 	GetTokenBalances(context.Context, *GetTokenBalancesRequest) (*GetTokenBalancesResponse, error)
-	// Verifies a user permitions to issue a token. Returns exceptions if
-	// passed user is not contained in issuer's db
-	VerifyIssuer(context.Context, *VerifyIssuerRequest) (*empty.Empty, error)
 	// IssueToken — Issue new token with given data. Request data equal to
 	// token purchase data, because it is token offer.
 	IssueToken(context.Context, *IssueTokenRequest) (*empty.Empty, error)
+	// SaveBlock get new block for local blockchain
 	SaveBlock(context.Context, *SaveBlockRequest) (*empty.Empty, error)
+	// GetHeaders returns headers of all block from given hash to last block
 	GetHeaders(context.Context, *GetHeadersRequest) (*GetHeadersResponse, error)
+	// GetToken returns only one specified token
 	GetToken(context.Context, *GetTokenRequest) (*GetTokenResponse, error)
 	// GetTokenList — return list of issued token with infomation about
 	// expiration time and fix price.
@@ -1371,9 +1350,6 @@ func (*UnimplementedReplicatorServer) GetTokenOffers(ctx context.Context, req *G
 }
 func (*UnimplementedReplicatorServer) GetTokenBalances(ctx context.Context, req *GetTokenBalancesRequest) (*GetTokenBalancesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenBalances not implemented")
-}
-func (*UnimplementedReplicatorServer) VerifyIssuer(ctx context.Context, req *VerifyIssuerRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyIssuer not implemented")
 }
 func (*UnimplementedReplicatorServer) IssueToken(ctx context.Context, req *IssueTokenRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueToken not implemented")
@@ -1427,24 +1403,6 @@ func _Replicator_GetTokenBalances_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReplicatorServer).GetTokenBalances(ctx, req.(*GetTokenBalancesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Replicator_VerifyIssuer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VerifyIssuerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReplicatorServer).VerifyIssuer(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/replicator.Replicator/VerifyIssuer",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicatorServer).VerifyIssuer(ctx, req.(*VerifyIssuerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1550,10 +1508,6 @@ var _Replicator_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTokenBalances",
 			Handler:    _Replicator_GetTokenBalances_Handler,
-		},
-		{
-			MethodName: "VerifyIssuer",
-			Handler:    _Replicator_VerifyIssuer_Handler,
 		},
 		{
 			MethodName: "IssueToken",

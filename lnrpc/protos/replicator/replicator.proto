@@ -8,48 +8,61 @@ import "google/protobuf/empty.proto";
 import "protos/DB/tokendb.proto";
 import "protos/discredit/discredit.proto";
 
-// Is mainly used to generate compatible querier (client)
-//
+// Replicator is mainly used to generate compatible querier (client)
 // Generated client can be used to serve two main purposes:
 //  - to interact with it via generated client
 //  - to test generated client implementation by mocking generated server
-//
 service Replicator {
-    // Returns available token offers
-    rpc GetTokenOffers (GetTokenOffersRequest) returns (GetTokenOffersResponse);
+    // GetTokenOffers returns available token offers
+    // Now deprecated, use GetTokenList instead
+    rpc GetTokenOffers (GetTokenOffersRequest) returns (GetTokenOffersResponse){
+        option deprecated = true;
+    };
 
-    // Returns current token balances
+    // GetTokenBalances returns current token balances
+    // TODO: rework or delete
     rpc GetTokenBalances (GetTokenBalancesRequest)
-        returns (GetTokenBalancesResponse);
-
-    // Verifies a user permitions to issue a token. Returns exceptions if
-    // passed user is not contained in issuer's db
-    rpc VerifyIssuer (VerifyIssuerRequest) returns (google.protobuf.Empty);
+        returns (GetTokenBalancesResponse) 
+    {
+        option deprecated = true;
+    };
 
     // IssueToken — Issue new token with given data. Request data equal to
     // token purchase data, because it is token offer.
     rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
 
-    rpc SaveBlock(SaveBlockRequest) returns (google.protobuf.Empty);
+    // SaveBlock get new block for local blockchain
+    rpc SaveBlock(SaveBlockRequest) returns (google.protobuf.Empty){
+        option deprecated = true;
+    };
 
+    // GetHeaders returns headers of all block from given hash to last block
     rpc GetHeaders(GetHeadersRequest) returns (GetHeadersResponse);
 
+    // GetToken returns only one specified token 
     rpc GetToken(GetTokenRequest) returns (GetTokenResponse);
 
     // GetTokenList — return list of issued token with infomation about
     // expiration time and fix price.
     rpc GetTokenList(GetTokenListRequest)
         returns(GetTokenListResponse);
-
 }
 
+// GetTokenOffersRequest godoc
 message GetTokenOffersRequest {
+    option deprecated = true;
+    // issuer_id godoc
     string issuer_id = 1;
+    // params godoc
     Pagination params = 2;
 }
 
+// GetTokenOffersResponse godoc
 message GetTokenOffersResponse {
+    option deprecated = true;
+    // offers godoc
     repeated TokenOffer offers = 1;
+    // total godoc
     uint64 total = 2;
 }
 
@@ -72,122 +85,144 @@ message GetTokenListResponse {
     int32 total = 2;
 }
 
+// Token contain information about token to send it and store in DB
 message Token {
+    // name — identifier of token
     string name = 1;
-    // offer on token issue
+    // token — meta info about token
     tokendb.Token token = 2;
-
+    // root — hash of last block in blockchain 
     string root = 3;
 }
 
+// TokenOffer is used to send an offer to buy a token
+// TODO: rework or remove
 message TokenOffer {
+    // token — name of token 
     string token = 1;
 
-    // TODO: discuss
-    //  ? Should we assume decimal prices
-    //  ? Add units field
+    // price in PKT tokens
     uint64 price = 2;
 
+    // issuer_info — contain info about token about the issuer server that 
+    // issued the token
     IssuerInfo issuer_info = 3;
 
-    // It is assumed that the each registered token holder login is unique
-    //
-    // Value of this field may be empty orRegisterTokenHolder filled depending
-    // on context (e.g. gettokenoffers, verifytokenpurchasesignature)
-    string token_holder_login = 4;
-
-    // It is assumed that the each registered token holder login is unique
-    //
-    // Value of this field may be empty or filled depending on context
-    // (e.g. gettokenoffers, verifytokenpurchasesignature)
-    string token_buyer_login = 5;
-
-    // This field protects issuers from such a case, when potential buyer
-    // successfully acquires dozens of signatures just in case if that issuer
-    // would raise up the price later. If a Token Wallet holder would like to
-    // open channel with an outdated offer, Replicator would reject to register
-    // this purchase and buyer stays unprotected
-    int64 valid_until_seconds = 6;
+    // valid_until_seconds — protects issuers from such a case, when potential
+    // buyer successfully acquires dozens of signatures just in case if that 
+    // issuer would raise up the price later. If a Token Wallet holder would
+    // like to open channel with an outdated offer, Replicator would reject to
+    // register this purchase and buyer stays unprotected
+    int64 valid_until_seconds = 4;
 
     // count — the number of tokens to be issued
-    uint64 count = 7;
+    uint64 count = 5;
 }
 
+// IssuerInfo info about issuer server
 message IssuerInfo {
-    // This value is explicetely used by Replicator to uniquely identify related
+    // id — value is explicetely used by Replicator to uniquely identify related
     // issuer later in order to ban him (discredite case), since
     // "identity_pubkey", "host" may be changed
     string id = 1;
 
-    // The following field values are used to open payment channel, invoices
-    // commands execution etc.
+    // identity_pubkey — the following field values are used to open payment
+    // channel, invoices commands execution etc.
     string identity_pubkey = 2;
 
-    // Is used to establish client connection to the issuer's node during some
-    // RPC calls
+    // host is used to establish client connection to the issuer's node during
+    // some RPC calls
     string host = 3;
 }
 
+// GetTokenBalancesRequest godoc
 // NOTE: we don't provide any token holder identification since the reqeuest is
 // authorized with JWT applied to the request metadata. It means, that
 // replicator is capable to extract all data needed to process the request
 message GetTokenBalancesRequest {
+    // params godoc
     Pagination params = 1;
 }
 
+// GetTokenBalancesResponse godoc
 message GetTokenBalancesResponse {
+    // balances godoc
     repeated TokenBalance balances = 1;
+    // total godoc
     uint64 total = 2;
 }
 
+// TokenBalance godoc
 message TokenBalance {
+    // token — name of token
     string token = 1;
+    // available godoc
     uint64 available = 2;
+    // frozen godoc
     uint64 frozen = 3;
 }
 
+// Pagination used for separation on page 
 message Pagination {
+    // limit – maximum on the one page
     uint64 limit = 1;
+    // offset from the beginning of the list
     uint64 offset = 2;
-}
-
-message VerifyIssuerRequest {
-    string login = 1;
 }
 
 // IssueTokenRequest — info about token will be issued
 message IssueTokenRequest {
+    // name — identifier of new token
     string name = 1;
     // offer on token issue
     tokendb.Token offer = 2;
 }
 
+// SaveBlockRequest godoc
 message SaveBlockRequest {
+    option deprecated = true;
+    // name of saved token
     string name = 1;
 
+    // block from blockchain
     tokendb.Block block = 2;
 }
 
+// GetTokenRequest used for identification token for getting
 message GetTokenRequest {
+    // token_id — name or hash of genesis block of the token
     string token_id = 1;
 }
 
+// GetTokenRequest contains the found token
 message GetTokenResponse {
+    // token — information about selected token
     Token token = 1;
 }
 
+// GetHeadersRequest contains a hash from which need to give all the hashes to
+// the last
 message GetHeadersRequest {
+    // token_id — name or hash of genesis block of the token
     string token_id = 1;
+
+    // hash from which tokens will be selected 
     string hash = 2;
 }
 
+// GetHeadersResponse contain block hashes with token information
 message GetHeadersResponse {
+    // token — information about token
     tokendb.Token token = 1;
+    // blocks — collcetion of block hash from given to last
     repeated MerkleBlock blocks = 2;
 }
 
+// MerkleBlock — inforamtion about block
 message MerkleBlock {
+    // hash of block
     string hash = 1;
+    // prev_hash — reference of previous block
     string prev_hash = 2;
 }
 

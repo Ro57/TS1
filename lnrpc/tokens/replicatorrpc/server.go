@@ -540,7 +540,7 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 
 func (s *Server) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerTokensRequest) (*replicator.GetIssuerTokensResponse, error) {
 	var (
-		response = &replicator.GetIssuerTokensResponse{}
+		responseTokens = []*replicator.IssuerTokens{}
 	)
 
 	tokens, err := s.getIssuerTokens()
@@ -548,20 +548,33 @@ func (s *Server) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerT
 		return nil, err.Native()
 	}
 
-	issuerTokens := tokens.GetTokens(req.Issuer)
-	if len(issuerTokens) == 0 {
-		return &replicator.GetIssuerTokensResponse{}, nil
-	}
+	for _, issuer := range req.Issuer {
+		issuerTokens := tokens.GetTokens(issuer)
 
-	for _, issuerToken := range issuerTokens {
-		token, err := s.getToken(issuerToken)
-		if err != nil {
-			return nil, err.Native()
+		quantityIssuerTokens := len(issuerTokens)
+		if quantityIssuerTokens == 0 {
+			return &replicator.GetIssuerTokensResponse{}, nil
 		}
-		response.Token = append(response.Token, token)
+
+		issuerResponse := &replicator.IssuerTokens{
+			Name:   issuer,
+			Tokens: []*replicator.Token{},
+		}
+
+		for _, issuerToken := range issuerTokens {
+			token, err := s.getToken(issuerToken)
+			if err != nil {
+				return nil, err.Native()
+			}
+			issuerResponse.Tokens = append(issuerResponse.Tokens, token)
+		}
+
+		responseTokens = append(responseTokens, issuerResponse)
 	}
 
-	return response, nil
+	return &replicator.GetIssuerTokensResponse{
+		Tokens: responseTokens,
+	}, nil
 }
 
 func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {

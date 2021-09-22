@@ -132,7 +132,7 @@ var getIssuerTokenCommand = cli.Command{
 	Description: `List information about available token offers per token id.`,
 
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		cli.StringSliceFlag{
 			Name:  "issuer",
 			Usage: "Returned token info of would belong token id",
 		},
@@ -145,12 +145,12 @@ func getIssuerToken(ctx *cli.Context) er.R {
 	defer cleanUp()
 
 	var ( // Default request parameters - no pagination
-		issuerKey string
+		issuerKey []string
 	)
 
 	// Acquire passed values, that are not zero
-	issuerKey = ctx.String("issuer")
-	if issuerKey == "" {
+	issuerKey = ctx.StringSlice("issuer")
+	if len(issuerKey) == 0 {
 		return er.New("issuer key cannot is empty")
 	}
 

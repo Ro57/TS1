@@ -178,11 +178,16 @@ message GetTokenResponse {
 }
 
 message GetIssuerTokensRequest {
-    string issuer = 1;
+   repeated string issuer = 1;
 }
 
 message GetIssuerTokensResponse {
-    repeated Token token = 1;
+  repeated IssuerTokens tokens = 1;
+}
+
+message IssuerTokens {
+  string name = 1;
+  repeated Token tokens = 2;
 }
 
 message GetHeadersRequest {

@@ -5749,10 +5749,10 @@
     "replicatorGetIssuerTokensResponse": {
       "type": "object",
       "properties": {
-        "token": {
+        "tokens": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/replicatorToken"
+            "$ref": "#/definitions/replicatorIssuerTokens"
           }
         }
       }
@@ -5827,6 +5827,20 @@
         "host": {
           "type": "string",
           "title": "Is used to establish client connection to the issuer's node during some\nRPC calls"
+        }
+      }
+    },
+    "replicatorIssuerTokens": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/replicatorToken"
+          }
         }
       }
     },

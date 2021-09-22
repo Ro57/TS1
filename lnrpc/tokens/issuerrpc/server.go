@@ -69,11 +69,12 @@ type IssunceEvents struct {
 
 type Server struct {
 	// Nest unimplemented server implementation in order to satisfy server interface
-	events IssunceEvents
-	Client replicator.ReplicatorClient
-	cfg    *Config
-	chain  lnwallet.BlockChainIO
-	db     *tokendb.TokenStrikeDB
+	events          IssunceEvents
+	Client          replicator.ReplicatorClient
+	cfg             *Config
+	chain           lnwallet.BlockChainIO
+	db              *tokendb.TokenStrikeDB
+	clientSyncChain replicator.Replicator_SyncChainClient
 }
 
 // New returns a new instance of the issueancerpc Issuer sub-server. We also return
@@ -218,6 +219,31 @@ func (s *Server) RegisterWithRestServer(ctx context.Context,
 	return nil
 }
 
+func (s *Server) GetSyncChainClient(ctx context.Context) (replicator.Replicator_SyncChainClient, error) {
+	if s.clientSyncChain == nil {
+		var err error
+		s.clientSyncChain, err = s.Client.SyncChain(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return s.clientSyncChain, nil
+}
+
+func (s *Server) SyncBlock(ctx context.Context, name string, blocks ...*DB.Block) error {
+	request := &replicator.SyncChainRequest{
+		Name:   name,
+		Blocks: blocks,
+	}
+
+	client, err := s.GetSyncChainClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	return client.Send(request)
+}
+
 func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {
 	tokenSell := encoder.TokenSell{
 		Token:          req.Offer.Token,
@@ -278,10 +304,7 @@ func (s *Server) LockToken(ctx context.Context, req *issuer.LockTokenRequest) (*
 	}
 
 	// send block to the replicator
-	_, err = s.Client.SaveBlock(ctx, &replicator.SaveBlockRequest{
-		Name:  req.Token,
-		Block: lockBlock,
-	})
+	err = s.SyncBlock(ctx, req.Token, lockBlock)
 	if err != nil {
 		return nil, err
 	}

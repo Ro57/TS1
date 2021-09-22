@@ -29,7 +29,7 @@ service Replicator {
     // token purchase data, because it is token offer.
     rpc IssueToken(IssueTokenRequest) returns (google.protobuf.Empty);
 
-    rpc SaveBlock(SaveBlockRequest) returns (google.protobuf.Empty);
+    rpc SyncChain(stream SyncChainRequest) returns (google.protobuf.Empty);
 
     rpc GetHeaders(GetHeadersRequest) returns (GetHeadersResponse);
 
@@ -163,10 +163,10 @@ message IssueTokenRequest {
     tokendb.Block block = 3;
 }
 
-message SaveBlockRequest {
+message SyncChainRequest {
     string name = 1;
 
-    tokendb.Block block = 2;
+   repeated  tokendb.Block blocks = 2;
 }
 
 message GetTokenRequest {

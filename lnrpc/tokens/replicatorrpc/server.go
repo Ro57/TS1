@@ -3,6 +3,7 @@ package replicatorrpc
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"os"
@@ -497,29 +498,96 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 	}, nil
 }
 
-func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest) (*empty.Empty, error) {
-	err := s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+func (s *Server) SyncChain(stream replicator.Replicator_SyncChainServer) error {
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		// save received blocks
+		errUpdate := s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+			rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
+			if err != nil {
+				return err
+			}
+
+			tokenBucket, err := rootBucket.CreateBucket([]byte(msg.Name))
+			if err != nil {
+				return err
+			}
+
+			// below is the algorithm for searching and saving blocks in order
+			var (
+				numberCurrentBlock = 0
+				quantityBlocks     = len(msg.Blocks)
+			)
+
+			// works until it passes through the entire number of blocks
+			for quantityBlocks != numberCurrentBlock {
+
+				// every time with a new pass we request the current signature
+				// after saving it changes
+				currentSignature := string(tokenBucket.Get(utils.RootHashKey))
+
+				// if the first block is incorrect
+				if currentSignature != msg.Blocks[0].PrevBlock {
+					// start searching the entire array
+					for index, block := range msg.Blocks {
+						// after finding the required block, save it
+						if currentSignature == block.Signature {
+							// save block
+							err := s.saveBlock(msg.Name, block)
+							if err != nil {
+								return err
+							}
+							msg.Blocks = append(msg.Blocks[:index], msg.Blocks[index+1:]...)
+						}
+					}
+				} else { // if the blocks are in the correct order we save block
+					err := s.saveBlock(msg.Name, msg.Blocks[0])
+					if err != nil {
+						return err
+					}
+					msg.Blocks = append(msg.Blocks[:0], msg.Blocks[1:]...)
+				}
+				numberCurrentBlock++
+			}
+
+			return nil
+		})
+		if errUpdate != nil {
+			return errUpdate.Native()
+		}
+	}
+}
+
+func (s *Server) saveBlock(name string, block *DB.Block) er.R {
+	return s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
 		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
 		if err != nil {
 			return err
 		}
 
-		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Name))
+		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(name))
 
-		if string(tokenBucket.Get(utils.RootHashKey)) != req.Block.PrevBlock {
-			return er.Errorf("invalid hash of the previous block want %s but get %s", tokenBucket.Get(utils.RootHashKey), req.Block.PrevBlock)
+		if string(tokenBucket.Get(utils.RootHashKey)) != block.PrevBlock {
+			return er.Errorf("invalid hash of the previous block want %s but get %s", tokenBucket.Get(utils.RootHashKey), block.PrevBlock)
 		}
 
-		log.Infof("block root fo replication %s", req.Block.GetSignature())
+		log.Infof("block root fo replication %s", block.GetSignature())
 
-		blockSignatureBytes := []byte(req.Block.GetSignature())
+		blockSignatureBytes := []byte(block.GetSignature())
 
 		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
 		if err != nil {
 			return err
 		}
 
-		blockBytes, errMarshal := proto.Marshal(req.Block)
+		blockBytes, errMarshal := proto.Marshal(block)
 		if errMarshal != nil {
 			return er.E(errMarshal)
 		}
@@ -530,11 +598,6 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 		}
 		return chainBucket.Put(blockSignatureBytes, blockBytes)
 	})
-	if err != nil {
-		return nil, err.Native()
-	}
-
-	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {

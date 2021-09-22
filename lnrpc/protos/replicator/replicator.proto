@@ -159,6 +159,8 @@ message IssueTokenRequest {
     string name = 1;
     // offer on token issue
     tokendb.Token offer = 2;
+    // genesis block for sending to replicator
+    tokendb.Block block = 3;
 }
 
 message SaveBlockRequest {

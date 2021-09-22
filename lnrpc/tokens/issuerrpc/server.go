@@ -241,29 +241,22 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
+	var err error
+
 	// issuing token
 	errIssueToken := s.issueTokenDB(req)
 	if errIssueToken != nil {
 		return nil, errIssueToken.Native()
 	}
 
-	// duplicate in the replicator
-	_, err := s.Client.IssueToken(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
 	// generate genesis block
-	genesisBlock, err := s.generateGenesisBlock(req.Name)
+	req.Block, err = s.generateGenesisBlock(req.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	// send block to the replicator
-	_, err = s.Client.SaveBlock(ctx, &replicator.SaveBlockRequest{
-		Name:  req.Name,
-		Block: genesisBlock,
-	})
+	// duplicate in the replicator
+	_, err = s.Client.IssueToken(ctx, req)
 	if err != nil {
 		return nil, err
 	}

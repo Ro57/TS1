@@ -449,7 +449,34 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 			}
 		}
 
-		return tokenBucket.Put(utils.RootHashKey, []byte(""))
+		err = tokenBucket.Put(utils.RootHashKey, []byte(""))
+		if err != nil {
+			return err
+		}
+
+		if string(tokenBucket.Get(utils.RootHashKey)) != req.Block.PrevBlock {
+			return er.Errorf("invalid hash of the previous block want %s but get %s", tokenBucket.Get(utils.RootHashKey), req.Block.PrevBlock)
+		}
+
+		log.Infof("block root fo replication %s", req.Block.GetSignature())
+
+		blockSignatureBytes := []byte(req.Block.GetSignature())
+
+		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
+		if err != nil {
+			return err
+		}
+
+		blockBytes, errMarshal := proto.Marshal(req.Block)
+		if errMarshal != nil {
+			return er.E(errMarshal)
+		}
+
+		chainBucket, err := tokenBucket.CreateBucketIfNotExists(utils.ChainKey)
+		if err != nil {
+			return err
+		}
+		return chainBucket.Put(blockSignatureBytes, blockBytes)
 	})
 	if err != nil {
 		return nil, err.Native()

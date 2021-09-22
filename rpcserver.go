@@ -835,22 +835,16 @@ func newRPCServer(
 
 	// Initialize rpc replicator client
 	var replicatorClient replicator.ReplicatorClient
-	if cfg.ReplicationServer {
-		var err error
-		replicatorClient, _, err = connectReplicatorClient(cfg.ReplicationServerAddress)
-		if err != nil {
-			return nil, er.E(errors.WithMessage(err, "connecting client to replication server"))
-		}
+	replicatorClient, _, errNative := connectReplicatorClient(cfg.ReplicationServerAddress)
+	if errNative != nil {
+		return nil, er.E(errors.WithMessage(errNative, "connecting client to replication server"))
 	}
 
 	// Initialize rpc issuance client
 	var issuerClient issuer.IssuerServiceClient
-	if cfg.IssuanceServer {
-		var err error
-		issuerClient, _, err = connectIssuerClient(cfg.IssuanceServerAddress)
-		if err != nil {
-			return nil, er.E(errors.WithMessage(err, "connecting client to replication server"))
-		}
+	issuerClient, _, errNative = connectIssuerClient(cfg.IssuanceServerAddress)
+	if errNative != nil {
+		return nil, er.E(errors.WithMessage(errNative, "connecting client to replication server"))
 	}
 	// Finally, with all the pre-set up complete,  we can create the main
 	// gRPC server, and register the main lnrpc server along side.
@@ -7065,6 +7059,7 @@ func connectReplicatorClient(ReplicationServerAddress string) (_ replicator.Repl
 	if err != nil {
 		return nil, nil, errors.WithMessage(err, "dialing")
 	}
+
 	return replicator.NewReplicatorClient(conn), conn.Close, nil
 }
 

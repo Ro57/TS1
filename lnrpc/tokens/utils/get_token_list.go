@@ -32,6 +32,11 @@ func GetTokenList(db *tokendb.TokenStrikeDB) ([]*replicator.Token, error) {
 		return rootBucket.ForEach(func(k, _ []byte) er.R {
 			tokenBucket := rootBucket.NestedReadBucket(k)
 
+			// skip useless buckets
+			if tokenBucket == nil {
+				return nil
+			}
+
 			var dbToken DB.Token
 			err := proto.Unmarshal(tokenBucket.Get(InfoKey), &dbToken)
 			if err != nil {

@@ -45,6 +45,8 @@ service Replicator {
     // expiration time and fix price.
     rpc GetTokenList(GetTokenListRequest)
         returns(GetTokenListResponse);
+
+    // TODO: Метод для генерации URL
 }
 
 // GetTokenOffersRequest godoc

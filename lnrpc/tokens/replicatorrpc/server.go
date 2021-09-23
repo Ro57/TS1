@@ -168,8 +168,7 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return replicatorServer, macPermissions, nil
 
 }
-
-func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) {
+func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) error {
 
 	var (
 		child = &Server{
@@ -179,19 +178,24 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 		}
 		root = grpc.NewServer()
 	)
+
 	replicator.RegisterReplicatorServer(root, child)
 
 	listener, err := net.Listen("tcp", host)
+
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	go func() {
 		err := root.Serve(listener)
 		if err != nil {
-			panic(err)
+			events.StopSig <- struct{}{}
+			return
 		}
 	}()
+
+	log.Info("root.Serve")
 
 	go func() {
 		<-events.StopSig
@@ -199,12 +203,9 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 	}()
 
 	jwtStore = jwtstore.New([]jwtstore.JWT{})
+	defer log.Info("RunServerServing end")
 
-	er := initLocalDB(db)
-	if er != nil {
-		panic(er.Native())
-	}
-
+	return nil
 }
 
 // Start launches any helper goroutines required for the rpcServer to function.
@@ -463,6 +464,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
+	log.Info("Get token info")
 	resultList, err := utils.GetTokenList(s.db)
 	if err != nil {
 		return nil, err

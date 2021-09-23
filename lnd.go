@@ -753,8 +753,14 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 				return err
 			}
 
+			err = replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO)
+			if err != nil {
+				err := er.Errorf("cannot start replication server: %v", err)
+				log.Error(err)
+				return err
+			}
+
 			log.Infof("Replication server started, address=%v", cfg.ReplicationServerAddress)
-			replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO)
 		}
 
 		// Initialize rpc issuance client
@@ -767,12 +773,13 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 				return err
 			}
 
-			log.Infof("Issuance server started, address=%v", cfg.IssuanceServerAddress)
 			issuerrpc.RunServerServing(cfg.IssuanceServerAddress, cfg.ReplicationServerAddress, issuerEvent, issuanceDB, activeChainControl.ChainIO)
+			log.Infof("Issuance server started, address=%v", cfg.IssuanceServerAddress)
 		}
 	}
 	// TODO: implement error channel and handle that on node close or exception
 
+	log.Info("and run issuence and replication servers")
 	// Initialize, and register our implementation of the gRPC interface
 	// exported by the rpcServer.
 	rpcServer, err := newRPCServer(

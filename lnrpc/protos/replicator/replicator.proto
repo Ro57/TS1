@@ -42,6 +42,7 @@ service Replicator {
     rpc GetTokenList(GetTokenListRequest)
         returns(GetTokenListResponse);
 
+    // TODO: Метод для генерации URL
 }
 
 message GetTokenOffersRequest {

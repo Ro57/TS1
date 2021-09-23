@@ -2,7 +2,6 @@ package replicatorrpc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -122,6 +121,7 @@ type token struct {
 }
 
 var _ replicator.ReplicatorServer = (*Server)(nil)
+var _ lnrpc.SubServer = (*Server)(nil)
 
 // New returns a new instance of the replicatorrpc Repicator sub-server. We also return
 // the set of permissions for the macaroons that we may create within this
@@ -176,17 +176,24 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return replicatorServer, macPermissions, nil
 
 }
-func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) {
+func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO, subConfig lnrpc.SubServerConfigDispatcher) (lnrpc.SubServer, er.R) {
+	var child = &Server{
+		events: events,
+		chain:  chain,
+		db:     db,
+	}
 
-	var (
-		child = &Server{
-			events: events,
-			chain:  chain,
-			db:     db,
-		}
-		root = grpc.NewServer()
-	)
-	replicator.RegisterReplicatorServer(root, child)
+	child.RunGRPCServer(host, events)
+	subServer, err := child.RunRestServer(subConfig)
+
+	jwtStore = jwtstore.New([]jwtstore.JWT{})
+
+	return subServer, err
+}
+
+func (s *Server) RunGRPCServer(host string, events ReplicatorEvents) {
+	root := grpc.NewServer()
+	replicator.RegisterReplicatorServer(root, s)
 
 	listener, err := net.Listen("tcp", host)
 	if err != nil {
@@ -204,8 +211,25 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 		<-events.StopSig
 		root.Stop()
 	}()
+}
 
-	jwtStore = jwtstore.New([]jwtstore.JWT{})
+func (s *Server) RunRestServer(subConfig lnrpc.SubServerConfigDispatcher) (lnrpc.SubServer, er.R) {
+	subServerDriver := &ServerDriver{
+		Name: subServerName,
+		New: func(c lnrpc.SubServerConfigDispatcher) (*Server, lnrpc.MacaroonPerms, er.R) {
+			return createNewSubServer(c)
+		},
+	}
+
+	subServer, _, err := subServerDriver.New(subConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	subServer.db = s.db
+	subServer.chain = s.chain
+
+	return subServer, nil
 }
 
 // Start launches any helper goroutines required for the rpcServer to function.
@@ -529,29 +553,65 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 }
 
 func (s *Server) GetBlockSequence(ctx context.Context, req *replicator.GetBlockSequenceRequest) (*replicator.GetUrlTokenResponse, error) {
-	var resp replicator.GetUrlTokenResponse
+	resp := &replicator.GetUrlTokenResponse{
+		State:  &DB.State{},
+		Blocks: []*DB.Block{},
+		Root:   "",
+	}
+
+	if s.db == nil { //todo del it later
+		return nil, errors.Errorf("db is not init error")
+	}
+
 	err := s.db.View(func(tx walletdb.ReadTx) er.R {
 		var err error
 		rootBucket := tx.ReadBucket(utils.TokensKey)
+
 		tokenBucket := rootBucket.NestedReadBucket([]byte(req.Name))
 
 		dbStateByte := tokenBucket.Get(utils.StateKey)
 
 		var dbstate DB.State
-		err = json.Unmarshal(dbStateByte, &dbstate)
+
+		err = proto.Unmarshal(dbStateByte, &dbstate)
 		if err != nil {
 			return er.E(err)
 		}
 
-		sequenceByte := tokenBucket.Get(utils.ChainKey)
+		//sequenceByte := tokenBucket.Get(utils.ChainKey)
 
-		var blocks []*DB.Block
-		err = json.Unmarshal(sequenceByte, &blocks)
-		if err != nil {
-			return er.E(err)
+		var (
+			rootHash    = tokenBucket.Get(utils.RootHashKey)
+			chainBucket = tokenBucket.NestedReadBucket(utils.ChainKey)
+
+			currentHash = rootHash
+
+			block  DB.Block
+			blocks []*DB.Block
+		)
+
+		for {
+			blockBytes := chainBucket.Get(currentHash)
+			if blockBytes == nil {
+				return er.New(fmt.Sprintf("block doesnot find by root hash=%v", currentHash))
+			}
+
+			err := proto.Unmarshal(blockBytes, &block)
+			if err != nil {
+				return er.E(err)
+			}
+
+			blocks = append(blocks, &block)
+
+			if block.PrevBlock == "" {
+				break
+			}
+
+			currentHash = []byte(block.PrevBlock)
+
 		}
 
-		root := string(tokenBucket.Get(utils.RootHashKey))
+		root := string(rootHash)
 
 		resp.State = &dbstate
 		resp.Root = root
@@ -562,7 +622,7 @@ func (s *Server) GetBlockSequence(ctx context.Context, req *replicator.GetBlockS
 	if err != nil {
 		return nil, err.Native()
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {

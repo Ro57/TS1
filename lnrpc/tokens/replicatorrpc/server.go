@@ -29,7 +29,6 @@ import (
 	"github.com/pkt-cash/pktd/pktwallet/walletdb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gopkg.in/macaroon-bakery.v2/bakery"
@@ -97,8 +96,6 @@ type RevokeSig struct {
 type Server struct {
 	// Nest unimplemented server implementation in order to satisfy server interface
 	replicator.UnimplementedReplicatorServer
-
-	users sync.Map
 
 	events ReplicatorEvents
 	cfg    *Config
@@ -264,6 +261,7 @@ func (s *Server) RegisterWithRestServer(ctx context.Context,
 }
 
 // Override method of unimplemented server
+// TODO: remove method
 func (s *Server) GetTokenOffers(ctx context.Context, req *replicator.GetTokenOffersRequest) (*replicator.GetTokenOffersResponse, error) {
 	const (
 		eachIssuerTokensNum = 3
@@ -354,62 +352,7 @@ func (s *Server) GetTokenOffers(ctx context.Context, req *replicator.GetTokenOff
 // Override method of unimplemented server
 // TODO: rework method
 func (s *Server) GetTokenBalances(ctx context.Context, req *replicator.GetTokenBalancesRequest) (*replicator.GetTokenBalancesResponse, error) {
-
-	meta, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "metadata not provided")
-	}
-
-	tokenSet, ok := meta["jwt"]
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "jwt token is not contained in context")
-	}
-
-	// Get first token. By default MD contain slice of strings
-	// But we need only one jwt
-	tokenHash := tokenSet[0]
-
-	innerJWT, err := jwtStore.GetByToken(tokenHash)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("jwt by token not found: %v", err))
-	}
-
-	if innerJWT.ExpireDate.Before(time.Now()) {
-		return nil, status.Error(codes.ResourceExhausted, "session expired")
-	}
-
-	v, ok := s.users.Load(innerJWT.HolderLogin)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("user with login %v does not exist ", innerJWT.HolderLogin))
-	}
-
-	info := v.(userInfo)
-
-	resp := &replicator.GetTokenBalancesResponse{
-		Total: uint64(len(info.password)),
-	}
-
-	return resp, nil
-}
-
-func (s *Server) VerifyIssuer(ctx context.Context, req *replicator.VerifyIssuerRequest) (*empty.Empty, error) {
-	if req.Login == "" {
-		return nil, status.Error(codes.InvalidArgument, "user login not presented")
-	}
-
-	user, ok := s.users.Load(req.Login)
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "user with this login does not exist")
-	}
-
-	ui := user.(userInfo)
-
-	_, ok = ui.roles["issuer"]
-	if !ok {
-		return nil, status.Error(codes.InvalidArgument, "this user was not permitted to create new tokens")
-	}
-
-	return &emptypb.Empty{}, nil
+	return nil, status.Error(codes.Unimplemented, "method not implemented")
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {

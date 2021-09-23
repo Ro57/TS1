@@ -80,7 +80,9 @@ import (
 	"github.com/pkt-cash/pktd/wire"
 	"github.com/tv42/zbase32"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
 
@@ -6985,15 +6987,7 @@ func (r *rpcServer) LockToken(ctx context.Context, req *issuer.LockTokenRequest)
 }
 
 func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBalancesRequest) (*replicator.GetTokenBalancesResponse, error) {
-	GetTokenBalancesRequest := &replicator.GetTokenBalancesRequest{
-		Params: req.Params,
-	}
-
-	resp, err := r.replicatorClient.GetTokenBalances(ctx, GetTokenBalancesRequest)
-	if err != nil {
-		return nil, fmt.Errorf("querying token balances: %s", err)
-	}
-	return resp, nil
+	return nil, status.Error(codes.Unimplemented, "method not implemented")
 }
 
 func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {

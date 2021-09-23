@@ -18,7 +18,8 @@ var getTokenOffersCommand = cli.Command{
 all the related deals would be tracked and protected by an overseer. 
 
 	There is an opportunity to list available offers in a pagination-like manner. A such behaviour 
-can be achieved by providing additional flags to the command.`,
+can be achieved by providing additional flags to the command.
+DEPRECATED`,
 
 	Flags: []cli.Flag{
 		cli.StringFlag{

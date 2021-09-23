@@ -113,15 +113,18 @@
       "type": "object",
       "properties": {
         "token": {
-          "$ref": "#/definitions/tokendbToken"
+          "$ref": "#/definitions/tokendbToken",
+          "title": "token — information about token"
         },
         "blocks": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/replicatorMerkleBlock"
-          }
+          },
+          "title": "blocks — collcetion of block hash from given to last"
         }
-      }
+      },
+      "title": "GetHeadersResponse contain block hashes with token information"
     },
     "replicatorGetIssuerTokensResponse": {
       "type": "object",
@@ -141,13 +144,16 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/replicatorTokenBalance"
-          }
+          },
+          "title": "balances godoc"
         },
         "total": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "total godoc"
         }
-      }
+      },
+      "title": "GetTokenBalancesResponse godoc"
     },
     "replicatorGetTokenListResponse": {
       "type": "object",
@@ -174,129 +180,141 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/replicatorTokenOffer"
-          }
+          },
+          "title": "offers godoc"
         },
         "total": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "total godoc"
         }
-      }
+      },
+      "title": "GetTokenOffersResponse godoc"
     },
     "replicatorGetTokenResponse": {
       "type": "object",
       "properties": {
         "token": {
-          "$ref": "#/definitions/replicatorToken"
+          "$ref": "#/definitions/replicatorToken",
+          "title": "token — information about selected token"
         }
-      }
+      },
+      "title": "GetTokenRequest contains the found token"
     },
     "replicatorIssuerInfo": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
-          "title": "This value is explicetely used by Replicator to uniquely identify related\nissuer later in order to ban him (discredite case), since\n\"identity_pubkey\", \"host\" may be changed"
+          "title": "id — value is explicetely used by Replicator to uniquely identify related\nissuer later in order to ban him (discredite case), since\n\"identity_pubkey\", \"host\" may be changed"
         },
         "identity_pubkey": {
           "type": "string",
-          "description": "The following field values are used to open payment channel, invoices\ncommands execution etc."
+          "description": "identity_pubkey — the following field values are used to open payment\nchannel, invoices commands execution etc."
         },
         "host": {
           "type": "string",
-          "title": "Is used to establish client connection to the issuer's node during some\nRPC calls"
+          "title": "host is used to establish client connection to the issuer's node during\nsome RPC calls"
         }
-      }
+      },
+      "title": "IssuerInfo info about issuer server"
     },
     "replicatorMerkleBlock": {
       "type": "object",
       "properties": {
         "hash": {
-          "type": "string"
+          "type": "string",
+          "title": "hash of block"
         },
         "prev_hash": {
-          "type": "string"
+          "type": "string",
+          "title": "prev_hash — reference of previous block"
         }
-      }
+      },
+      "title": "MerkleBlock — inforamtion about block"
     },
     "replicatorPagination": {
       "type": "object",
       "properties": {
         "limit": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "limit – maximum on the one page"
         },
         "offset": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "offset from the beginning of the list"
         }
-      }
+      },
+      "title": "Pagination used for separation on page"
     },
     "replicatorToken": {
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "title": "name — identifier of token"
         },
         "token": {
           "$ref": "#/definitions/tokendbToken",
-          "title": "offer on token issue"
+          "title": "token — meta info about token"
         },
         "root": {
-          "type": "string"
+          "type": "string",
+          "title": "root — hash of last block in blockchain"
         }
-      }
+      },
+      "title": "Token contain information about token to send it and store in DB"
     },
     "replicatorTokenBalance": {
       "type": "object",
       "properties": {
         "token": {
-          "type": "string"
+          "type": "string",
+          "title": "token — name of token"
         },
         "available": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "available godoc"
         },
         "frozen": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "frozen godoc"
         }
-      }
+      },
+      "title": "TokenBalance godoc"
     },
     "replicatorTokenOffer": {
       "type": "object",
       "properties": {
         "token": {
-          "type": "string"
+          "type": "string",
+          "title": "token — name of token"
         },
         "price": {
           "type": "string",
           "format": "uint64",
-          "title": "TODO: discuss\n ? Should we assume decimal prices\n ? Add units field"
+          "title": "price in PKT tokens"
         },
         "issuer_info": {
-          "$ref": "#/definitions/replicatorIssuerInfo"
-        },
-        "token_holder_login": {
-          "type": "string",
-          "description": "Value of this field may be empty orRegisterTokenHolder filled depending\non context (e.g. gettokenoffers, verifytokenpurchasesignature)",
-          "title": "It is assumed that the each registered token holder login is unique"
-        },
-        "token_buyer_login": {
-          "type": "string",
-          "description": "Value of this field may be empty or filled depending on context\n(e.g. gettokenoffers, verifytokenpurchasesignature)",
-          "title": "It is assumed that the each registered token holder login is unique"
+          "$ref": "#/definitions/replicatorIssuerInfo",
+          "title": "issuer_info — contain info about token about the issuer server that \nissued the token"
         },
         "valid_until_seconds": {
           "type": "string",
           "format": "int64",
-          "title": "This field protects issuers from such a case, when potential buyer\nsuccessfully acquires dozens of signatures just in case if that issuer\nwould raise up the price later. If a Token Wallet holder would like to\nopen channel with an outdated offer, Replicator would reject to register\nthis purchase and buyer stays unprotected"
+          "title": "valid_until_seconds — protects issuers from such a case, when potential\nbuyer successfully acquires dozens of signatures just in case if that \nissuer would raise up the price later. If a Token Wallet holder would\nlike to open channel with an outdated offer, Replicator would reject to\nregister this purchase and buyer stays unprotected"
         },
         "count": {
           "type": "string",
           "format": "uint64",
           "title": "count — the number of tokens to be issued"
         }
-      }
+      },
+      "title": "TokenOffer is used to send an offer to buy a token\nTODO: rework or remove"
     },
     "runtimeError": {
       "type": "object",

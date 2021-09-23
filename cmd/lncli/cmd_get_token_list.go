@@ -167,3 +167,46 @@ func getUrlToken(ctx *cli.Context) er.R {
 
 	return nil
 }
+
+var getIssuerTokenCommand = cli.Command{
+	Name:        "get-issuer-tokens",
+	Category:    "Tokens",
+	Usage:       "List information about available token set per token id.",
+	Description: `List information about available token offers per token id.`,
+
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "issuer",
+			Usage: "Returned token info of would belong token id",
+		},
+	},
+	Action: getIssuerToken,
+}
+
+func getIssuerToken(ctx *cli.Context) er.R {
+	client, cleanUp := getClient(ctx)
+	defer cleanUp()
+
+	var ( // Default request parameters - no pagination
+		issuerKey string
+	)
+
+	// Acquire passed values, that are not zero
+	issuerKey = ctx.String("issuer")
+	if issuerKey == "" {
+		return er.New("issuer key cannot is empty")
+	}
+
+	// Request offers
+	req := &replicator.GetIssuerTokensRequest{
+		Issuer: issuerKey,
+	}
+	resp, err := client.GetIssuerTokens(context.TODO(), req)
+	if err != nil {
+		return er.E(err)
+	}
+
+	printRespJSON(resp)
+
+	return nil
+}

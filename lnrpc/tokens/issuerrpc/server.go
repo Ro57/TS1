@@ -306,19 +306,15 @@ func (s *Server) LockToken(ctx context.Context, req *issuer.LockTokenRequest) (*
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	if req.Local {
-		resultList, err := utils.GetTokenList(s.db)
-		if err != nil {
-			return nil, err
-		}
-
-		return &replicator.GetTokenListResponse{
-			Tokens: resultList,
-			Total:  int32(len(resultList)),
-		}, nil
+	resultList, err := utils.GetTokenList(s.db)
+	if err != nil {
+		return nil, err
 	}
 
-	return s.Client.GetTokenList(ctx, req)
+	return &replicator.GetTokenListResponse{
+		Tokens: resultList,
+		Total:  int32(len(resultList)),
+	}, nil
 }
 
 func connectReplicatorClient(ctx context.Context, replicationHost string) (_ replicator.ReplicatorClient, closeConn func() error, _ error) {

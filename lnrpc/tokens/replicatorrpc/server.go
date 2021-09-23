@@ -2,6 +2,7 @@ package replicatorrpc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -455,20 +456,46 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 		return nil, err.Native()
 	}
 
+	s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
+		if err != nil {
+			return err
+		}
+
+		tokens := rootBucket.Get(utils.IssuerTokens)
+		if tokens == nil {
+			tokens, _ = json.Marshal(IssuerTokens{})
+		}
+
+		var issuerTokens IssuerTokens
+		errUnmarshal := json.Unmarshal(tokens, &issuerTokens)
+		if errUnmarshal != nil {
+			return er.E(errUnmarshal)
+		}
+
+		issuerTokens.AddToken(req.Offer.IssuerPubkey, req.Name)
+
+		issuerTokensBytes, errMarshal := json.Marshal(issuerTokens)
+		if errMarshal != nil {
+			return er.E(errMarshal)
+		}
+
+		return rootBucket.Put(utils.IssuerTokens, issuerTokensBytes)
+	})
+
 	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	tokenList, err := s.allTokensFromIssuer()
+	resultList, err := utils.GetTokenList(s.db)
 	if err != nil {
 		return nil, err
 	}
 
 	return &replicator.GetTokenListResponse{
-		Tokens: tokenList,
-		Total:  int32(len(tokenList)),
+		Tokens: resultList,
+		Total:  int32(len(resultList)),
 	}, nil
-
 }
 
 func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest) (*empty.Empty, error) {
@@ -511,43 +538,41 @@ func (s *Server) SaveBlock(ctx context.Context, req *replicator.SaveBlockRequest
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
-	response := &replicator.GetTokenResponse{
-		Token: &replicator.Token{
-			Name:  req.TokenId,
-			Token: &DB.Token{},
-			Root:  "",
-		},
-	}
+func (s *Server) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerTokensRequest) (*replicator.GetIssuerTokensResponse, error) {
+	var (
+		response = &replicator.GetIssuerTokensResponse{}
+	)
 
-	err := s.db.View(func(tx walletdb.ReadTx) er.R {
-		rootBucket := tx.ReadBucket(utils.TokensKey)
-		if rootBucket == nil {
-			return er.New("tokens DB not created")
-		}
-
-		tokenBucket := rootBucket.NestedReadBucket([]byte(req.TokenId))
-		if tokenBucket == nil {
-			return utils.TokenNotFoundErr
-		}
-		infoBytes := tokenBucket.Get(utils.InfoKey)
-		if infoBytes == nil {
-			return utils.InfoNotFoundErr
-		}
-
-		err := proto.Unmarshal(infoBytes, response.Token.Token)
-		if err != nil {
-			return er.E(err)
-		}
-
-		response.Token.Root = string(tokenBucket.Get(utils.RootHashKey))
-		return nil
-	})
+	tokens, err := s.getIssuerTokens()
 	if err != nil {
 		return nil, err.Native()
 	}
 
+	issuerTokens := tokens.GetTokens(req.Issuer)
+	if len(issuerTokens) == 0 {
+		return &replicator.GetIssuerTokensResponse{}, nil
+	}
+
+	for _, issuerToken := range issuerTokens {
+		token, err := s.getToken(issuerToken)
+		if err != nil {
+			return nil, err.Native()
+		}
+		response.Token = append(response.Token, token)
+	}
+
 	return response, nil
+}
+
+func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {
+	token, err := s.getToken(req.TokenId)
+	if err != nil {
+		return nil, err.Native()
+	}
+
+	return &replicator.GetTokenResponse{
+		Token: token,
+	}, nil
 }
 
 func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersRequest) (*replicator.GetHeadersResponse, error) {
@@ -690,4 +715,18 @@ type TokenName = string
 type TokenHolder struct {
 	Login    TokenHolderLogin
 	Password string
+}
+
+type IssuerTokens map[string][]string
+
+func (i IssuerTokens) GetTokens(issuer string) []string {
+	val, found := i[issuer]
+	if !found {
+		return []string{}
+	}
+	return val
+}
+
+func (i IssuerTokens) AddToken(issuer, token string) {
+	i[issuer] = append(i[issuer], token)
 }

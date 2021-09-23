@@ -517,6 +517,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "read",
 		}},
+		"/lnrpc.Lightning/GetIssuerTokens": {{
+			Entity: "proxy",
+			Action: "read",
+		}},
 		"/lnrpc.Lightning/GetTokenBalances": {{
 			Entity: "proxy",
 			Action: "read",
@@ -6993,7 +6997,17 @@ func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBal
 }
 
 func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
-	resp, err := r.issuanceClient.GetTokenList(ctx, req)
+	var (
+		resp *replicator.GetTokenListResponse
+		err  error
+	)
+
+	if req.Local {
+		resp, err = r.issuanceClient.GetTokenList(ctx, req)
+	} else {
+		resp, err = r.replicatorClient.GetTokenList(ctx, req)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("get token list: %s", err)
 	}
@@ -7037,6 +7051,14 @@ func (r *rpcServer) GetUrlToken(ctx context.Context, req *replicator.GetUrlToken
 	}
 	// TODO: validate and save in the database
 	return &token, nil
+}
+func (r *rpcServer) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerTokensRequest) (*replicator.GetIssuerTokensResponse, error) {
+	resp, err := r.replicatorClient.GetIssuerTokens(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("get only one token: %s", err)
+	}
+
+	return resp, nil
 }
 
 func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {

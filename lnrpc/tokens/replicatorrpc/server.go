@@ -74,8 +74,7 @@ type userInfo struct {
 	password string
 	// TODO: implement role system
 	// ? method for add new role to user
-	roles    map[string]struct{}
-	balances TokenHolderBalancesStore
+	roles map[string]struct{}
 }
 
 type OpenChannel struct {
@@ -173,6 +172,7 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return replicatorServer, macPermissions, nil
 
 }
+
 func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) {
 
 	var (
@@ -203,6 +203,12 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 	}()
 
 	jwtStore = jwtstore.New([]jwtstore.JWT{})
+
+	er := initLocalDB(db)
+	if er != nil {
+		panic(er.Native())
+	}
+
 }
 
 // Start launches any helper goroutines required for the rpcServer to function.
@@ -347,6 +353,7 @@ func (s *Server) GetTokenOffers(ctx context.Context, req *replicator.GetTokenOff
 }
 
 // Override method of unimplemented server
+// TODO: rework method
 func (s *Server) GetTokenBalances(ctx context.Context, req *replicator.GetTokenBalancesRequest) (*replicator.GetTokenBalancesResponse, error) {
 
 	meta, ok := metadata.FromIncomingContext(ctx)
@@ -380,8 +387,7 @@ func (s *Server) GetTokenBalances(ctx context.Context, req *replicator.GetTokenB
 	info := v.(userInfo)
 
 	resp := &replicator.GetTokenBalancesResponse{
-		Balances: info.balances.store,
-		Total:    uint64(len(info.balances.store)),
+		Total: uint64(len(info.password)),
 	}
 
 	return resp, nil
@@ -760,51 +766,45 @@ func (s *Server) getMerkleRoot(bucket walletdb.ReadBucket, root []byte, hash str
 	return response, nil
 }
 
-type TokenHoldersStoreAPI interface {
-	Insert(TokenHolder) error
-	Has(TokenHolder) bool
-}
-type TokenHoldersStore struct {
-	holders map[TokenHolderLogin]TokenHolder
-	mu      sync.RWMutex
-}
+// Helper to append new issuer for collection on connect
+func (s *Server) appendIssuer(pubKey string, host string) er.R {
+	issuer := replicator.IssuerConnection{Host: host, Descredits: []*replicator.IssuerConnection_DiscreditWrapper{}}
 
-var _ TokenHoldersStoreAPI = (*TokenHoldersStore)(nil)
-
-func NewTokenHoldersStore() *TokenHoldersStore {
-	return &TokenHoldersStore{
-		holders: make(map[TokenHolderLogin]TokenHolder),
-	}
-}
-
-func (s *TokenHoldersStore) Insert(holder TokenHolder) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	_, ok := s.holders[holder.Login]
-	if ok {
-		return errors.Errorf("login duplication: %q", holder.Login)
+	byteIssuer, err := proto.Marshal(&issuer)
+	if err != nil {
+		return er.E(err)
 	}
 
-	s.holders[holder.Login] = holder
+	er := s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		issuers := tx.ReadWriteBucket(utils.Issuers)
+
+		er := issuers.Put([]byte(pubKey), byteIssuer)
+		if er != nil {
+			return er
+		}
+
+		return nil
+	})
+	if er != nil {
+		return er
+	}
 
 	return nil
 }
 
-func (s *TokenHoldersStore) Has(holder TokenHolder) bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+func initLocalDB(db *tokendb.TokenStrikeDB) er.R {
+	return db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		meta, err := tx.CreateTopLevelBucket(utils.Replication)
+		if err != nil {
+			return err
+		}
 
-	_, ok := s.holders[holder.Login]
-	return ok
-}
-
-type TokenHolderLogin string
-type TokenName = string
-
-type TokenHolder struct {
-	Login    TokenHolderLogin
-	Password string
+		_, err = meta.CreateBucketIfNotExists(utils.Issuers)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 type IssuerTokens map[string][]string

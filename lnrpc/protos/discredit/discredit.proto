@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package descredit;
+package discredit;
 
 option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/descredit";
 

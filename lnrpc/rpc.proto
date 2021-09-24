@@ -550,7 +550,7 @@ service Lightning {
 
     // lncli: `get-url-token`
     // Proxies initial request to the replicator for token info
-    rpc GetUrlToken (replicator.GetUrlTokenRequest)
+    rpc GetUrlToken (replicator.GenerateURLRequest)
         returns (replicator.GetUrlTokenResponse);
         
     // lncli: `get-issuer-tokens`
@@ -634,7 +634,7 @@ message Transaction {
 // GetTokenListRequest contain info to requesting token from servers
 message GetTokenListRequest{
     // inner — content for server filter
-    replication.GetTokenListRequest inner = 1;
+    replicator.GetTokenListRequest inner = 1;
     // local — use for specify server
     bool local = 2;
 }

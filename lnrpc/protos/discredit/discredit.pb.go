@@ -24,10 +24,8 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 // DuplicateBlock 2 identical blocks were generated (Updated the structure)
 type DuplicateBlock struct {
 	// first_block_header — copied block
-	/// Caleb: Should be `message Block` rather than string
 	FirstBlockHeader *DB.Block `protobuf:"bytes,1,opt,name=first_block_header,json=firstBlockHeader,proto3" json:"first_block_header,omitempty"`
 	// second_block_header — block copy
-	/// Caleb: Should be `message Block` rather than string
 	SecondBlockHeader    *DB.Block `protobuf:"bytes,2,opt,name=second_block_header,json=secondBlockHeader,proto3" json:"second_block_header,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`

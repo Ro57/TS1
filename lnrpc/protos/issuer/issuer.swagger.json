@@ -137,7 +137,7 @@
           "items": {
             "$ref": "#/definitions/replicatorToken"
           },
-          "title": "tokens list of registred tokens"
+          "title": "/ Caleb: We need to be careful to identify a token by it's ID \n(hash of block 1). This ID cannot be stored inside of the Token object \nbecause it will change the hash of the Token object which will then \nchange the hash of the State object, which will then change the hash of\nblock 1, which changes the ID. It is important to use the ID to identify\n a token because this contains the initial token holders. IMO this \nshould be `repeated string token_ids = 1;`"
         },
         "total": {
           "type": "integer",

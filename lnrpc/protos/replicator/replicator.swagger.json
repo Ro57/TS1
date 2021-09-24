@@ -12,6 +12,52 @@
   ],
   "paths": {},
   "definitions": {
+    "DiscreditListDiscreditWrapper": {
+      "type": "object",
+      "properties": {
+        "duplicate_block": {
+          "$ref": "#/definitions/discreditDuplicateBlock",
+          "title": "duplicate_block — problem with dubled block"
+        },
+        "denial_service": {
+          "$ref": "#/definitions/discreditDenialService",
+          "title": "denial_service — ignore transactions after lock"
+        }
+      },
+      "title": "DiscreditWrapper used for resolve problem with repeated oneof\nhttps://github.com/protocolbuffers/protobuf/issues/2592#issuecomment-284540212"
+    },
+    "discreditDenialService": {
+      "type": "object",
+      "properties": {
+        "lock": {
+          "type": "string",
+          "title": "lock — hash of ignored lock"
+        },
+        "htlc_secret": {
+          "type": "string",
+          "title": "htlc_secret — htlc genereted issuer"
+        },
+        "proof_mercle_branch": {
+          "type": "string",
+          "title": "proof_mercle_branch — proof from PKT blockchain"
+        }
+      },
+      "title": "DenialService the issuer accepts a lock_tokens request from a sender but \nthen ignores the transfer_tokens request from the recipient"
+    },
+    "discreditDuplicateBlock": {
+      "type": "object",
+      "properties": {
+        "first_block_header": {
+          "$ref": "#/definitions/tokendbBlock",
+          "title": "first_block_header — copied block"
+        },
+        "second_block_header": {
+          "$ref": "#/definitions/tokendbBlock",
+          "title": "second_block_header — block copy"
+        }
+      },
+      "title": "DuplicateBlock 2 identical blocks were generated (Updated the structure)"
+    },
     "justificationsGenesis": {
       "type": "object",
       "properties": {
@@ -109,6 +155,29 @@
         }
       }
     },
+    "replicatorDiscreditList": {
+      "type": "object",
+      "properties": {
+        "dicredits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DiscreditListDiscreditWrapper"
+          },
+          "title": "dicredits — collections of discredits"
+        }
+      },
+      "title": "DiscreditList contain collection of dicredit"
+    },
+    "replicatorGenerateURLResponse": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "title": "url generated from replications"
+        }
+      },
+      "title": "GenerateURLResponse contains the url to add it to the token information"
+    },
     "replicatorGetHeadersResponse": {
       "type": "object",
       "properties": {
@@ -163,7 +232,7 @@
           "items": {
             "$ref": "#/definitions/replicatorToken"
           },
-          "title": "tokens list of registred tokens"
+          "title": "/ Caleb: We need to be careful to identify a token by it's ID \n(hash of block 1). This ID cannot be stored inside of the Token object \nbecause it will change the hash of the Token object which will then \nchange the hash of the State object, which will then change the hash of\nblock 1, which changes the ID. It is important to use the ID to identify\n a token because this contains the initial token holders. IMO this \nshould be `repeated string token_ids = 1;`"
         },
         "total": {
           "type": "integer",
@@ -197,6 +266,10 @@
         "token": {
           "$ref": "#/definitions/replicatorToken",
           "title": "token — information about selected token"
+        },
+        "discredits": {
+          "$ref": "#/definitions/replicatorDiscreditList",
+          "title": "discredits — in case the replicator is aware that the issuer has been \ndiscredit set it discredit collection"
         }
       },
       "title": "GetTokenRequest contains the found token"

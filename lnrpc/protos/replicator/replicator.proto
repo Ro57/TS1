@@ -212,7 +212,7 @@ message GetTokenResponse {
 
     // discredits — in case the replicator is aware that the issuer has been 
     // discredit set it discredit collection
-    optional DiscreditList discredits = 2;
+    DiscreditList discredits = 2;
 }
 
 message GetIssuerTokensRequest {
@@ -259,8 +259,8 @@ message GetUrlTokenResponse {
 
 // GenerateURLRequest contain name for generate new url
 message GenerateURLRequest {
-    // name of token
-    string name = 1;
+    // url — reference where will the json get from
+    string url = 1;
 }
 
 // GenerateURLResponse contains the url to add it to the token information

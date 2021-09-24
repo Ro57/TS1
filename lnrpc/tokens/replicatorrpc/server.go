@@ -3,6 +3,7 @@ package replicatorrpc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -101,6 +102,7 @@ type Server struct {
 	cfg    *Config
 	chain  lnwallet.BlockChainIO
 	db     *tokendb.TokenStrikeDB
+	domain string
 }
 
 type loginCliams struct {
@@ -168,13 +170,18 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return replicatorServer, macPermissions, nil
 
 }
-func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) error {
+func RunServerServing(host, domain string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) error {
+
+	if domain == "" {
+		return errors.New("domain is empty")
+	}
 
 	var (
 		child = &Server{
 			events: events,
 			chain:  chain,
 			db:     db,
+			domain: domain,
 		}
 		root = grpc.NewServer()
 	)
@@ -470,6 +477,20 @@ func (s *Server) GetTokenList(ctx context.Context, req *replicator.GetTokenListR
 		return nil, err
 	}
 
+	// Apply pagination
+	if req.Params.Offset > 0 {
+		if int(req.Params.Offset) <= len(resultList)-1 {
+			resultList = resultList[req.Params.Offset:]
+		} else {
+			resultList = nil
+		}
+	}
+	if req.Params.Limit > 0 {
+		if int(req.Params.Limit) <= len(resultList)-1 {
+			resultList = resultList[:req.Params.Limit]
+		}
+	}
+
 	return &replicator.GetTokenListResponse{
 		Tokens: resultList,
 		Total:  int32(len(resultList)),
@@ -601,6 +622,20 @@ func (s *Server) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerT
 		response.Token = append(response.Token, token)
 	}
 
+	// Apply pagination
+	if req.Params.Offset > 0 {
+		if int(req.Params.Offset) <= len(response.Token)-1 {
+			response.Token = response.Token[req.Params.Offset:]
+		} else {
+			response.Token = nil
+		}
+	}
+	if req.Params.Limit > 0 {
+		if int(req.Params.Limit) <= len(response.Token)-1 {
+			response.Token = response.Token[:req.Params.Limit]
+		}
+	}
+
 	return response, nil
 }
 
@@ -655,6 +690,14 @@ func (s *Server) GetHeaders(ctx context.Context, req *replicator.GetHeadersReque
 	}
 
 	return response, nil
+}
+
+func (s Server) GetUrlSequence(c context.Context, req *replicator.GetUrlSequenceRequest) (*replicator.GetUrlSequenceResponse, error) {
+	responseUrl := fmt.Sprintf(tokenUrlPattern, s.domain, req.TokenName)
+	resp := &replicator.GetUrlSequenceResponse{
+		Url: responseUrl,
+	}
+	return resp, nil
 }
 
 // TODO: Rework this method. Need geting all issuers and their tokens with wallet addresses

@@ -88,9 +88,9 @@ func extractTokenIssue(ctx *cli.Context) (*replicator.IssueTokenRequest, er.R) {
 	}
 
 	offer.Offer.Urls = ctx.StringSlice(flagUrl)
-	if len(offer.Offer.Urls) == 0 {
+	/*if len(offer.Offer.Urls) == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagUrl)
-	}
+	}*/
 
 	offer.Offer.Creation = time.Now().Unix()
 

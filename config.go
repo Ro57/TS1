@@ -338,6 +338,7 @@ type Config struct {
 
 	ReplicationServer        bool   `long:"replication-server" description:"Start rpc replicator server"`
 	ReplicationServerAddress string `long:"replication-server-addr" description:"Address where the replicator server started"`
+	ReplicationServerDomain  string `long:"replication-server-domain" description:"Domain of replicator server"`
 
 	IssuanceServer        bool   `long:"issuance-server" description:"Start rpc issuance server"`
 	IssuanceServerAddress string `long:"issuance-server-addr" description:"Address where the issuance server started"`
@@ -492,6 +493,7 @@ func DefaultConfig() Config {
 		ActiveNetParams:          chainreg.BitcoinTestNetParams,
 		IssuanceServerAddress:    defaultIssuanceServerAddress,
 		ReplicationServerAddress: defaultReplicationServerAddress,
+		ReplicationServerDomain:  "",
 	}
 }
 

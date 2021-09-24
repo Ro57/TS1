@@ -753,7 +753,7 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 				return err
 			}
 
-			err = replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO)
+			err = replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, cfg.ReplicationServerDomain, replicatorEvent, replicationDB, activeChainControl.ChainIO)
 			if err != nil {
 				err := er.Errorf("cannot start replication server: %v", err)
 				log.Error(err)

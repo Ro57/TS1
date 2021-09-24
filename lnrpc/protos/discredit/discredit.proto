@@ -9,10 +9,8 @@ import "protos/DB/tokendb.proto";
 // DuplicateBlock 2 identical blocks were generated (Updated the structure)
 message DuplicateBlock {
     // first_block_header — copied block
-    /// Caleb: Should be `message Block` rather than string
     tokendb.Block first_block_header = 1;
     // second_block_header — block copy
-    /// Caleb: Should be `message Block` rather than string
     tokendb.Block second_block_header = 2;
 }
 

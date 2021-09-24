@@ -46,7 +46,9 @@ service Replicator {
     rpc GetTokenList(GetTokenListRequest)
         returns(GetTokenListResponse);
 
-    // TODO: Метод для генерации URL
+    // GenerateURL return url from every replication server to add it to
+    // inforamtion about token
+    rpc GenerateURL(GenerateURLRequest) returns (GenerateURLResponse);
 }
 
 // GetTokenOffersRequest godoc
@@ -73,13 +75,19 @@ message GetTokenListRequest {
     string issuer_id = 1;
     // params of paginaton
     replicator.Pagination params = 2;
-    // local its provide getting data from local database
-    bool local = 3;
 }
 
 // GetTokenListResponse — list of tokens with additional info
 message GetTokenListResponse {
     // tokens list of registred tokens
+    
+    /// Caleb: We need to be careful to identify a token by it's ID 
+    // (hash of block 1). This ID cannot be stored inside of the Token object 
+    // because it will change the hash of the Token object which will then 
+    // change the hash of the State object, which will then change the hash of
+    // block 1, which changes the ID. It is important to use the ID to identify
+    //  a token because this contains the initial token holders. IMO this 
+    // should be `repeated string token_ids = 1;`
     repeated Token tokens = 1;
     // total number of registered tokens, if the issued_id is passed, only
     // its tokens are taken into account
@@ -141,12 +149,16 @@ message IssuerInfo {
 // authorized with JWT applied to the request metadata. It means, that
 // replicator is capable to extract all data needed to process the request
 message GetTokenBalancesRequest {
+    option deprecated = true;
+
     // params godoc
     Pagination params = 1;
 }
 
 // GetTokenBalancesResponse godoc
 message GetTokenBalancesResponse {
+    option deprecated = true;
+
     // balances godoc
     repeated TokenBalance balances = 1;
     // total godoc
@@ -197,6 +209,10 @@ message GetTokenRequest {
 message GetTokenResponse {
     // token — information about selected token
     Token token = 1;
+
+    // discredits — in case the replicator is aware that the issuer has been 
+    // discredit set it discredit collection
+    optional DiscreditList discredits = 2;
 }
 
 message GetIssuerTokensRequest {
@@ -233,20 +249,38 @@ message MerkleBlock {
     string prev_hash = 2;
 }
 
-message GetUrlTokenRequest {
-    string url = 1;
-}
-
 message GetUrlTokenResponse {
     tokendb.State state = 1;
     repeated tokendb.Block blocks = 2;
+
+    // root — Hash of the chain tip block
     string root = 3;
+}
+
+// GenerateURLRequest contain name for generate new url
+message GenerateURLRequest {
+    // name of token
+    string name = 1;
+}
+
+// GenerateURLResponse contains the url to add it to the token information
+message GenerateURLResponse {
+    // url generated from replications
+    string url = 1;
 }
 
 // IssuerConnection contain local information for connect to issuer 
 message IssuerConnection {
     // host — connection address
     string host = 1;
+    DiscreditList descredits = 2;
+}
+
+// DiscreditList contain collection of dicredit
+message DiscreditList {
+    // dicredits — collections of discredits
+    repeated DiscreditWrapper dicredits = 1;
+
     // DiscreditWrapper used for resolve problem with repeated oneof
     // https://github.com/protocolbuffers/protobuf/issues/2592#issuecomment-284540212
     message DiscreditWrapper {
@@ -257,7 +291,5 @@ message IssuerConnection {
             discredit.DenialService denial_service = 3;
         }
     }
-    // descredits — collections of descredits
-    repeated DiscreditWrapper descredits = 4;
 
 }

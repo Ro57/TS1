@@ -540,7 +540,7 @@ service Lightning {
     // lncli: `get-token-list`
     // Proxies initial request to the replicator for available issuer token
     // offers
-    rpc GetTokenList (replicator.GetTokenListRequest)
+    rpc GetTokenList (GetTokenListRequest)
         returns (replicator.GetTokenListResponse);
 
     // lncli: `get-token`
@@ -630,6 +630,15 @@ message Transaction {
     // A label that was optionally set on transaction broadcast.
     string label = 10;
 }
+
+// GetTokenListRequest contain info to requesting token from servers
+message GetTokenListRequest{
+    // inner — content for server filter
+    replication.GetTokenListRequest inner = 1;
+    // local — use for specify server
+    bool local = 2;
+}
+
 message GetTransactionsRequest {
     /*
     The height from which to list transactions, inclusive. If this value is

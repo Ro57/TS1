@@ -7,20 +7,23 @@ option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/protos/issuer";
 import "google/protobuf/empty.proto";
 import "protos/replicator/replicator.proto";
 
-
 // IssuerService Is mainly used to generate compatible querier (client)
 //
 // Generated client can be used to serve two main purposes:
 //  - to interact with it via generated client
 //  - to test generated client implementation by mocking generated server
 //
+/// Caleb: Since IssueToken is UI and LockToken should be present in the replicator, this service can be deleted.
 service IssuerService {
     // SignTokenSell Returns token sell signature for further
     // registration along with offer via Replication Server
-    rpc SignTokenSell (SignTokenSellRequest) returns (SignTokenSellResponse);
+    rpc SignTokenSell (SignTokenSellRequest) returns (SignTokenSellResponse){
+        option deprecated = true;
+    };
 
     // IssueToken — Issue new token with given data. Request data equal to 
     // token purchase data, because it is token offer.
+    /// Caleb: This is user interface, I don't want to address this until we have completed the p2p protocol.
     rpc IssueToken(replicator.IssueTokenRequest) 
         returns (google.protobuf.Empty);
 
@@ -31,6 +34,12 @@ service IssuerService {
 
     // LockToken — Return hash of lock token for verify htlc and information
     // about transaction
+    /// Caleb: This RPC should also be available on a replicator. When 
+    // LockToken is called on the replicator, it simply replicates the 
+    // LockTokenRequest to other replicators and to the issuer. This is needed
+    // in order to make sure the issuer is honest and does not try to cheat at
+    // locking a token when they are supposed to.
+
     rpc LockToken(LockTokenRequest) 
         returns(LockTokenResponse);
 }
@@ -57,12 +66,14 @@ message LockTokenResponse {
 
 // SignTokenSellRequest — info about sell token
 message SignTokenSellRequest {
+    option deprecated = true;
     // offer on sell token
     replicator.TokenOffer offer = 1;
 }
 
 // SignTokenSellResponse — info about sign offer
 message SignTokenSellResponse {
+    option deprecated = true;
     // issuer_signature signature on sell offer
     string issuer_signature = 1;
 }

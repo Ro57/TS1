@@ -155,10 +155,10 @@ func getUrlToken(ctx *cli.Context) er.R {
 	}
 
 	// Request offers
-	req := &replicator.GetTokenRequest{
-		TokenId: url,
+	req := &replicator.GetUrlTokenRequest{
+		Url: url,
 	}
-	resp, err := client.GetToken(context.TODO(), req)
+	resp, err := client.GetUrlToken(context.TODO(), req)
 	if err != nil {
 		return er.E(err)
 	}

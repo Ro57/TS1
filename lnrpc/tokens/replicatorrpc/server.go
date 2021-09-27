@@ -75,6 +75,7 @@ type OpenChannel struct {
 }
 
 type ReplicatorEvents struct {
+	ErrorSig         chan error
 	StopSig          chan struct{}
 	OpenChannelEvent chan OpenChannel
 	RevokeEvent      chan RevokeSig
@@ -181,17 +182,26 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 		return err
 	}
 
+	// handle stop signal and errors
 	go func() {
-		err := root.Serve(listener)
-		if err != nil {
-			events.StopSig <- struct{}{}
-			return
+		for {
+			select {
+			case err := <-events.ErrorSig:
+				log.Error(err)
+				events.StopSig <- struct{}{}
+
+			case <-events.StopSig:
+				root.Stop()
+			}
 		}
 	}()
 
 	go func() {
-		<-events.StopSig
-		root.Stop()
+		err := root.Serve(listener)
+		if err != nil {
+			events.ErrorSig <- err
+			return
+		}
 	}()
 
 	return nil

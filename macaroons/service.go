@@ -125,7 +125,7 @@ func NewService(dir, location string, statelessInit bool,
 		}
 	}
 
-	//todo make normal init later (by list from in params)
+	//todo make normal init later (by list from params)
 	wl := make(map[string]struct{})
 	wl["/replicator.Replicator/GetBlockSequence"] = struct{}{}
 
@@ -186,9 +186,15 @@ func (svc *Service) UnaryServerInterceptor(
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (interface{}, error) {
 
-		uriPermissions, ok := permissionMap[info.FullMethod]
+		// Check maybe our rest route in whitelist that
+		//need to skip middleware
 		_, skip := svc.RestWhiteList[info.FullMethod]
-		if !ok && !skip {
+		if skip {
+			return handler(ctx, req)
+		}
+		uriPermissions, ok := permissionMap[info.FullMethod]
+
+		if !ok {
 			return nil, er.Wrapped(er.Errorf("%s: unknown permissions "+
 				"required for method", info.FullMethod))
 		}

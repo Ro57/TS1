@@ -7058,6 +7058,11 @@ func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRe
 	return resp, nil
 }
 
+func (r *rpcServer) TransferTokens(ctx context.Context, req *lnrpc.TokenTransfersRequest) (*lnrpc.TokenTransfersResponse, error) {
+	//todo make call of needed func
+	return &lnrpc.TokenTransfersResponse{}, nil
+}
+
 // TODO: optimize
 // 	? Move replication server client connection to the rpc server initialization stage, to keep connection in a persistent way.
 //	  This could be done in the following manner: connection reopening/closing for a while, after some time of inactivity

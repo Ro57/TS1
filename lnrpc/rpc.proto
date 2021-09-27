@@ -577,6 +577,11 @@ service Lightning {
     // Proxies initial request to the generate new lock token
     rpc LockToken(issuer.LockTokenRequest)
         returns (issuer.LockTokenResponse);
+
+    // lncli: `transfer-tokens`
+    //TransferTokens lock token and transfer it
+    rpc TransferTokens(TokenTransfersRequest)
+        returns (TokenTransfersResponse);
 }
 
 message Utxo {
@@ -3823,3 +3828,11 @@ message GetTokenBalancesRequest {
     replicator.Pagination params = 1;
     string login = 2;
 }
+
+message TokenTransfersRequest {
+    string LockID = 1;
+    string HtlcSecret = 2;
+    string Token = 3;
+}
+
+message TokenTransfersResponse {}

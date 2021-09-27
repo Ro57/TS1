@@ -370,6 +370,7 @@ func main() {
 		getTokenBalancesCommand,
 		lockTokenCommand,
 		issueTokenCommand,
+		transferTokensCommand,
 	}
 
 	// Add any extra commands determined by build flags.

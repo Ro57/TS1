@@ -6984,16 +6984,16 @@ func (r *rpcServer) GetTokenBalances(ctx context.Context, req *lnrpc.GetTokenBal
 	return nil, status.Error(codes.Unimplemented, "method not implemented")
 }
 
-func (r *rpcServer) GetTokenList(ctx context.Context, req *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
+func (r *rpcServer) GetTokenList(ctx context.Context, req *lnrpc.GetTokenListRequest) (*replicator.GetTokenListResponse, error) {
 	var (
 		resp *replicator.GetTokenListResponse
 		err  error
 	)
 
 	if req.Local {
-		resp, err = r.issuanceClient.GetTokenList(ctx, req)
+		resp, err = r.issuanceClient.GetTokenList(ctx, req.Inner)
 	} else {
-		resp, err = r.replicatorClient.GetTokenList(ctx, req)
+		resp, err = r.replicatorClient.GetTokenList(ctx, req.Inner)
 	}
 
 	if err != nil {
@@ -7021,7 +7021,7 @@ func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenReques
 	return resp, nil
 }
 
-func (r *rpcServer) GetUrlToken(ctx context.Context, req *replicator.GetUrlTokenRequest) (*replicator.GetUrlTokenResponse, error) {
+func (r *rpcServer) GetUrlToken(ctx context.Context, req *replicator.GenerateURLRequest) (*replicator.GetUrlTokenResponse, error) {
 	res, err := http.Get(req.Url)
 	if err != nil {
 		return nil, err

@@ -344,21 +344,12 @@
           "type": "string",
           "title": "prev_block — hash of previous block"
         },
-        "lock": {
-          "$ref": "#/definitions/justificationsLockToken",
-          "title": "lock — payload with lock"
-        },
-        "transfer": {
-          "$ref": "#/definitions/justificationsTranferToken",
-          "title": "transfer — payload with transaction info"
-        },
-        "lock_over": {
-          "$ref": "#/definitions/justificationsLockTimeOver",
-          "title": "lock_over — payload with lock time over"
-        },
-        "genesis": {
-          "$ref": "#/definitions/justificationsGenesis",
-          "title": "genesis — justification to initialize block chian"
+        "justifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tokendbJustification"
+          },
+          "description": "justifications — collection of one of justification structure with \npayload information."
         },
         "creation": {
           "type": "string",
@@ -389,6 +380,28 @@
         }
       },
       "title": "Block is struct of block in blockchain"
+    },
+    "tokendbJustification": {
+      "type": "object",
+      "properties": {
+        "lock": {
+          "$ref": "#/definitions/justificationsLockToken",
+          "title": "lock — payload with lock"
+        },
+        "transfer": {
+          "$ref": "#/definitions/justificationsTranferToken",
+          "title": "transfer — payload with transaction info"
+        },
+        "lock_over": {
+          "$ref": "#/definitions/justificationsLockTimeOver",
+          "title": "lock_over — payload with lock time over"
+        },
+        "genesis": {
+          "$ref": "#/definitions/justificationsGenesis",
+          "title": "genesis — justification to initialize block chian"
+        }
+      },
+      "title": "Justification is a helper to use it in block"
     },
     "tokendbToken": {
       "type": "object",

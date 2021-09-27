@@ -39,6 +39,7 @@ const (
 )
 
 var (
+	ticker = time.NewTicker(time.Second * 10)
 
 	// macaroonOps are the set of capabilities that our minted macaroon (if
 	// it doesn't already exist) will have.
@@ -164,6 +165,14 @@ func RunServerServing(host string, replicationHost string, events IssunceEvents,
 		root.Stop()
 		closeConn()
 	}()
+
+	go func() {
+		for {
+			<-ticker.C
+			// TODO: Add generate block function
+		}
+	}()
+
 }
 
 // Start launches any helper goroutines required for the rpcServer to function.
@@ -298,7 +307,7 @@ func (s *Server) LockToken(ctx context.Context, req *issuer.LockTokenRequest) (*
 	}
 
 	// generate lock block
-	lockBlock, err := s.generateLockBlock(req)
+	lockBlock, err := s.generateBlock()
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +318,8 @@ func (s *Server) LockToken(ctx context.Context, req *issuer.LockTokenRequest) (*
 		return nil, err
 	}
 
-	lockID, err := s.generateLockID(lockBlock.Justification.(*DB.Block_Lock))
+	// TODO: get from local pool of justification
+	lockID, err := s.generateLockID(lockBlock.GetJustifications()[0].Content.(*DB.Justification_Lock))
 	if err != nil {
 		return nil, err
 	}
@@ -476,7 +486,7 @@ func (s *Server) lockTokenDB(req *issuer.LockTokenRequest) er.R {
 	})
 }
 
-func (s *Server) generateLockID(blockLock *DB.Block_Lock) (*string, error) {
+func (s *Server) generateLockID(blockLock *DB.Justification_Lock) (*string, error) {
 	lock := blockLock.Lock.Lock
 
 	jsonLock, err := proto.Marshal(lock)
@@ -489,96 +499,107 @@ func (s *Server) generateLockID(blockLock *DB.Block_Lock) (*string, error) {
 	return &lockID, nil
 }
 
-func (s *Server) generateLockBlock(req *issuer.LockTokenRequest) (*DB.Block, error) {
-	var state DB.State
-	var block DB.Block
+// TODO: remove this method and add generateBlock
+// func (s *Server) generateLockBlock(req *issuer.LockTokenRequest) (*DB.Block, error) {
+// 	var state DB.State
+// 	var block DB.Block
 
-	lockBlock := &DB.Block{
-		Justification: &DB.Block_Lock{},
-		Creation:      time.Now().Unix(),
-	}
+// 	lockBlock := &DB.Block{
+// 		Justifications: []*DB.Justification{
+// 			&DB.Justification{Content: &DB.Justification_Lock{}},
+// 		},
+// 		Creation: time.Now().Unix(),
+// 	}
 
-	currentBlockHash, currentBlockHeight, err := s.chain.GetBestBlock()
-	if err != nil {
-		return nil, err.Native()
-	}
+// 	currentBlockHash, currentBlockHeight, err := s.chain.GetBestBlock()
+// 	if err != nil {
+// 		return nil, err.Native()
+// 	}
 
-	lockBlock.PktBlockHash = currentBlockHash.String()
-	lockBlock.PktBlockHeight = currentBlockHeight
+// 	lockBlock.PktBlockHash = currentBlockHash.String()
+// 	lockBlock.PktBlockHeight = currentBlockHeight
 
-	err = s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
-		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
-		if err != nil {
-			return err
-		}
+// 	err = s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+// 		rootBucket, err := tx.CreateTopLevelBucket(utils.TokensKey)
+// 		if err != nil {
+// 			return err
+// 		}
 
-		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Token))
+// 		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Token))
 
-		lastHash := tokenBucket.Get(utils.RootHashKey)
-		if lastHash == nil {
-			return utils.LastBlockNotFoundErr
-		}
+// 		lastHash := tokenBucket.Get(utils.RootHashKey)
+// 		if lastHash == nil {
+// 			return utils.LastBlockNotFoundErr
+// 		}
 
-		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
-		if chainBucket == nil {
-			return utils.ChainBucketNotFoundErr
-		}
+// 		chainBucket := tokenBucket.NestedReadWriteBucket(utils.ChainKey)
+// 		if chainBucket == nil {
+// 			return utils.ChainBucketNotFoundErr
+// 		}
 
-		jsonBlock := chainBucket.Get(lastHash)
-		if jsonBlock == nil {
-			return utils.LastBlockNotFoundErr
-		}
+// 		jsonBlock := chainBucket.Get(lastHash)
+// 		if jsonBlock == nil {
+// 			return utils.LastBlockNotFoundErr
+// 		}
 
-		nativeErr := proto.Unmarshal(jsonBlock, &block)
-		if nativeErr != nil {
-			return er.Errorf("unmarshal block form json: %v", nativeErr)
-		}
+// 		nativeErr := proto.Unmarshal(jsonBlock, &block)
+// 		if nativeErr != nil {
+// 			return er.Errorf("unmarshal block form json: %v", nativeErr)
+// 		}
 
-		jsonState := tokenBucket.Get(utils.StateKey)
-		if jsonState == nil {
-			return utils.StateNotFoundErr
-		}
+// 		jsonState := tokenBucket.Get(utils.StateKey)
+// 		if jsonState == nil {
+// 			return utils.StateNotFoundErr
+// 		}
 
-		nativeErr = proto.Unmarshal(jsonState, &state)
-		if nativeErr != nil {
-			return er.Errorf("marshal new state: %v", nativeErr)
-		}
+// 		nativeErr = proto.Unmarshal(jsonState, &state)
+// 		if nativeErr != nil {
+// 			return er.Errorf("marshal new state: %v", nativeErr)
+// 		}
 
-		lock := state.Locks[len(state.Locks)-1]
-		lockBlock.Justification = &DB.Block_Lock{Lock: &justifications.LockToken{Lock: lock}}
-		lockBlock.Height = block.Height + 1
+// 		lock := state.Locks[len(state.Locks)-1]
+// 		lockBlock.Justifications = &DB.Block_Lock{Lock: &justifications.LockToken{Lock: lock}}
+// 		lockBlock.Height = block.Height + 1
 
-		hashState := encoder.CreateHash(jsonState)
-		lockBlock.State = hex.EncodeToString(hashState)
-		// TODO: Change to signature generation
-		lockBlock.Signature = lockBlock.GetState()
-		lockBlock.PrevBlock = string(lastHash)
+// 		hashState := encoder.CreateHash(jsonState)
+// 		lockBlock.State = hex.EncodeToString(hashState)
+// 		// TODO: Change to signature generation
+// 		lockBlock.Signature = lockBlock.GetState()
+// 		lockBlock.PrevBlock = string(lastHash)
 
-		lockBlockBytes, nativeErr := proto.Marshal(lockBlock)
-		if nativeErr != nil {
-			return err
-		}
+// 		lockBlockBytes, nativeErr := proto.Marshal(lockBlock)
+// 		if nativeErr != nil {
+// 			return err
+// 		}
 
-		blockSignatureBytes := []byte(lockBlock.GetSignature())
-		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
-		if err != nil {
-			return err
-		}
+// 		blockSignatureBytes := []byte(lockBlock.GetSignature())
+// 		err = tokenBucket.Put(utils.RootHashKey, blockSignatureBytes)
+// 		if err != nil {
+// 			return err
+// 		}
 
-		return chainBucket.Put(blockSignatureBytes, lockBlockBytes)
-	})
+// 		return chainBucket.Put(blockSignatureBytes, lockBlockBytes)
+// 	})
 
-	if err != nil {
-		return nil, err.Native()
-	}
+// 	if err != nil {
+// 		return nil, err.Native()
+// 	}
 
-	return lockBlock, nil
-}
+// 	return lockBlock, nil
+// }
 
 func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
+	justificationPool := []*DB.Justification{
+		&DB.Justification{
+			Content: &DB.Justification_Genesis{
+				Genesis: &justifications.Genesis{Token: name},
+			},
+		},
+	}
+
 	genesisBlock := &DB.Block{
 		PrevBlock:      "",
-		Justification:  &DB.Block_Genesis{Genesis: &justifications.Genesis{Token: name}}, //TODO: setup the justification
+		Justifications: justificationPool,
 		Creation:       time.Now().Unix(),
 		State:          "",
 		PktBlockHash:   "",
@@ -643,4 +664,8 @@ func (s *Server) generateGenesisBlock(name string) (*DB.Block, error) {
 	}
 
 	return genesisBlock, nil
+}
+
+func (s *Server) generateBlock() (*DB.Block, error) {
+	return nil, nil
 }

@@ -139,14 +139,21 @@ func TestTokenBlock(t *testing.T) {
 		IssuerPubkey: "issuerPublicKey",
 	}
 
-	wantBlock := DB.Block{
-		Justification: &DB.Block_Transfer{
-			Transfer: &justifications.TranferToken{
-				HtlcSecret: "some",
-				Lock:       "some",
+	justificationPool := []*DB.Justification{}
+
+	justificationPool = append(justificationPool,
+		&DB.Justification{
+			Content: &DB.Justification_Transfer{
+				Transfer: &justifications.TranferToken{
+					HtlcSecret: "some",
+					Lock:       "some",
+				},
 			},
 		},
+	)
 
+	wantBlock := DB.Block{
+		Justifications: justificationPool,
 		Signature:      "someSig",
 		PrevBlock:      "hashPrevBlock",
 		Creation:       time.Now().Unix(),

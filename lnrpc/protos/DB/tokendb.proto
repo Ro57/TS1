@@ -11,31 +11,23 @@ import "protos/lock/lock.proto";
 message Block {
     // prev_block — hash of previous block 
     string prev_block = 1;
-    // justification — one of justification structure with payload information.
-    oneof justification{
-        // lock — payload with lock
-        justifications.LockToken lock = 2;
-        // transfer — payload with transaction info
-        justifications.TranferToken transfer = 3;
-        // lock_over — payload with lock time over
-        justifications.LockTimeOver lock_over = 4;
-        // genesis — justification to initialize block chian
-        justifications.Genesis genesis = 11;
-    }
+    // justifications — collection of one of justification structure with 
+    // payload information.
+    repeated Justification justifications = 2;
     // creation — date of block creation in unix time format
-    int64 creation = 5;
+    int64 creation = 3;
     // state — hash of state structure containing locks, owners and meta token 
     // info
-    string state = 6;
+    string state = 4;
     // pkt_block_hash —  the hash of the most recent PKT block
-    string pkt_block_hash = 7;
+    string pkt_block_hash = 5;
     // pkt_block_height — the height of the most recent PKT block
-    int32 pkt_block_height = 8;
+    int32 pkt_block_height = 6;
     // height — the current height of this TokenStrike chain
-    uint64 height = 9;
+    uint64 height = 7;
     // signature — issuer ID, needed for validate. If signature incorrect block
     // is not valid
-    string signature = 10;
+    string signature = 8;
 }
 
 // Owner contains information about the holders' wallets and their balances
@@ -68,4 +60,18 @@ message State {
     repeated Owner owners = 2;
     // locks — set of lock structures 
     repeated lock.Lock locks = 3;
+}
+
+// Justification is a helper to use it in block
+message Justification {
+    oneof content {
+        // lock — payload with lock
+        justifications.LockToken lock = 1;
+        // transfer — payload with transaction info
+        justifications.TranferToken transfer = 2;
+        // lock_over — payload with lock time over
+        justifications.LockTimeOver lock_over = 3;
+        // genesis — justification to initialize block chian
+        justifications.Genesis genesis = 4;
+    }
 }

@@ -539,6 +539,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "write",
 		}},
+		"/lnrpc.Lightning/TransferTokens": {{
+			Entity: "proxy",
+			Action: "write",
+		}},
 	}
 }
 

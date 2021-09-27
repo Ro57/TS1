@@ -9,8 +9,8 @@ import (
 
 var transferTokensCommand = cli.Command{
 	Name:     "transfer-tokens",
-	Category: "Payments",
-	Usage:    "Build a route from a list of hop pubkeys.",
+	Category: "Tokens",
+	Usage:    "transfer selected tokens by lock id using htlc secret",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "lockID",
@@ -25,7 +25,7 @@ var transferTokensCommand = cli.Command{
 			Usage: "selected token for transfer",
 		},
 	},
-	Action:   transferTokens,
+	Action: transferTokens,
 }
 
 func transferTokens(ctx *cli.Context) er.R {
@@ -34,7 +34,7 @@ func transferTokens(ctx *cli.Context) er.R {
 	}
 
 	if !ctx.IsSet("secret") {
-		return er.New("htlc secret")
+		return er.New("htlc secret required")
 	}
 
 	if !ctx.IsSet("token") {
@@ -42,9 +42,9 @@ func transferTokens(ctx *cli.Context) er.R {
 	}
 
 	req := &lnrpc.TokenTransfersRequest{
-		LockID:               ctx.String("lockID"),
-		HtlcSecret:           ctx.String("secret"),
-		Token:                ctx.String("token"),
+		LockID:     ctx.String("lockID"),
+		HtlcSecret: ctx.String("secret"),
+		Token:      ctx.String("token"),
 	}
 
 	client, cleanUp := getClient(ctx)

@@ -273,7 +273,9 @@ message GenerateURLResponse {
 message IssuerConnection {
     // host — connection address
     string host = 1;
-    DiscreditList descredits = 2;
+    // pubkey of the issuer, used on the issuer's server, and to get by key in
+    // the descredit local database
+    string pubkey = 2;
 }
 
 // DiscreditList contain collection of dicredit

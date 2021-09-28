@@ -302,6 +302,21 @@
       },
       "title": "Block is struct of block in blockchain"
     },
+    "tokendbOwner": {
+      "type": "object",
+      "properties": {
+        "holder_wallet": {
+          "type": "string",
+          "title": "holder_wallet — hash of wallet address of holder"
+        },
+        "count": {
+          "type": "string",
+          "format": "int64",
+          "title": "count — number of tokens held on wallet"
+        }
+      },
+      "title": "Owner contains information about the holders' wallets and their balances"
+    },
     "tokendbToken": {
       "type": "object",
       "properties": {

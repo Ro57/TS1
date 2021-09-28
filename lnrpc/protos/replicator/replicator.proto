@@ -179,12 +179,14 @@ message IssueTokenRequest {
     tokendb.Token offer = 2;
     // genesis block for sending to replicator
     tokendb.Block block = 3;
+    // list recipients for sending tokens after mint
+    repeated tokendb.Owner recipient = 4;
 }
 
 message SyncChainRequest {
     string name = 1;
 
-   repeated  tokendb.Block blocks = 2;
+    repeated  tokendb.Block blocks = 2;
 }
 
 // GetTokenRequest used for identification token for getting

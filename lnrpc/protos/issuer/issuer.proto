@@ -39,7 +39,6 @@ service IssuerService {
     // LockTokenRequest to other replicators and to the issuer. This is needed
     // in order to make sure the issuer is honest and does not try to cheat at
     // locking a token when they are supposed to.
-
     rpc LockToken(LockTokenRequest) 
         returns(LockTokenResponse);
 }

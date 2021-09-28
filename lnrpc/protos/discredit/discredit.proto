@@ -22,5 +22,9 @@ message DenialService {
     // htlc_secret — htlc genereted issuer
     string htlc_secret = 2;
     // proof_mercle_branch — proof from PKT blockchain
-    string proof_mercle_branch = 3; 
+    string proof_mercle_branch = 3;
+    // creation_height — height of the block on create lock
+    uint64 creation_height = 4;
+    // lock_expire — pkt block on which has expired lock
+    uint64 lock_expire = 5;
 }

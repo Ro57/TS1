@@ -259,8 +259,8 @@ message GetUrlTokenResponse {
 
 // GenerateURLRequest contain name for generate new url
 message GenerateURLRequest {
-    // url — reference where will the json get from
-    string url = 1;
+    // name of token
+    string name = 1;
 }
 
 // GenerateURLResponse contains the url to add it to the token information

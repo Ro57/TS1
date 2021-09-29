@@ -22,12 +22,16 @@
       },
       "title": "LockTokenResponse response with hash of lock"
     },
-    "issuerSignTokenSellResponse": {
+    "issuerTransferTokensResponse": {
       "type": "object",
       "properties": {
-        "issuer_signature": {
+        "lock_id": {
           "type": "string",
-          "title": "issuer_signature signature on sell offer"
+          "title": "lock_id — hash of lock"
+        },
+        "htlc": {
+          "type": "string",
+          "title": "htlc — hash of preimagine"
         }
       },
       "title": "SignTokenSellResponse — info about sign offer"
@@ -147,24 +151,6 @@
       },
       "title": "GetTokenListResponse — list of tokens with additional info"
     },
-    "replicatorIssuerInfo": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "title": "id — value is explicetely used by Replicator to uniquely identify related\nissuer later in order to ban him (discredite case), since\n\"identity_pubkey\", \"host\" may be changed"
-        },
-        "identity_pubkey": {
-          "type": "string",
-          "description": "identity_pubkey — the following field values are used to open payment\nchannel, invoices commands execution etc."
-        },
-        "host": {
-          "type": "string",
-          "title": "host is used to establish client connection to the issuer's node during\nsome RPC calls"
-        }
-      },
-      "title": "IssuerInfo info about issuer server"
-    },
     "replicatorPagination": {
       "type": "object",
       "properties": {
@@ -198,35 +184,6 @@
         }
       },
       "title": "Token contain information about token to send it and store in DB"
-    },
-    "replicatorTokenOffer": {
-      "type": "object",
-      "properties": {
-        "token": {
-          "type": "string",
-          "title": "token — name of token"
-        },
-        "price": {
-          "type": "string",
-          "format": "uint64",
-          "title": "price in PKT tokens"
-        },
-        "issuer_info": {
-          "$ref": "#/definitions/replicatorIssuerInfo",
-          "title": "issuer_info — contain info about token about the issuer server that \nissued the token"
-        },
-        "valid_until_seconds": {
-          "type": "string",
-          "format": "int64",
-          "title": "valid_until_seconds — protects issuers from such a case, when potential\nbuyer successfully acquires dozens of signatures just in case if that \nissuer would raise up the price later. If a Token Wallet holder would\nlike to open channel with an outdated offer, Replicator would reject to\nregister this purchase and buyer stays unprotected"
-        },
-        "count": {
-          "type": "string",
-          "format": "uint64",
-          "title": "count — the number of tokens to be issued"
-        }
-      },
-      "title": "TokenOffer is used to send an offer to buy a token\nTODO: rework or remove"
     },
     "runtimeError": {
       "type": "object",

@@ -15,31 +15,22 @@ import "protos/replicator/replicator.proto";
 //
 /// Caleb: Since IssueToken is UI and LockToken should be present in the replicator, this service can be deleted.
 service IssuerService {
-    // SignTokenSell Returns token sell signature for further
-    // registration along with offer via Replication Server
-    rpc SignTokenSell (SignTokenSellRequest) returns (SignTokenSellResponse){
-        option deprecated = true;
-    };
+    // TransferTokens
+    rpc TransferTokens(TransferTokensRequest) returns (TransferTokensResponse);
 
-    // IssueToken — Issue new token with given data. Request data equal to 
+    // IssueToken — Issue new token with given data. Request data equal to
     // token purchase data, because it is token offer.
-    /// Caleb: This is user interface, I don't want to address this until we have completed the p2p protocol.
-    rpc IssueToken(replicator.IssueTokenRequest) 
+    rpc IssueToken(replicator.IssueTokenRequest)
         returns (google.protobuf.Empty);
 
     // GetTokenList — Return list of issued token with information about
     // expiration time and fix price.
-    rpc GetTokenList(replicator.GetTokenListRequest) 
+    rpc GetTokenList(replicator.GetTokenListRequest)
         returns(replicator.GetTokenListResponse);
 
     // LockToken — Return hash of lock token for verify htlc and information
     // about transaction
-    /// Caleb: This RPC should also be available on a replicator. When 
-    // LockToken is called on the replicator, it simply replicates the 
-    // LockTokenRequest to other replicators and to the issuer. This is needed
-    // in order to make sure the issuer is honest and does not try to cheat at
-    // locking a token when they are supposed to.
-    rpc LockToken(LockTokenRequest) 
+    rpc LockToken(LockTokenRequest)
         returns(LockTokenResponse);
 }
 
@@ -51,7 +42,7 @@ message LockTokenRequest {
     int64 count = 2;
     // htlc — hash of preimagine
     string htlc = 3;
-    // recipient — wallet addres of new owner of tokens
+    // recipient — wallet address of new owner of tokens
     string recipient = 4;
     // proof_count — lock expiration time in PKT blocks
     int32 proof_count = 5;
@@ -63,16 +54,24 @@ message LockTokenResponse {
     string lock_id = 1;
 }
 
-// SignTokenSellRequest — info about sell token
-message SignTokenSellRequest {
-    option deprecated = true;
-    // offer on sell token
-    replicator.TokenOffer offer = 1;
+message TransferTokensRequest {
+    // token — token name
+    string token = 1;
+    // count — number of tokens to lock
+    int64 count = 2;
+    // total price
+    int64 amt = 3;
+    // recipient — wallet address of new owner of tokens
+    string recipient = 4;
+    // proof_count — lock expiration time in PKT blocks
+    int32 proof_count = 5;
+    string  memo = 6;
 }
 
 // SignTokenSellResponse — info about sign offer
-message SignTokenSellResponse {
-    option deprecated = true;
-    // issuer_signature signature on sell offer
-    string issuer_signature = 1;
+message TransferTokensResponse {
+    // lock_id — hash of lock
+    string lock_id = 1;
+    // htlc — hash of preimagine
+    string htlc = 2;
 }

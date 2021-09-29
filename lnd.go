@@ -792,7 +792,14 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 				return err
 			}
 
-			issuerrpc.RunServerServing(cfg.IssuanceServerAddress, cfg.ReplicationServerAddress, issuerEvent, issuanceDB, activeChainControl.ChainIO)
+			clientConn, err := grpc.DialContext(
+				context.TODO(),
+				cfg.RPCListeners[0].String(),
+				grpc.WithInsecure(),
+			)
+			lnClient := lnrpc.NewLightningClient(clientConn)
+
+			issuerrpc.RunServerServing(cfg.IssuanceServerAddress, cfg.ReplicationServerAddress, issuerEvent, issuanceDB, lnClient, activeChainControl.ChainIO)
 			log.Infof("Issuance server started, address=%v", cfg.IssuanceServerAddress)
 		}
 	}

@@ -539,6 +539,10 @@ func MainRPCServerPermissions() map[string][]bakery.Op {
 			Entity: "proxy",
 			Action: "write",
 		}},
+		"/lnrpc.Lightning/TransferTokens": {{
+			Entity: "proxy",
+			Action: "write",
+		}},
 	}
 }
 
@@ -7076,6 +7080,11 @@ func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRe
 		return nil, fmt.Errorf("issue new token: %s", err)
 	}
 	return resp, nil
+}
+
+func (r *rpcServer) TransferTokens(ctx context.Context, req *lnrpc.TokenTransfersRequest) (*lnrpc.TokenTransfersResponse, error) {
+	//todo make call of needed func
+	return &lnrpc.TokenTransfersResponse{}, nil
 }
 
 // TODO: optimize

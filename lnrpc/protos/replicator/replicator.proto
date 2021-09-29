@@ -51,6 +51,18 @@ service Replicator {
     rpc GenerateURL(GenerateURLRequest) returns (GenerateURLResponse);
 }
 
+// TransferTokenRequest need to unlock tokens to user
+message TransferTokenRequest {
+    // token name
+    string token = 1;
+    // htlc — secret preimage 
+    string htlc = 2;
+    // lock_id — from LockToken method
+    string lock_id = 3;
+    // address — wallet to send tokens
+    string address = 4;
+}
+
 // GetTokenOffersRequest godoc
 message GetTokenOffersRequest {
     option deprecated = true;

@@ -292,6 +292,13 @@ type IssuerServiceClient interface {
 	// GetTokenList — Return list of issued token with information about
 	// expiration time and fix price.
 	GetTokenList(ctx context.Context, in *replicator.GetTokenListRequest, opts ...grpc.CallOption) (*replicator.GetTokenListResponse, error)
+	// LockToken — Return hash of lock token for verify htlc and information
+	// about transaction
+	/// Caleb: This RPC should also be available on a replicator. When
+	// LockToken is called on the replicator, it simply replicates the
+	// LockTokenRequest to other replicators and to the issuer. This is needed
+	// in order to make sure the issuer is honest and does not try to cheat at
+	// locking a token when they are supposed to.
 	LockToken(ctx context.Context, in *LockTokenRequest, opts ...grpc.CallOption) (*LockTokenResponse, error)
 }
 
@@ -352,6 +359,13 @@ type IssuerServiceServer interface {
 	// GetTokenList — Return list of issued token with information about
 	// expiration time and fix price.
 	GetTokenList(context.Context, *replicator.GetTokenListRequest) (*replicator.GetTokenListResponse, error)
+	// LockToken — Return hash of lock token for verify htlc and information
+	// about transaction
+	/// Caleb: This RPC should also be available on a replicator. When
+	// LockToken is called on the replicator, it simply replicates the
+	// LockTokenRequest to other replicators and to the issuer. This is needed
+	// in order to make sure the issuer is honest and does not try to cheat at
+	// locking a token when they are supposed to.
 	LockToken(context.Context, *LockTokenRequest) (*LockTokenResponse, error)
 }
 

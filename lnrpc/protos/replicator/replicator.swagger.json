@@ -40,6 +40,16 @@
         "proof_mercle_branch": {
           "type": "string",
           "title": "proof_mercle_branch — proof from PKT blockchain"
+        },
+        "creation_height": {
+          "type": "string",
+          "format": "uint64",
+          "title": "creation_height — height of the block on create lock"
+        },
+        "lock_expire": {
+          "type": "string",
+          "format": "uint64",
+          "title": "lock_expire — pkt block on which has expired lock"
         }
       },
       "title": "DenialService the issuer accepts a lock_tokens request from a sender but \nthen ignores the transfer_tokens request from the recipient"

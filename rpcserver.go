@@ -7021,7 +7021,7 @@ func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenReques
 	return resp, nil
 }
 
-func (r *rpcServer) GetUrlToken(ctx context.Context, req *replicator.GenerateURLRequest) (*replicator.GetUrlTokenResponse, error) {
+func (r *rpcServer) GetUrlToken(ctx context.Context, req *lnrpc.GetUrlTokenRequest) (*replicator.GetUrlTokenResponse, error) {
 	res, err := http.Get(req.Url)
 	if err != nil {
 		return nil, err

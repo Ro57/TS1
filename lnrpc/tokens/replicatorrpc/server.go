@@ -712,7 +712,7 @@ func (s *Server) getMerkleRoot(bucket walletdb.ReadBucket, root []byte, hash str
 
 // Helper to append new issuer for collection on connect
 func (s *Server) appendIssuer(pubKey string, host string) er.R {
-	issuer := replicator.IssuerConnection{Host: host, Descredits: &replicator.DiscreditList{}}
+	issuer := replicator.IssuerConnection{Host: host, Pubkey: pubKey}
 
 	byteIssuer, err := proto.Marshal(&issuer)
 	if err != nil {

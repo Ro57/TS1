@@ -9,7 +9,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/dgrijalva/jwt-go/v4"
@@ -20,7 +19,6 @@ import (
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/replicator"
-	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/jwtstore"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/tokendb"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/tokens/utils"
 	"github.com/pkt-cash/pktd/lnd/lnwallet"
@@ -40,10 +38,6 @@ const (
 
 // token holders with login password
 var (
-	jwtStore *jwtstore.Store
-	tokens   sync.Map
-
-	signingKey = []byte("SUPER_SECRET")
 
 	// macaroonOps are the set of capabilities that our minted macaroon (if
 	// it doesn't already exist) will have.
@@ -81,6 +75,7 @@ type OpenChannel struct {
 }
 
 type ReplicatorEvents struct {
+	ErrorSig         chan error
 	StopSig          chan struct{}
 	OpenChannelEvent chan OpenChannel
 	RevokeEvent      chan RevokeSig
@@ -187,23 +182,27 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 		return err
 	}
 
+	// handle stop signal and errors
 	go func() {
-		err := root.Serve(listener)
-		if err != nil {
-			events.StopSig <- struct{}{}
-			return
+		for {
+			select {
+			case err := <-events.ErrorSig:
+				log.Error(err)
+				events.StopSig <- struct{}{}
+
+			case <-events.StopSig:
+				root.Stop()
+			}
 		}
 	}()
 
-	log.Info("root.Serve")
-
 	go func() {
-		<-events.StopSig
-		root.Stop()
+		err := root.Serve(listener)
+		if err != nil {
+			events.ErrorSig <- err
+			return
+		}
 	}()
-
-	jwtStore = jwtstore.New([]jwtstore.JWT{})
-	defer log.Info("RunServerServing end")
 
 	return nil
 }

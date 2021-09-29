@@ -5910,10 +5910,10 @@
     "replicatorGetIssuerTokensResponse": {
       "type": "object",
       "properties": {
-        "token": {
+        "tokens": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/replicatorToken"
+            "$ref": "#/definitions/replicatorIssuerTokens"
           }
         }
       }
@@ -6035,6 +6035,20 @@
         }
       },
       "title": "IssuerInfo info about issuer server"
+    },
+    "replicatorIssuerTokens": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/replicatorToken"
+          }
+        }
+      }
     },
     "replicatorMerkleBlock": {
       "type": "object",

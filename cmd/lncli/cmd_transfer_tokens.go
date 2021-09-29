@@ -60,7 +60,7 @@ func transferTokens(ctx *cli.Context) er.R {
 		return er.New("count cannot be equal to or less than zero")
 	}
 
-	proofBlocks := ctx.Int64("proofBlocks")
+	proofBlocks := ctx.Int64("proof_blocks")
 	if proofBlocks <= 0 {
 		return er.New("proof_blocks cannot be equal to or less than zero")
 	}

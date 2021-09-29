@@ -33,6 +33,9 @@ service Replicator {
 
     rpc SyncChain(stream SyncChainRequest) returns (google.protobuf.Empty);
 
+    // GetBlockSequence get all sequence from a selected by token name bucket and return it
+    rpc GetBlockSequence(GetBlockSequenceRequest) returns(GetUrlTokenResponse);
+    
     // GetHeaders returns headers of all block from given hash to last block
     rpc GetHeaders(GetHeadersRequest) returns (GetHeadersResponse);
 
@@ -209,6 +212,11 @@ message SyncChainRequest {
     string name = 1;
 
    repeated  tokendb.Block blocks = 2;
+}
+
+// GetBlockSequenceRequest get block sequence by token name
+message GetBlockSequenceRequest{
+    string name = 1;
 }
 
 // GetTokenRequest used for identification token for getting

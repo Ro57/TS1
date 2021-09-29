@@ -68,6 +68,9 @@ type Service struct {
 	// StatelessInit denotes if the service was initialized in the stateless
 	// mode where no macaroon files should be created on disk.
 	StatelessInit bool
+
+	// RestWhiteList list with approved rest methods that don't need to check
+	RestWhiteList map[string]struct{}
 }
 
 // NewService returns a service backed by the macaroon Bolt DB stored in the
@@ -122,11 +125,16 @@ func NewService(dir, location string, statelessInit bool,
 		}
 	}
 
+	//todo make normal init later (by list from params)
+	wl := make(map[string]struct{})
+	wl["/replicator.Replicator/GetBlockSequence"] = struct{}{}
+
 	return &Service{
 		Bakery:             *svc,
 		rks:                rootKeyStore,
 		externalValidators: make(map[string]MacaroonValidator),
 		StatelessInit:      statelessInit,
+		RestWhiteList:      wl,
 	}, nil
 }
 
@@ -178,7 +186,14 @@ func (svc *Service) UnaryServerInterceptor(
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (interface{}, error) {
 
+		// Check maybe our rest route in whitelist that
+		//need to skip middleware
+		_, skip := svc.RestWhiteList[info.FullMethod]
+		if skip {
+			return handler(ctx, req)
+		}
 		uriPermissions, ok := permissionMap[info.FullMethod]
+
 		if !ok {
 			return nil, er.Wrapped(er.Errorf("%s: unknown permissions "+
 				"required for method", info.FullMethod))

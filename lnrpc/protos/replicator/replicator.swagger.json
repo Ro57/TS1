@@ -10,7 +10,39 @@
   "produces": [
     "application/json"
   ],
-  "paths": {},
+  "paths": {
+    "/v2/replicator/blocksequence/{name}": {
+      "get": {
+        "summary": "GetBlockSequence get all sequence from a selected by token name bucket and return it",
+        "operationId": "GetBlockSequence",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/replicatorGetUrlTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Replicator"
+        ]
+      }
+    }
+  },
   "definitions": {
     "DiscreditListDiscreditWrapper": {
       "type": "object",
@@ -284,6 +316,24 @@
       },
       "title": "GetTokenRequest contains the found token"
     },
+    "replicatorGetUrlTokenResponse": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/definitions/tokendbState"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tokendbBlock"
+          }
+        },
+        "root": {
+          "type": "string",
+          "title": "root — Hash of the chain tip block"
+        }
+      }
+    },
     "replicatorIssuerInfo": {
       "type": "object",
       "properties": {
@@ -485,6 +535,45 @@
         }
       },
       "title": "Justification is a helper to use it in block"
+    },
+    "tokendbOwner": {
+      "type": "object",
+      "properties": {
+        "holder_wallet": {
+          "type": "string",
+          "title": "holder_wallet — hash of wallet address of holder"
+        },
+        "count": {
+          "type": "string",
+          "format": "int64",
+          "title": "count — number of tokens held on wallet"
+        }
+      },
+      "title": "Owner contains information about the holders' wallets and their balances"
+    },
+    "tokendbState": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "$ref": "#/definitions/tokendbToken",
+          "title": "token — metadata about token"
+        },
+        "owners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tokendbOwner"
+          },
+          "title": "owners — a set of structures with addresses and their balances"
+        },
+        "locks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/lockLock"
+          },
+          "title": "locks — set of lock structures"
+        }
+      },
+      "title": "State is a current state of blockchain"
     },
     "tokendbToken": {
       "type": "object",

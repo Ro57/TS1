@@ -741,8 +741,20 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	// On close pld node send stop signal to issuence server
 	defer func() { issuerEvent.StopSig <- struct{}{} }()
 
-	if cfg.Pkt.Active {
+	// Initialize, and register our implementation of the gRPC interface
+	// exported by the rpcServer.
+	rpcServer, err := newRPCServer(
+		cfg, server, macaroonService, cfg.SubRPCServers, serverOpts,
+		restDialOpts, restProxyDest, atplManager, server.invoices,
+		tower, restListen, rpcListeners, chainedAcceptor,
+	)
+	if err != nil {
+		err := er.Errorf("unable to create RPC server: %v", err)
+		log.Error(err)
+		return err
+	}
 
+	if cfg.Pkt.Active {
 		// Initialize rpc replicator server
 		if cfg.ReplicationServer {
 			replicationDB, err := tokendb.Connect(cfg.Pkt.ReplicationServerDbPath)
@@ -753,14 +765,21 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 				return err
 			}
 
-			err = replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO)
-			if err != nil {
-				err := er.Errorf("cannot start replication server: %v", err)
-				log.Error(err)
-				return err
-			}
-
 			log.Infof("Replication server started, address=%v", cfg.ReplicationServerAddress)
+			restReplicator, errR := replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO, cfg.SubRPCServers)
+			if err != nil {
+				errR := er.Errorf("unable to serve Replicator servers: %v", errR)
+				log.Error(errR)
+				return errR
+			}
+			errR = restReplicator.RegisterWithRootServer(rpcServer.grpcServer)
+			if err != nil {
+				errR := er.Errorf("unable to register Replicator rest: %v", errR)
+				log.Error(errR)
+				return errR
+			}
+			rpcServer.subServers = append(rpcServer.subServers, restReplicator)
+
 		}
 
 		// Initialize rpc issuance client
@@ -779,19 +798,6 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 	}
 	// TODO: implement error channel and handle that on node close or exception
 
-	log.Info("and run issuence and replication servers")
-	// Initialize, and register our implementation of the gRPC interface
-	// exported by the rpcServer.
-	rpcServer, err := newRPCServer(
-		cfg, server, macaroonService, cfg.SubRPCServers, serverOpts,
-		restDialOpts, restProxyDest, atplManager, server.invoices,
-		tower, restListen, rpcListeners, chainedAcceptor,
-	)
-	if err != nil {
-		err := er.Errorf("unable to create RPC server: %v", err)
-		log.Error(err)
-		return err
-	}
 	if err := rpcServer.Start(); err != nil {
 		err := er.Errorf("unable to start RPC server: %v", err)
 		log.Error(err)

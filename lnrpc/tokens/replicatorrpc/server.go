@@ -15,6 +15,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/pkg/errors"
 	"github.com/pkt-cash/pktd/btcutil/er"
 	"github.com/pkt-cash/pktd/lnd/lnrpc"
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
@@ -51,6 +52,10 @@ var (
 	// macPermissions maps RPC calls to the permissions they require.
 	macPermissions = map[string][]bakery.Op{
 		"/replicatorrpc.Replicator/GetTokenBalances": {{
+			Entity: "replicator",
+			Action: "read",
+		}},
+		"/replicator.Replicator/GetBlockSequence": {{
 			Entity: "replicator",
 			Action: "read",
 		}},
@@ -109,6 +114,7 @@ type token struct {
 }
 
 var _ replicator.ReplicatorServer = (*Server)(nil)
+var _ lnrpc.SubServer = (*Server)(nil)
 
 // New returns a new instance of the replicatorrpc Repicator sub-server. We also return
 // the set of permissions for the macaroons that we may create within this
@@ -163,18 +169,22 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return replicatorServer, macPermissions, nil
 
 }
-func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) error {
+func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO, subConfig lnrpc.SubServerConfigDispatcher) (lnrpc.SubServer, er.R) {
+	var child = &Server{
+		events: events,
+		chain:  chain,
+		db:     db,
+	}
 
-	var (
-		child = &Server{
-			events: events,
-			chain:  chain,
-			db:     db,
-		}
-		root = grpc.NewServer()
-	)
+	child.RunGRPCServer(host, events)
+	subServer, err := child.RunRestServer(subConfig)
 
-	replicator.RegisterReplicatorServer(root, child)
+	return subServer, err
+}
+
+func (s *Server) RunGRPCServer(host string, events ReplicatorEvents) error {
+	root := grpc.NewServer()
+	replicator.RegisterReplicatorServer(root, s)
 
 	listener, err := net.Listen("tcp", host)
 
@@ -205,6 +215,25 @@ func RunServerServing(host string, events ReplicatorEvents, db *tokendb.TokenStr
 	}()
 
 	return nil
+}
+
+func (s *Server) RunRestServer(subConfig lnrpc.SubServerConfigDispatcher) (lnrpc.SubServer, er.R) {
+	subServerDriver := &ServerDriver{
+		Name: subServerName,
+		New: func(c lnrpc.SubServerConfigDispatcher) (*Server, lnrpc.MacaroonPerms, er.R) {
+			return createNewSubServer(c)
+		},
+	}
+
+	subServer, _, err := subServerDriver.New(subConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	subServer.db = s.db
+	subServer.chain = s.chain
+
+	return subServer, nil
 }
 
 // Start launches any helper goroutines required for the rpcServer to function.
@@ -252,11 +281,23 @@ func (s *Server) RegisterWithRootServer(grpcServer *grpc.Server) er.R {
 //
 // NOTE: This is part of the lnrpc.SubServer interface.
 func (s *Server) RegisterWithRestServer(ctx context.Context,
+	//RegisterReplicatorHandlerFromEndpoint
 	mux *runtime.ServeMux, dest string, opts []grpc.DialOption) er.R {
 	// TODO: Clarify whether it is necessary REST API, and if it necessary
 	// describe rest notation in yaml file and generate .gw file from proto
 	// notation. Implementation of RegisterWithRestServer can be found in
 	// other services, such as the signature service.
+	// We make sure that we register it with the main REST server to ensure
+	// all our methods are routed properly.
+	err := replicator.RegisterReplicatorHandlerFromEndpoint(ctx, mux, dest, opts)
+	if err != nil {
+		log.Errorf("Could not register replicator REST server "+
+			"with root REST server: %v", err)
+		return er.E(err)
+	}
+
+	log.Debugf("Replicator REST server successfully registered with " +
+		"root REST server")
 	return nil
 }
 
@@ -601,6 +642,79 @@ func (s *Server) GetIssuerTokens(ctx context.Context, req *replicator.GetIssuerT
 	}
 
 	return response, nil
+}
+
+func (s *Server) GetBlockSequence(ctx context.Context, req *replicator.GetBlockSequenceRequest) (*replicator.GetUrlTokenResponse, error) {
+	resp := &replicator.GetUrlTokenResponse{
+		State:  &DB.State{},
+		Blocks: []*DB.Block{},
+		Root:   "",
+	}
+
+	if s.db == nil { //todo del it later
+		return nil, errors.Errorf("db is not init error")
+	}
+
+	err := s.db.View(func(tx walletdb.ReadTx) er.R {
+		var err error
+		rootBucket := tx.ReadBucket(utils.TokensKey)
+
+		tokenBucket := rootBucket.NestedReadBucket([]byte(req.Name))
+
+		dbStateByte := tokenBucket.Get(utils.StateKey)
+
+		var dbstate DB.State
+
+		err = proto.Unmarshal(dbStateByte, &dbstate)
+		if err != nil {
+			return er.E(err)
+		}
+
+		//sequenceByte := tokenBucket.Get(utils.ChainKey)
+
+		var (
+			rootHash    = tokenBucket.Get(utils.RootHashKey)
+			chainBucket = tokenBucket.NestedReadBucket(utils.ChainKey)
+
+			currentHash = rootHash
+
+			block  DB.Block
+			blocks []*DB.Block
+		)
+
+		for {
+			blockBytes := chainBucket.Get(currentHash)
+			if blockBytes == nil {
+				return er.New(fmt.Sprintf("block doesnot find by root hash=%v", currentHash))
+			}
+
+			err := proto.Unmarshal(blockBytes, &block)
+			if err != nil {
+				return er.E(err)
+			}
+
+			blocks = append(blocks, &block)
+
+			if block.PrevBlock == "" {
+				break
+			}
+
+			currentHash = []byte(block.PrevBlock)
+
+		}
+
+		root := string(rootHash)
+
+		resp.State = &dbstate
+		resp.Root = root
+		resp.Blocks = blocks
+
+		return nil
+	})
+	if err != nil {
+		return nil, err.Native()
+	}
+	return resp, nil
 }
 
 func (s *Server) GetToken(ctx context.Context, req *replicator.GetTokenRequest) (*replicator.GetTokenResponse, error) {

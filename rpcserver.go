@@ -993,6 +993,7 @@ func (r *rpcServer) Start() er.R {
 			return er.Errorf("unable to register REST sub-server "+
 				"%v with root: %v", subServer.Name(), err)
 		}
+		log.Infof("subserver %s was registered", subServer.Name())
 	}
 
 	// Before listening on any of the interfaces, we also want to give the
@@ -1008,6 +1009,8 @@ func (r *rpcServer) Start() er.R {
 				log.Errorf("error registering "+
 					"external REST subserver: %v", err)
 			}
+			lis.Addr()
+			log.Infof("subserver was registered at address", lis.Addr())
 		}
 	}
 
@@ -7022,6 +7025,23 @@ func (r *rpcServer) GetToken(ctx context.Context, req *replicator.GetTokenReques
 }
 
 func (r *rpcServer) GetUrlToken(ctx context.Context, req *lnrpc.GetUrlTokenRequest) (*replicator.GetUrlTokenResponse, error) {
+	/* todo how to avoid tls and added macaroon data in req
+	tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client := &http.Client{Transport: tr}
+
+		request, err := http.NewRequest("GET", req.Url, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		request.Header.Add("Grpc-Metadata-macaroon","0201036C6E64022A030A10B155CCF5C8E9104510FC53C531E586B41201301A120A0A7265706C696361746F7212047265616400000620097D5F6365869D9055525057154BA55F41C5EC415EB432240DC6E7BB1EF64682")
+		response, err := client.Do(request)
+		if err != nil {
+			return nil, err
+		}
+	*/
 	res, err := http.Get(req.Url)
 	if err != nil {
 		return nil, err

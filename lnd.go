@@ -766,14 +766,14 @@ func Main(cfg *Config, lisCfg ListenerCfg, shutdownChan <-chan struct{}) er.R {
 			}
 
 			log.Infof("Replication server started, address=%v", cfg.ReplicationServerAddress)
-			restReplicator, errR := replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, replicatorEvent, replicationDB, activeChainControl.ChainIO, cfg.SubRPCServers)
-			if err != nil {
+			restReplicator, errR := replicatorrpc.RunServerServing(cfg.ReplicationServerAddress, cfg.ReplicationServerDomain, replicatorEvent, replicationDB, activeChainControl.ChainIO, cfg.SubRPCServers)
+			if errR != nil {
 				errR := er.Errorf("unable to serve Replicator servers: %v", errR)
 				log.Error(errR)
 				return errR
 			}
 			errR = restReplicator.RegisterWithRootServer(rpcServer.grpcServer)
-			if err != nil {
+			if errR != nil {
 				errR := er.Errorf("unable to register Replicator rest: %v", errR)
 				log.Error(errR)
 				return errR

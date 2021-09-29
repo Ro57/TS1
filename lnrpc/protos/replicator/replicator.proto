@@ -44,6 +44,8 @@ service Replicator {
 
     rpc GetIssuerTokens(GetIssuerTokensRequest) returns (GetIssuerTokensResponse);
 
+    rpc GetUrlSequence(GetUrlSequenceRequest) returns(GetUrlSequenceResponse);
+
     // GetTokenList — return list of issued token with infomation about
     // expiration time and fix price.
     rpc GetTokenList(GetTokenListRequest)
@@ -237,10 +239,19 @@ message GetTokenResponse {
 
 message GetIssuerTokensRequest {
     string issuer = 1;
+    Pagination params = 2;
 }
 
 message GetIssuerTokensResponse {
     repeated Token token = 1;
+}
+
+message GetUrlSequenceRequest {
+    string token_name = 1;
+}
+
+message GetUrlSequenceResponse {
+    string url = 1;
 }
 
 // GetHeadersRequest contains a hash from which need to give all the hashes to

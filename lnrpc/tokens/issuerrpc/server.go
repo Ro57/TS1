@@ -298,6 +298,21 @@ func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellReq
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {
 	var err error
 
+	//get url for token
+	reqGetUrl := &replicator.GetUrlSequenceRequest{
+		TokenName: req.Name,
+	}
+	respGetUrl, errGetUrl := s.Client.GetUrlSequence(ctx, reqGetUrl)
+	if errGetUrl != nil {
+		return nil, errGetUrl
+	}
+
+	if req.Offer.Urls == nil {
+		req.Offer.Urls = make([]string, 0, 1)
+	}
+
+	req.Offer.Urls = append(req.Offer.Urls, respGetUrl.Url)
+
 	// issuing token
 	errIssueToken := s.issueTokenDB(req)
 	if errIssueToken != nil {

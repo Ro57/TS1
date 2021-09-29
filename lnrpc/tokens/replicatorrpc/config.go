@@ -2,6 +2,8 @@ package replicatorrpc
 
 import "github.com/pkt-cash/pktd/lnd/macaroons"
 
+const tokenUrlPattern = "%s/v2/replicator/blocksequence/%s"
+
 // Config is the main configuration file for the router RPC server. It contains
 // all the items required for the router RPC server to carry out its duties.
 // The fields with struct tags are meant to be parsed as normal configuration

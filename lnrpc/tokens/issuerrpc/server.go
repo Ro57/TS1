@@ -338,7 +338,7 @@ func (s *Server) LockToken(ctx context.Context, req *issuer.LockTokenRequest) (*
 		},
 	)
 
-	lockID, err := s.generateLockID(justification)
+	lockID, err := s.generateLockID(lastLock)
 	if err != nil {
 		return nil, err
 	}
@@ -429,6 +429,67 @@ func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 	})
 }
 
+// transferTokenDB — generate justification to transfer token
+func (s *Server) transferTokenDB(req *replicator.TransferTokenRequest) (lastLock *lock.Lock, err er.R) {
+	err = s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
+		var oldState DB.State
+
+		rootBucket := tx.ReadWriteBucket(utils.TokensKey)
+		if rootBucket == nil {
+			return er.Errorf("%s bucket not created", string(utils.TokensKey))
+		}
+
+		tokenBucket := rootBucket.NestedReadWriteBucket([]byte(req.Token))
+
+		// if information about token did not exist then create
+		if tokenBucket.Get(utils.InfoKey) == nil {
+			return er.Errorf("token %s without information", req.Token)
+		}
+
+		jsonState := tokenBucket.Get(utils.StateKey)
+		if jsonState == nil {
+			return utils.StateNotFoundErr
+		}
+
+		err := proto.Unmarshal(jsonState, &oldState)
+		if err != nil {
+			return er.Errorf("unmarshal state form json: %v", err)
+		}
+
+		currentLock, err := s.getLockByLockID(oldState.Locks, req.LockId)
+		if err != nil {
+			return er.E(err)
+		}
+
+		state := &DB.State{
+			Token: oldState.Token,
+			Owners: append(oldState.Owners, &DB.Owner{
+				HolderWallet: req.Address,
+				Count:        currentLock.Count,
+			}),
+			Locks: oldState.Locks,
+		}
+
+		stateBytes, err := proto.Marshal(state)
+		if err != nil {
+			return er.Errorf("marshal new state: %v", err)
+		}
+
+		errPut := tokenBucket.Put(utils.StateKey, stateBytes)
+		if errPut != nil {
+			return errPut
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return lastLock, nil
+}
+
 func (s *Server) lockTokenDB(req *issuer.LockTokenRequest) (lastLock *lock.Lock, err er.R) {
 
 	err = s.db.Update(func(tx walletdb.ReadWriteTx) er.R {
@@ -514,9 +575,7 @@ func (s *Server) lockTokenDB(req *issuer.LockTokenRequest) (lastLock *lock.Lock,
 	return lastLock, nil
 }
 
-func (s *Server) generateLockID(blockLock *DB.Justification_Lock) (*string, error) {
-	lock := blockLock.Lock.Lock
-
+func (s *Server) generateLockID(lock *lock.Lock) (*string, error) {
 	jsonLock, err := proto.Marshal(lock)
 	if err != nil {
 		return nil, err
@@ -726,4 +785,24 @@ func (s *Server) assemblyBlock(name string, justifications []*DB.Justification) 
 	}
 
 	return block, nil
+}
+
+func removeLockIndex(s []*lock.Lock, index int) []*lock.Lock {
+	return append(s[:index], s[index+1:]...)
+}
+
+func (s *Server) getLockByLockID(locks []*lock.Lock, lockID string) (*lock.Lock, error) {
+	for i, v := range locks {
+		ID, err := s.generateLockID(v)
+		if err != nil {
+			return nil, err
+		}
+
+		if *ID == lockID {
+			removeLockIndex(locks, i)
+			return v, nil
+		}
+	}
+
+	return nil, errors.Errorf("lock with lockid: %v not found", lockID)
 }

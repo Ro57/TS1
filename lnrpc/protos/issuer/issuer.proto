@@ -15,23 +15,22 @@ import "protos/replicator/replicator.proto";
 //  - to test generated client implementation by mocking generated server
 //
 service IssuerService {
-    // SignTokenSell Returns token sell signature for further
-    // registration along with offer via Replication Server
-    rpc SignTokenSell (SignTokenSellRequest) returns (SignTokenSellResponse);
+    // TransferTokens
+    rpc TransferTokens(TransferTokensRequest) returns (TransferTokensResponse);
 
-    // IssueToken — Issue new token with given data. Request data equal to 
+    // IssueToken — Issue new token with given data. Request data equal to
     // token purchase data, because it is token offer.
-    rpc IssueToken(replicator.IssueTokenRequest) 
+    rpc IssueToken(replicator.IssueTokenRequest)
         returns (google.protobuf.Empty);
 
     // GetTokenList — Return list of issued token with information about
     // expiration time and fix price.
-    rpc GetTokenList(replicator.GetTokenListRequest) 
+    rpc GetTokenList(replicator.GetTokenListRequest)
         returns(replicator.GetTokenListResponse);
 
     // LockToken — Return hash of lock token for verify htlc and information
     // about transaction
-    rpc LockToken(LockTokenRequest) 
+    rpc LockToken(LockTokenRequest)
         returns(LockTokenResponse);
 }
 
@@ -43,7 +42,7 @@ message LockTokenRequest {
     int64 count = 2;
     // htlc — hash of preimagine
     string htlc = 3;
-    // recipient — wallet addres of new owner of tokens
+    // recipient — wallet address of new owner of tokens
     string recipient = 4;
     // proof_count — lock expiration time in PKT blocks
     int32 proof_count = 5;
@@ -56,13 +55,24 @@ message LockTokenResponse {
 }
 
 // SignTokenSellRequest — info about sell token
-message SignTokenSellRequest {
-    // offer on sell token
-    replicator.TokenOffer offer = 1;
+message TransferTokensRequest {
+    // token — token name
+    string token = 1;
+    // count — number of tokens to lock
+    int64 count = 2;
+    // total price
+    int64 amt = 3;
+    // recipient — wallet address of new owner of tokens
+    string recipient = 4;
+    // proof_count — lock expiration time in PKT blocks
+    int32 proof_count = 5;
+    string  memo = 6;
 }
 
 // SignTokenSellResponse — info about sign offer
-message SignTokenSellResponse {
-    // issuer_signature signature on sell offer
-    string issuer_signature = 1;
+message TransferTokensResponse {
+    // lock_id — hash of lock
+    string lock_id = 1;
+    // htlc — hash of preimagine
+    string htlc = 2;
 }

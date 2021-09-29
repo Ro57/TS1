@@ -563,11 +563,6 @@ service Lightning {
     rpc GetHeaders (replicator.GetHeadersRequest)
         returns (replicator.GetHeadersResponse);
 
-    // lncli: `signtokensell`
-    // Proxies initial request to the issuer for a signature
-    rpc SignTokenSell (issuer.SignTokenSellRequest)
-        returns (issuer.SignTokenSellResponse);
-
     // lncli: `issuetoken`
     // Proxies initial request to the issuer for register new token
     rpc IssueToken(replicator.IssueTokenRequest)
@@ -580,8 +575,8 @@ service Lightning {
 
     // lncli: `transfer-tokens`
     //TransferTokens lock token and transfer it
-    rpc TransferTokens(TokenTransfersRequest)
-        returns (TokenTransfersResponse);
+    rpc TransferTokens(issuer.TransferTokensRequest)
+        returns (issuer.TransferTokensResponse);
 }
 
 message Utxo {
@@ -3828,11 +3823,3 @@ message GetTokenBalancesRequest {
     replicator.Pagination params = 1;
     string login = 2;
 }
-
-message TokenTransfersRequest {
-    string LockID = 1;
-    string HtlcSecret = 2;
-    string Token = 3;
-}
-
-message TokenTransfersResponse {}

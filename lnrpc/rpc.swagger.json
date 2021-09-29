@@ -2453,12 +2453,16 @@
       },
       "title": "LockTokenResponse response with hash of lock"
     },
-    "issuerSignTokenSellResponse": {
+    "issuerTransferTokensResponse": {
       "type": "object",
       "properties": {
-        "issuer_signature": {
+        "lock_id": {
           "type": "string",
-          "title": "issuer_signature signature on sell offer"
+          "title": "lock_id — hash of lock"
+        },
+        "htlc": {
+          "type": "string",
+          "title": "htlc — hash of preimagine"
         }
       },
       "title": "SignTokenSellResponse — info about sign offer"
@@ -5620,9 +5624,6 @@
           "description": "The string representation of the error sent by our peer."
         }
       }
-    },
-    "lnrpcTokenTransfersResponse": {
-      "type": "object"
     },
     "lnrpcTransaction": {
       "type": "object",

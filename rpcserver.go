@@ -6968,8 +6968,8 @@ func (r *rpcServer) GetTokenOffers(ctx context.Context, req *replicator.GetToken
 	return resp, nil
 }
 
-func (r *rpcServer) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {
-	resp, err := r.issuanceClient.SignTokenSell(ctx, req)
+func (r *rpcServer) TransferTokens(ctx context.Context, req *issuer.TransferTokensRequest) (*issuer.TransferTokensResponse, error) {
+	resp, err := r.issuanceClient.TransferTokens(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("requesting token sell signature: %s", err)
 	}
@@ -7060,11 +7060,6 @@ func (r *rpcServer) IssueToken(ctx context.Context, req *replicator.IssueTokenRe
 		return nil, fmt.Errorf("issue new token: %s", err)
 	}
 	return resp, nil
-}
-
-func (r *rpcServer) TransferTokens(ctx context.Context, req *lnrpc.TokenTransfersRequest) (*lnrpc.TokenTransfersResponse, error) {
-	//todo make call of needed func
-	return &lnrpc.TokenTransfersResponse{}, nil
 }
 
 // TODO: optimize

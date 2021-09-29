@@ -3,8 +3,6 @@ package issueancerpc
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
@@ -51,7 +49,7 @@ var (
 
 	// macPermissions maps RPC calls to the permissions they require.
 	macPermissions = map[string][]bakery.Op{
-		"/issuancerpc.Issuance/SignTokenSell": {{
+		"/issuancerpc.Issuance/TransferTokens": {{
 			Entity: "issuance",
 			Action: "read",
 		}},
@@ -71,6 +69,7 @@ type Server struct {
 	// Nest unimplemented server implementation in order to satisfy server interface
 	events          IssunceEvents
 	Client          replicator.ReplicatorClient
+	lnClient        lnrpc.LightningClient
 	cfg             *Config
 	chain           lnwallet.BlockChainIO
 	db              *tokendb.TokenStrikeDB
@@ -129,7 +128,7 @@ func New(cfg *Config) (*Server, lnrpc.MacaroonPerms, er.R) {
 	return issuanceServer, macPermissions, nil
 }
 
-func RunServerServing(host string, replicationHost string, events IssunceEvents, db *tokendb.TokenStrikeDB, chain lnwallet.BlockChainIO) {
+func RunServerServing(host string, replicationHost string, events IssunceEvents, db *tokendb.TokenStrikeDB, lnClient lnrpc.LightningClient, chain lnwallet.BlockChainIO) {
 	client, closeConn, err := connectReplicatorClient(context.TODO(), replicationHost)
 	if err != nil {
 		panic(err)
@@ -137,10 +136,11 @@ func RunServerServing(host string, replicationHost string, events IssunceEvents,
 
 	var (
 		child = &Server{
-			Client: client,
-			events: events,
-			chain:  chain,
-			db:     db,
+			Client:   client,
+			lnClient: lnClient,
+			events:   events,
+			chain:    chain,
+			db:       db,
 		}
 		root = grpc.NewServer()
 	)
@@ -244,26 +244,53 @@ func (s *Server) SyncBlock(ctx context.Context, name string, blocks ...*DB.Block
 	return client.Send(request)
 }
 
-func (s *Server) SignTokenSell(ctx context.Context, req *issuer.SignTokenSellRequest) (*issuer.SignTokenSellResponse, error) {
-	tokenSell := encoder.TokenSell{
-		Token:          req.Offer.Token,
-		Price:          req.Offer.Price,
-		ValidUntilTime: req.Offer.ValidUntilSeconds,
-		Count:          req.Offer.Count,
-	}
+func (s *Server) TransferTokens(ctx context.Context, req *issuer.TransferTokensRequest) (*issuer.TransferTokensResponse, error) {
 
-	bytes, err := json.Marshal(tokenSell)
+	addInvoiceResponse, err := s.lnClient.AddInvoice(ctx, &lnrpc.Invoice{
+		Memo:            req.Memo,
+		RPreimage:       nil,
+		RHash:           nil,
+		Value:           req.Amt,
+		ValueMsat:       0,
+		Settled:         false,
+		CreationDate:    0,
+		SettleDate:      0,
+		PaymentRequest:  "",
+		DescriptionHash: nil,
+		Expiry:          0,
+		FallbackAddr:    "",
+		CltvExpiry:      0,
+		RouteHints:      nil,
+		Private:         false,
+		AddIndex:        0,
+		SettleIndex:     0,
+		AmtPaid:         0,
+		AmtPaidSat:      0,
+		AmtPaidMsat:     0,
+		State:           0,
+		Htlcs:           nil,
+		Features:        nil,
+		IsKeysend:       false,
+	})
 	if err != nil {
-		return nil, errors.WithMessage(err, "marshalling request")
+		return nil, err
 	}
 
-	hash := encoder.CreateHash(bytes)
-
-	resp := &issuer.SignTokenSellResponse{
-		IssuerSignature: fmt.Sprintf("%x", hash),
+	lockTokenResponse, err := s.LockToken(ctx, &issuer.LockTokenRequest{
+		Token:      req.Token,
+		Count:      req.Count,
+		Htlc:       addInvoiceResponse.PaymentRequest,
+		Recipient:  req.Recipient,
+		ProofCount: req.ProofCount,
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	return &issuer.TransferTokensResponse{
+		LockId: lockTokenResponse.LockId,
+		Htlc:   addInvoiceResponse.PaymentRequest,
+	}, nil
 }
 
 func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenRequest) (*empty.Empty, error) {

@@ -425,7 +425,7 @@ func (s *Server) issueTokenDB(req *replicator.IssueTokenRequest) er.R {
 		if tokenBucket.Get(utils.StateKey) == nil {
 			state := &DB.State{
 				Token:  req.Offer,
-				Owners: nil,
+				Owners: req.Recipient,
 				Locks:  nil,
 			}
 

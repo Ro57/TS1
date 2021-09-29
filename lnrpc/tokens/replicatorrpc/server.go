@@ -432,7 +432,7 @@ func (s *Server) IssueToken(ctx context.Context, req *replicator.IssueTokenReque
 		if tokenBucket.Get(utils.StateKey) == nil {
 			state := DB.State{
 				Token:  req.Offer,
-				Owners: nil,
+				Owners: req.Recipient,
 				Locks:  nil,
 			}
 

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkt-cash/pktd/lnd/lnrpc/protos/DB"
@@ -25,6 +27,7 @@ const (
 	flagUrl                   = "url"
 	flagCount                 = "count"
 	flagExpirationBlockNumber = "expiration-block-number"
+	flagOwner                 = "owner"
 )
 
 var issueTokenFlags = []cli.Flag{
@@ -43,6 +46,10 @@ var issueTokenFlags = []cli.Flag{
 	cli.StringSliceFlag{
 		Name:  flagUrl,
 		Usage: "urls for access to blockchain",
+	},
+	cli.StringSliceFlag{
+		Name:  flagOwner,
+		Usage: "(optional) addresses and amount (dividing by comma) for then to delegate token",
 	},
 }
 
@@ -91,6 +98,30 @@ func extractTokenIssue(ctx *cli.Context) (*replicator.IssueTokenRequest, er.R) {
 	/*if len(offer.Offer.Urls) == 0 {
 		return nil, er.Errorf("empty %q argument provided", flagUrl)
 	}*/
+
+	recipients := ctx.StringSlice(flagOwner)
+	var summaryAmount int64
+	if len(recipients) > 0 {
+		for idx, recipient := range recipients {
+			data := strings.Split(recipient, ",")
+			if len(data) != 2 {
+				return nil, er.Errorf("not enough data for recipient with id=%d", idx)
+			}
+			amount, err := strconv.ParseInt(data[1], 10, 64)
+			if err != nil {
+				return nil, er.Errorf("error during parse amount err=%v", err.Error())
+			}
+			offer.Recipient = append(offer.Recipient, &DB.Owner{
+				HolderWallet: data[0],
+				Count:        amount,
+			})
+			summaryAmount += amount
+		}
+	}
+
+	if summaryAmount > offer.Offer.Count {
+		return nil, er.Errorf("error of delegating amount: delegate amount = %d, has amount = %d", summaryAmount, offer.Offer.Count)
+	}
 
 	offer.Offer.Creation = time.Now().Unix()
 
